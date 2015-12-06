@@ -22,14 +22,18 @@ Administrative PowerShell or ISE window
 
 ### Updates
 04 Dec
+
 Improved Cluster detection error control
+
 Re-ordered the code of the diagnostics
+
 Improved comments and documentation
 
 02 Dec
+
 Fixed error where RAM was not being tallied properly
+
 Added code to allow diagnostics to run correctly on VMM platforms
-Added 
 
 ### Contributors
 

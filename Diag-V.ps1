@@ -1011,8 +1011,8 @@ function Get-VMAllVHDs{
 }
 <#
 .Synopsis
-    For each VM detected every associated VHD/VHDX is identified and several pieces of 
-    VHD/VHDX information is displayed
+    For each VM detected every associated VHD/VHDX is checked to determine
+    if the VHD/VHDX is shared or not
 .DESCRIPTION
     Identifies all VHDs/VHDXs associated with each VM detected. For each VHD/VHDX it
     pulls several pieces of information to display to user. If 
