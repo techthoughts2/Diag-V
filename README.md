@@ -42,3 +42,4 @@ Contributors: Marco-Antonio Cervantez
 
 ### Notes
 
+You must run Diag-V as an domain user that has privelages for all Cluster nodes if you expect Diag-V to return results from all nodes in the cluster.
