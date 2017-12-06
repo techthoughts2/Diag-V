@@ -73,6 +73,7 @@
         'Get-IntegrationServicesCheck',
         'Get-BINSpaceInfo',
         'Get-VMAllVHDs',
+        'Get-SharedVHDs',
         'Show-DiagVMenu'
     )
     
