@@ -456,7 +456,7 @@ function Get-VMInfo {
                                 $vms = get-vm -ComputerName $node.name
                                 foreach ($vm in $vms) {
                                     Write-Host "----------------------------------------------" `
-                                    -ForegroundColor Gray
+                                        -ForegroundColor Gray
                                     #_____________________________________________________________
                                     #_____________________________________________________________
                                     $opsName = $null
@@ -523,7 +523,7 @@ function Get-VMInfo {
                                     $object | Format-List -GroupBy Name
                                 }#foreachVM
                                 Write-Host "----------------------------------------------" `
-                                -ForegroundColor Gray
+                                    -ForegroundColor Gray
                                 #####################################
                             }
                             else {
@@ -563,7 +563,7 @@ function Get-VMInfo {
                 $vms = get-vm
                 foreach ($vm in $vms) {
                     Write-Host "----------------------------------------------" `
-                    -ForegroundColor Gray
+                        -ForegroundColor Gray
                     #_____________________________________________________________
                     #_____________________________________________________________
                     $opsName = $null
@@ -629,7 +629,7 @@ function Get-VMInfo {
                     $object | Format-List -GroupBy Name
                 }#foreachVM
                 Write-Host "----------------------------------------------" `
-                -ForegroundColor Gray
+                    -ForegroundColor Gray
                 #####################################
             }
             #--------------END Get VM Data ---------------------
@@ -1103,10 +1103,10 @@ function Get-BINSpaceInfo {
                         Write-Error $_
                     }
                     Write-Host "----------------------------------------------" `
-                               -ForegroundColor Gray
+                        -ForegroundColor Gray
                 }#nodesForEach
                 Write-Host "Total Hard drive space being taken up by BIN files: $vmMemory GB" `
-                           -ForegroundColor Magenta
+                    -ForegroundColor Magenta
                 Write-Host "----------------------------------------------" `
                     -ForegroundColor Gray
                 #-----------------------------------------------------------------------
@@ -1122,23 +1122,23 @@ function Get-BINSpaceInfo {
             $quickCheck = Get-VM | Measure-Object | Select-Object -ExpandProperty count
             if ($quickCheck -ne 0) {
                 $VMInfo = get-vm
-                $VMInfo | Select-Object VMName, @{ Label = "Memory Assigned"; Expression = { '{0:N0}' -F ($_.MemoryAssigned/1GB) } },`
-                                        AutomaticStopAction | Format-Table -AutoSize
+                $VMInfo | Select-Object VMName, @{ Label = "Memory Assigned"; Expression = { '{0:N0}' -F ($_.MemoryAssigned / 1GB) } }, `
+                    AutomaticStopAction | Format-Table -AutoSize
                 foreach ($vm in $VMInfo) {
                     if ($vm.AutomaticStopAction -eq "Save") {
                         $vmMemory += [math]::round($vm.MemoryAssigned / 1GB, 0)
                     }
                 }
                 Write-Host "----------------------------------------------" `
-                           -ForegroundColor Gray
+                    -ForegroundColor Gray
                 Write-Host "Total Hard drive space being taken up by BIN files: $vmMemory GB" `
-                           -ForegroundColor Magenta
+                    -ForegroundColor Magenta
                 Write-Host "----------------------------------------------" `
-                           -ForegroundColor Gray
+                    -ForegroundColor Gray
             }
             else {
                 Write-Host "No VMs are present on this node." `
-                           -ForegroundColor White -BackgroundColor Black
+                    -ForegroundColor White -BackgroundColor Black
             }
             #--------------END Get VM Data ---------------------
         }#clusterEval
@@ -1164,22 +1164,23 @@ function Get-BINSpaceInfo {
 
     Displays information for each VHD for every VM discovered
 .OUTPUTS
-    Standalone server detected. Executing standalone diagnostic...
-    ----------------------------------------------
-    2008R2Clust2
+    HYP1
+    PSHost-1
 
-    VhdType Size(GB) MaxSize(GB) Path                                                            
-    ------- -------- ----------- ----                                                            
-    Dynamic       14          60 \\sofs-csv\VMs\2008R2Clust2\Virtual Hard Disks\2008R2Clust2.vhdx
-    ----------------------------------------------
-    Web1
+        VhdType Size(GB) MaxSize(GB) Path
+        ------- -------- ----------- ----
+    Differencing       10          60 C:\ClusterStorage\Volume1\VMs\VHDs\PSHost-1_A2B10ECE-58EA-474C-A0FA-A66E2104A345.a...
+    Differencing       33         275 C:\ClusterStorage\volume1\vms\vhds\PSHost_VMs_915F1EA6-1D11-4E6B-A7DC-1C4E30AA0829...
 
-    VhdType Size(GB) MaxSize(GB) Path                                            
-    ------- -------- ----------- ----                                            
-    Dynamic       12          40 \\sofs-csv\VMs\Web1\Virtual Hard Disks\Web1.vhdx
+
     ----------------------------------------------
-    VMs are currently utilizing:  48 GB
-    VMs could POTENTIALLY Utilize:  180 GB
+    HYP2
+    No VMs are present on this node.
+    ----------------------------------------------
+        Total Vhd(x) utilization:
+    ----------------------------------------------
+    VMs are currently utilizing:  43 GB
+    VMs could POTENTIALLY Utilize:  335 GB
     ----------------------------------------------
 .NOTES
     Author: Jake Morrison
@@ -1231,10 +1232,10 @@ function Get-VMAllVHDs {
                                     Write-Host $vm.VMName -ForegroundColor White `
                                         -BackgroundColor Black
                                     Get-VHD -ComputerName $node.Name -VMId $VM.VMId | `
-                                        Format-Table vhdtype, @{label = ’Size(GB)’; `
+                                        Format-Table vhdtype, @{label = 'Size(GB)'; `
                                             expression = {$_.filesize / 1gb -as [int]}
                                     }, `
-                                    @{label = ’MaxSize(GB)’; expression = {$_.size / 1gb -as [int]}}, `
+                                    @{label = 'MaxSize(GB)'; expression = {$_.size / 1gb -as [int]}}, `
                                         path -AutoSize 
                                     #------END for output------------
         
@@ -1283,11 +1284,16 @@ function Get-VMAllVHDs {
                     }
                     catch {
                         Write-Host "An error was encountered with $node - skipping this node" `
-                        -ForegroundColor Red
+                            -ForegroundColor Red
                         Write-Error $_
                     }
                 }#foreachVM
                 #------------------------------------------------------------------------
+                Write-Host "----------------------------------------------" `
+                    -ForegroundColor Gray
+                Write-Host "      Total Vhd(x) utilization:"                    
+                Write-Host "----------------------------------------------" `
+                    -ForegroundColor Gray    
                 $currentStorageUse = $currentS
                 $potentialStorageUse = $potentialS
                 Write-Host "VMs are currently utilizing: " $currentStorageUse "GB" `
@@ -1317,9 +1323,9 @@ function Get-VMAllVHDs {
                 foreach ($VM in $VMs ) { 
                     #---------for output-------------
                     Write-Host $vm.VMName -ForegroundColor White -BackgroundColor Black
-                    Get-VHD -VMId $VM.VMId |  Format-Table vhdtype, @{label = ’Size(GB)’; `
+                    Get-VHD -VMId $VM.VMId |  Format-Table vhdtype, @{label = 'Size(GB)'; `
                             expression = {$_.filesize / 1gb -as [int]}
-                    }, @{label = ’MaxSize(GB)’; `
+                    }, @{label = 'MaxSize(GB)'; `
                             expression = {$_.size / 1gb -as [int]}
                     }, path -AutoSize 
                     #------END for output------------
@@ -1352,6 +1358,11 @@ function Get-VMAllVHDs {
                     Write-Host "----------------------------------------------" -ForegroundColor Gray
                 }
                 #---------------------------------------------------------------------
+                Write-Host "----------------------------------------------" `
+                    -ForegroundColor Gray
+                Write-Host "      Total Vhd(x) utilization:"                    
+                Write-Host "----------------------------------------------" `
+                    -ForegroundColor Gray    
                 $currentStorageUse = $currentS
                 $potentialStorageUse = $potentialS
                 Write-Host "VMs are currently utilizing: " $currentStorageUse "GB" `
@@ -1452,7 +1463,7 @@ function Get-SharedVHDs {
                     }
                     catch {
                         Write-Host "An error was encountered with $node - skipping this node" `
-                        -ForegroundColor Red
+                            -ForegroundColor Red
                         Write-Error $_
                     }
                 }#foreachVM
@@ -1463,8 +1474,7 @@ function Get-SharedVHDs {
         }#clusterEval     
         else {
             #standalone server - execute code for standalone server
-            Write-Host "Standalone server detected. Executing standalone diagnostic..." `
-                -ForegroundColor Yellow -BackgroundColor Black
+            Write-Verbose -Message "Standalone server detected. Executing standalone diagnostic..."
             #-----------------Get VM Data Now---------------------
             $quickCheck = Get-VM | Measure-Object | `
                 Select-Object -ExpandProperty count
@@ -1763,7 +1773,7 @@ function Test-HyperVAllocation {
                     if ($totalramrequired -lt $availVMMemory) {
                         Write-Host "Minimum RAM: $totalramrequired GB does not exceed available RAM: $availVMMemory GB" -ForegroundColor Green
                     }
-                    elseif ($totalramrequired -eq $availVMMemory){
+                    elseif ($totalramrequired -eq $availVMMemory) {
                         Write-Host "Minimum RAM: $totalramrequired GB is exactly at available RAM: $availVMMemory GB" -ForegroundColor Yellow
                     }
                     else {
@@ -1782,6 +1792,9 @@ function Test-HyperVAllocation {
                     #--------------------------------------------------------------------
                 }#nodesForEach
                 #calculating a node loss and its impact
+                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
+                Write-Host "N+1 Allocation Evaluation:"
+                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
                 $x = $totalClusterRAM / $nodeCount
                 $clusterNodeDownUseable = $totalClusterRAM - $x
                 if ($totalVMClusterRAM -gt $clusterNodeDownUseable) {
@@ -2011,7 +2024,7 @@ function Test-HyperVAllocation {
             if ($totalramrequired -lt $availVMMemory) {
                 Write-Host "Minimum RAM: $totalramrequired GB does not exceed available RAM: $availVMMemory GB" -ForegroundColor Green
             }
-            elseif ($totalramrequired -eq $availVMMemory){
+            elseif ($totalramrequired -eq $availVMMemory) {
                 Write-Host "Minimum RAM: $totalramrequired GB is exactly at available RAM: $availVMMemory GB" -ForegroundColor Yellow
             }
             else {
@@ -2095,21 +2108,21 @@ function Test-HyperVAllocation {
     diagnostic. Each diagnostic is a fully independent function which can be
     copied and run independent of Diag-V if desired.
 .EXAMPLE
-    Diag-V
+    Show-DiagVMenu
 
-    Copy code into an administrative PS or ISE window and run.
+    
 .OUTPUTS
     Output will vary depending on the selected diagnostic.
 
     ##############################################
-     ____  _                __     __
-    |  _ \(_) __ _  __ _    \ \   / /
-    | | | | |/ _  |/ _  |____\ \ / / 
-    | |_| | | (_| | (_| |_____\ V / 
-    |____/|_|\__,_|\__, |      \_/ 
-                   |___/          
+        ____  _                __     __
+        |  _ \(_) __ _  __ _    \ \   / /
+        | | | | |/ _  |/ _  |____\ \ / / 
+        | |_| | | (_| | (_| |_____\ V / 
+        |____/|_|\__,_|\__, |      \_/ 
+                        |___/          
     ##############################################
-    A Hyper-V diagnostic utility
+            A Hyper-V diagnostic utility
     ##############################################
                     MAIN MENU
     ##############################################
@@ -2131,8 +2144,6 @@ function Test-HyperVAllocation {
 	------------------------------
     Get-VMLocationPathInfo
     ------------------------------
-    Get-VMDetails
-    ------------------------------
     Get-IntegrationServicesCheck
     ------------------------------
 	Get-BINSpaceInfo
@@ -2147,260 +2158,260 @@ function Test-HyperVAllocation {
     ------------------------------
     Get-FileSizes
 #>
-                            function Show-DiagVMenu {
-                                #all this serves to do is to launch the parent menu choice option
-                                showTheTopLevel
-                            }
-                            ####################################################################################
-                            #------------------------------Menu Selections--------------------------------------
-                            ####################################################################################
-                            <#
+function Show-DiagVMenu {
+    #all this serves to do is to launch the parent menu choice option
+    showTheTopLevel
+}
+####################################################################################
+#------------------------------Menu Selections--------------------------------------
+####################################################################################
+<#
 .Synopsis
    showTheTopLevel is a menu level function that shows the parent (or top) menu choices
 .DESCRIPTION
    showTheTopLevel is a menu level function that shows the parent (or top) menu choices
 #>
-                            function showTheTopLevel {
-                                Clear-Host
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host " ____  _                __     __" -ForegroundColor Cyan
-                                Write-Host "|  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
-                                Write-Host "| | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
-                                Write-Host "| |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
-                                Write-Host "|____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
-                                Write-Host "               |___/          " -ForegroundColor Cyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "                MAIN MENU" -ForegroundColor DarkCyan                                       
-                                Write-Host "##############################################" -ForegroundColor DarkGray
+function showTheTopLevel {
+    Clear-Host
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "      ____  _                __     __" -ForegroundColor Cyan
+    Write-Host "     |  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
+    Write-Host "     | | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
+    Write-Host "     | |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
+    Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
+    Write-Host "                    |___/          " -ForegroundColor Cyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "                MAIN MENU" -ForegroundColor DarkCyan                                       
+    Write-Host "##############################################" -ForegroundColor DarkGray
 
-                                Write-Host "[1]  VMs" 
-                                Write-Host "[2]  VHDs" 
-                                Write-Host "[3]  Overallocation" 
-                                Write-Host "[4]  CSVs" 
-                                Write-Host "[5]  Hyper-V Event Logs"
+    Write-Host "[1]  VMs" 
+    Write-Host "[2]  VHDs" 
+    Write-Host "[3]  Overallocation" 
+    Write-Host "[4]  CSVs" 
+    Write-Host "[5]  Hyper-V Event Logs"
 
-                                $topLevel = $null
-                                $topLevel = Read-Host "Please select a menu number"
-                                if ($topLevel -eq 1) {
-                                    showVMDiags
-                                }
-                                elseif ($topLevel -eq 2) {
-                                    showVHDDiags
-                                }
-                                elseif ($topLevel -eq 3) {
-                                    showAllocationDiags
-                                }
-                                elseif ($topLevel -eq 4) {
-                                    showCSVDiags
-                                }
-                                elseif ($topLevel -eq 5) {
-                                    showHyperVLogs
-                                }
-                                else {
-                                    Write-Warning "You failed to select one of the available choices"
-                                }
-                            }
-                            <#
+    $topLevel = $null
+    $topLevel = Read-Host "Please select a menu number"
+    if ($topLevel -eq 1) {
+        showVMDiags
+    }
+    elseif ($topLevel -eq 2) {
+        showVHDDiags
+    }
+    elseif ($topLevel -eq 3) {
+        showAllocationDiags
+    }
+    elseif ($topLevel -eq 4) {
+        showCSVDiags
+    }
+    elseif ($topLevel -eq 5) {
+        showHyperVLogs
+    }
+    else {
+        Write-Warning "You failed to select one of the available choices"
+    }
+}
+<#
 .Synopsis
    showTheTopLevel is a menu level function that shows the VM diagnostic menu choices
 .DESCRIPTION
    showTheTopLevel is a menu level function that shows the VM diagnostic menu choices
 #>
-                            function showVMDiags {
-                                Clear-Host
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host " ____  _                __     __" -ForegroundColor Cyan
-                                Write-Host "|  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
-                                Write-Host "| | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
-                                Write-Host "| |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
-                                Write-Host "|____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
-                                Write-Host "               |___/          " -ForegroundColor Cyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "               VM Diagnostics" -ForegroundColor DarkCyan                                       
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "[1]  Get-VMStatus"
-                                Write-Host "[2]  Get-VMInfo"
-                                Write-Host "[3]  Get-VMReplicationStatus"
-                                Write-Host "[4]  Get-VMLocationPathInfo"
-                                Write-Host "[5]  Get-IntegrationServicesCheck"
-                                Write-Host "[6]  Get-BINSpaceInfo"
-                                Write-Host "[7]  Main Menu"
-                                $topLevel = $null
-                                $topLevel = Read-Host "Please select a menu number"
-                                if ($topLevel -eq 1) {
-                                    Get-VMStatus
-                                }
-                                elseif ($topLevel -eq 2) {
-                                    Get-VMInfo
-                                }
-                                elseif ($topLevel -eq 3) {
-                                    Get-VMReplicationStatus
-                                }
-                                elseif ($topLevel -eq 4) {
-                                    Get-VMLocationPathInfo
-                                }
-                                elseif ($topLevel -eq 5) {
-                                    Get-IntegrationServicesCheck
-                                }
-                                elseif ($topLevel -eq 6) {
-                                    Get-BINSpaceInfo
-                                }
-                                elseif ($topLevel -eq 7) {
-                                    showTheTopLevel
-                                }
-                                else {
-                                    Write-Warning "You failed to select one of the available choices"
-                                }
-                            }
-                            <#
+function showVMDiags {
+    Clear-Host
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "      ____  _                __     __" -ForegroundColor Cyan
+    Write-Host "     |  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
+    Write-Host "     | | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
+    Write-Host "     | |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
+    Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
+    Write-Host "                    |___/          " -ForegroundColor Cyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "               VM Diagnostics" -ForegroundColor DarkCyan                                       
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "[1]  Get-VMStatus"
+    Write-Host "[2]  Get-VMInfo"
+    Write-Host "[3]  Get-VMReplicationStatus"
+    Write-Host "[4]  Get-VMLocationPathInfo"
+    Write-Host "[5]  Get-IntegrationServicesCheck"
+    Write-Host "[6]  Get-BINSpaceInfo"
+    Write-Host "[7]  Main Menu"
+    $topLevel = $null
+    $topLevel = Read-Host "Please select a menu number"
+    if ($topLevel -eq 1) {
+        Get-VMStatus
+    }
+    elseif ($topLevel -eq 2) {
+        Get-VMInfo
+    }
+    elseif ($topLevel -eq 3) {
+        Get-VMReplicationStatus
+    }
+    elseif ($topLevel -eq 4) {
+        Get-VMLocationPathInfo
+    }
+    elseif ($topLevel -eq 5) {
+        Get-IntegrationServicesCheck
+    }
+    elseif ($topLevel -eq 6) {
+        Get-BINSpaceInfo
+    }
+    elseif ($topLevel -eq 7) {
+        showTheTopLevel
+    }
+    else {
+        Write-Warning "You failed to select one of the available choices"
+    }
+}
+<#
 .Synopsis
    showVHDDiags is a menu level function that shows the VHD/VHDX diagnostic menu choices
 .DESCRIPTION
    showVHDDiags is a menu level function that shows the VHD/VHDX diagnostic menu choices
 #>
-                            function showVHDDiags {
-                                Clear-Host
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host " ____  _                __     __" -ForegroundColor Cyan
-                                Write-Host "|  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
-                                Write-Host "| | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
-                                Write-Host "| |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
-                                Write-Host "|____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
-                                Write-Host "               |___/          " -ForegroundColor Cyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "             VHD Diagnostics" -ForegroundColor DarkCyan                                       
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "[1]  Get-VMAllVHDs"
-                                Write-Host "[2]  Get-SharedVHDs"
-                                Write-Host "[3]  Main Menu"
-                                $topLevel = $null
-                                $topLevel = Read-Host "Please select a menu number"
-                                if ($topLevel -eq 1) {
-                                    Get-VMAllVHDs
-                                }
-                                elseif ($topLevel -eq 2) {
-                                    Get-SharedVHDs
-                                }
-                                elseif ($topLevel -eq 3) {
-                                    showTheTopLevel
-                                }
-                                else {
-                                    Write-Warning "You failed to select one of the available choices"
-                                }
-                            }
-                            <#
+function showVHDDiags {
+    Clear-Host
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "      ____  _                __     __" -ForegroundColor Cyan
+    Write-Host "     |  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
+    Write-Host "     | | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
+    Write-Host "     | |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
+    Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
+    Write-Host "                    |___/          " -ForegroundColor Cyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "             VHD Diagnostics" -ForegroundColor DarkCyan                                       
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "[1]  Get-VMAllVHDs"
+    Write-Host "[2]  Get-SharedVHDs"
+    Write-Host "[3]  Main Menu"
+    $topLevel = $null
+    $topLevel = Read-Host "Please select a menu number"
+    if ($topLevel -eq 1) {
+        Get-VMAllVHDs
+    }
+    elseif ($topLevel -eq 2) {
+        Get-SharedVHDs
+    }
+    elseif ($topLevel -eq 3) {
+        showTheTopLevel
+    }
+    else {
+        Write-Warning "You failed to select one of the available choices"
+    }
+}
+<#
 .Synopsis
    showAllocationDiags is a menu level function that shows the resource allocation diagnostic menu choices
 .DESCRIPTION
    showAllocationDiags is a menu level function that shows the resource allocation diagnostic menu choices
 #>
-                            function showAllocationDiags {
-                                Clear-Host
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host " ____  _                __     __" -ForegroundColor Cyan
-                                Write-Host "|  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
-                                Write-Host "| | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
-                                Write-Host "| |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
-                                Write-Host "|____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
-                                Write-Host "               |___/          " -ForegroundColor Cyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "          OverAllocation Diagnostics" -ForegroundColor DarkCyan                                       
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "[1]  Test-HyperVAllocation"
-                                Write-Host "[2]  Main Menu"
-                                $topLevel = $null
-                                $topLevel = Read-Host "Please select a menu number"
-                                if ($topLevel -eq 1) {
-                                    Test-HyperVAllocation
-                                }
-                                elseif ($topLevel -eq 2) {
-                                    showTheTopLevel
-                                }
-                                else {
-                                    Write-Warning "You failed to select one of the available choices"
-                                }
-                            }
-                            <#
+function showAllocationDiags {
+    Clear-Host
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "      ____  _                __     __" -ForegroundColor Cyan
+    Write-Host "     |  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
+    Write-Host "     | | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
+    Write-Host "     | |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
+    Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
+    Write-Host "                    |___/          " -ForegroundColor Cyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "          OverAllocation Diagnostics" -ForegroundColor DarkCyan                                       
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "[1]  Test-HyperVAllocation"
+    Write-Host "[2]  Main Menu"
+    $topLevel = $null
+    $topLevel = Read-Host "Please select a menu number"
+    if ($topLevel -eq 1) {
+        Test-HyperVAllocation
+    }
+    elseif ($topLevel -eq 2) {
+        showTheTopLevel
+    }
+    else {
+        Write-Warning "You failed to select one of the available choices"
+    }
+}
+<#
 .Synopsis
    showCSVDiags is a menu level function that shows the CSV diagnostic menu choices
 .DESCRIPTION
    showCSVDiags is a menu level function that shows the CSV diagnostic menu choices
 #>
-                            function showCSVDiags {
-                                Clear-Host
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host " ____  _                __     __" -ForegroundColor Cyan
-                                Write-Host "|  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
-                                Write-Host "| | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
-                                Write-Host "| |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
-                                Write-Host "|____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
-                                Write-Host "               |___/          " -ForegroundColor Cyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "             CSV Diagnostics" -ForegroundColor DarkCyan                                       
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "[1]  Get-CSVtoPhysicalDiskMapping"
-                                Write-Host "[2]  Get-FileSizes"
-                                Write-Host "[3]  Main Menu"
-                                $topLevel = $null
-                                $topLevel = Read-Host "Please select a menu number"
-                                if ($topLevel -eq 1) {
-                                    Get-CSVtoPhysicalDiskMapping
-                                }
-                                elseif ($topLevel -eq 2) {
-                                    Get-FileSizes
-                                }
-                                elseif ($topLevel -eq 3) {
-                                    showTheTopLevel
-                                }
-                                else {
-                                    Write-Warning "You failed to select one of the available choices"
-                                }
-                            }
+function showCSVDiags {
+    Clear-Host
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "      ____  _                __     __" -ForegroundColor Cyan
+    Write-Host "     |  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
+    Write-Host "     | | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
+    Write-Host "     | |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
+    Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
+    Write-Host "                    |___/          " -ForegroundColor Cyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "             CSV Diagnostics" -ForegroundColor DarkCyan                                       
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "[1]  Get-CSVtoPhysicalDiskMapping"
+    Write-Host "[2]  Get-FileSizes"
+    Write-Host "[3]  Main Menu"
+    $topLevel = $null
+    $topLevel = Read-Host "Please select a menu number"
+    if ($topLevel -eq 1) {
+        Get-CSVtoPhysicalDiskMapping
+    }
+    elseif ($topLevel -eq 2) {
+        Get-FileSizes
+    }
+    elseif ($topLevel -eq 3) {
+        showTheTopLevel
+    }
+    else {
+        Write-Warning "You failed to select one of the available choices"
+    }
+}
 
-                            <#
+<#
 .Synopsis
    showHyperVLogs is a menu level function that shows the Hyper-V Event Log menu choices
 .DESCRIPTION
    showHyperVLogs is a menu level function that shows the Hyper-V Event Log menu choices
 #>
-                            function showHyperVLogs {
-                                Clear-Host
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host " ____  _                __     __" -ForegroundColor Cyan
-                                Write-Host "|  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
-                                Write-Host "| | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
-                                Write-Host "| |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
-                                Write-Host "|____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
-                                Write-Host "               |___/          " -ForegroundColor Cyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "           Hyper-V Event Log Search" -ForegroundColor DarkCyan                                       
-                                Write-Host "##############################################" -ForegroundColor DarkGray
-                                Write-Host "[1]  Search last 24 hours"
-                                Write-Host "[2]  Specify date range"
-                                Write-Host "[3]  Main Menu"
+function showHyperVLogs {
+    Clear-Host
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "      ____  _                __     __" -ForegroundColor Cyan
+    Write-Host "     |  _ \(_) __ _  __ _    \ \   / /" -ForegroundColor Cyan
+    Write-Host "     | | | | |/ _`  |/ _`  |____\ \ / / " -ForegroundColor Cyan
+    Write-Host "     | |_| | | (_| | (_| |_____\ V / " -ForegroundColor Cyan
+    Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
+    Write-Host "                    |___/          " -ForegroundColor Cyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "           Hyper-V Event Log Search" -ForegroundColor DarkCyan                                       
+    Write-Host "##############################################" -ForegroundColor DarkGray
+    Write-Host "[1]  Search last 24 hours"
+    Write-Host "[2]  Specify date range"
+    Write-Host "[3]  Main Menu"
 
-                                $MenuChoice = $null
-                                $MenuChoice = Read-Host "Please select a menu number"
+    $MenuChoice = $null
+    $MenuChoice = Read-Host "Please select a menu number"
 
-                                if ($MenuChoice -eq 3) {
-                                    showTheTopLevel
-                                }
-                                else {
-                                    Get-ClusterCheck
-                                }
-                            }
+    if ($MenuChoice -eq 3) {
+        showTheTopLevel
+    }
+    else {
+        Get-ClusterCheck
+    }
+}
 
 ####################################################################################
 #-----------------------------END Menu Selections-----------------------------------
