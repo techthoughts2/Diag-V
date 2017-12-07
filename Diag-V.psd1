@@ -12,7 +12,7 @@
     RootModule = 'Diag-V.psm1'
     
     # Version number of this module.
-    ModuleVersion = '2.0'
+    ModuleVersion = '1.0'
     
     # ID used to uniquely identify this module
     GUID = 'd0a9150d-b6a4-4b17-a325-e3a24fed0aa9'
@@ -70,11 +70,14 @@
         'Get-VMStatus',
         'Get-VMInfo',
         'Get-VMReplicationStatus',
+        'Get-VMLocationPathInfo',
         'Get-IntegrationServicesCheck',
         'Get-BINSpaceInfo',
         'Get-VMAllVHDs',
         'Get-SharedVHDs',
         'Test-HyperVAllocation',
+        'Get-CSVtoPhysicalDiskMapping',
+        'Get-FileSizes',
         'Show-DiagVMenu'
     )
     

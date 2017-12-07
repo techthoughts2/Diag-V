@@ -1,3 +1,9 @@
+#region variables
+
+$Script:version = "1.0"
+
+#endregion
+
 #region supportingFunctions
 
 <#
@@ -144,6 +150,8 @@ filter Import-CimXml {
 
 #endregion
 
+#region diagnosticFunctions
+
 #region vmDiagnosticFunctions
 
 <#
@@ -198,6 +206,7 @@ filter Import-CimXml {
 function Get-VMStatus {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         $clusterEval = Test-IsACluster
@@ -428,6 +437,7 @@ function Get-VMStatus {
 function Get-VMInfo {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         $clusterEval = Test-IsACluster
@@ -673,6 +683,7 @@ function Get-VMInfo {
 function Get-VMReplicationStatus {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         $clusterEval = Test-IsACluster
@@ -787,6 +798,7 @@ function Get-VMReplicationStatus {
 function Get-VMLocationPathInfo {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         $clusterEval = Test-IsACluster
@@ -912,6 +924,7 @@ function Get-VMLocationPathInfo {
 function Get-IntegrationServicesCheck {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         $clusterEval = Test-IsACluster
@@ -1053,6 +1066,7 @@ function Get-IntegrationServicesCheck {
 function Get-BINSpaceInfo {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         $clusterEval = Test-IsACluster
@@ -1197,6 +1211,7 @@ function Get-BINSpaceInfo {
 function Get-VMAllVHDs {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         #---------------------------------
@@ -1423,6 +1438,7 @@ function Get-VMAllVHDs {
 function Get-SharedVHDs {
     [CmdletBinding()]
     param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
         if ($clusterEval -eq $true) {
@@ -1495,6 +1511,11 @@ function Get-SharedVHDs {
         Write-Warning -Message "Not running as administrator. No further action can be taken." 
     }#administrator check
 }
+
+#endregion
+
+#region allocationDiagnosticFunctions
+
 <#
 .Synopsis
     Determines the current resource allocation health of Hyper-V Server or Hyper-V Cluster
@@ -1576,7 +1597,7 @@ function Test-HyperVAllocation {
     param ()
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
-        Write-Host "Processing pre-checks. This may take a few seconds..."
+        Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
             #we are definitely dealing with a cluster - execute code for cluster
@@ -2097,6 +2118,231 @@ function Test-HyperVAllocation {
 
 #endregion
 
+#region csvFunctions
+
+<#
+.Synopsis
+    Resolves CSV to a physicalDisk drive
+.DESCRIPTION
+    Discovers all cluster shared volumes associated with the specificed cluster
+    Resolves all cluster shared volumes to physical drives and pulls usefull
+    information about the characteristcs of the associated physical drive
+.EXAMPLE
+    Get-CSVtoPhysicalDiskMapping
+
+    This command retrieves all cluster shared volumes and pulls information 
+    related to the physical disk associated with each CSV.  Since no cluster name 
+    is specified this command resolves to a locally available cluster (".")
+.EXAMPLE
+    Get-CSVtoPhysicalDiskMappying -clusterName "Clus1.domain.local"
+
+    This command retrieves all cluster shared volumes and pulls information related 
+    to the physical disk associated with the CSVs that are associated with the 
+    Clus1.domain.local cluster.
+.OUTPUTS
+    #CSVName : Cluster Disk 1
+    #CSVPartitionNumber : 2
+    #Size (GB) : 1500
+    #CSVOwnerNode : node1
+    #FreeSpace (GB) : 697
+    #CSVVolumePath : C:\ClusterStorage\Volume1
+    #CSVPhysicalDiskNumber : 3
+    #Percent Free : 46.49729
+.NOTES
+    Adapted from code written by Ravikanth Chaganti http://www.ravichaganti.com
+    Enhanced by: Jake Morrison - TechThoughts - http://techthoughts.info
+.FUNCTIONALITY
+     Get the following information for each CSV in the cluster:
+     CSV Name
+     Total Size of associated physical disk
+     CSV Volume Path
+     Percent free of physical disk - VERY useful
+     CSV Owner Node
+     CSV Partition Number
+     Freespace in (GB)
+#>
+function Get-CSVtoPhysicalDiskMapping {
+    [cmdletbinding()]
+    param ()
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
+    $adminEval = Test-RunningAsAdmin
+    if ($adminEval -eq $true) {
+        $clusterEval = Test-IsACluster
+        if ($clusterEval -eq $true) {
+            Write-Verbose -Message "Cluster detected. Performing CSV discovery..."
+            try {
+                $clusterSharedVolume = Get-ClusterSharedVolume -ErrorAction SilentlyContinue
+                if ($clusterSharedVolume -eq $null) {
+                    Write-Warning "No CSVs discovered."
+                }
+                else {
+                    Write-Verbose -Message "CSVs found. Performing evaluations..."
+                    foreach ($volume in $clusterSharedVolume) {
+                        $volumeowner = $volume.OwnerNode.Name
+                        $csvVolume = $volume.SharedVolumeInfo.Partition.Name
+                        $cimSession = New-CimSession -ComputerName $volumeowner
+                        $volumeInfo = Get-Disk -CimSession $cimSession -ErrorAction Stop `
+                            | Get-Partition -ErrorAction Stop `
+                            | Select-Object DiskNumber, @{Name = "Volume"; `
+                                Expression = {Get-Volume -Partition $_ -ErrorAction Stop `
+                                    | Select-Object -ExpandProperty ObjectId }
+                        } 
+                        $csvdisknumber = $null
+                        $csvdisknumber = ($volumeinfo | Where-Object `
+                            { $_.Volume -eq $csvVolume}).Disknumber
+                        if ($csvdisknumber -eq $null) {
+                            #we can try path instead of ObjectId as a last ditch effort
+                            $volumeInfo = Get-Disk -CimSession $cimSession -ErrorAction Stop `
+                                | Get-Partition -ErrorAction Stop `
+                                | Select-Object DiskNumber, @{Name = "Volume"; `
+                                    Expression = {Get-Volume -Partition $_ -ErrorAction Stop `
+                                        | Select-Object -ExpandProperty Path }
+                            }
+                            $csvdisknumber = ($volumeinfo | Where-Object `
+                                { $_.Volume -eq $csvVolume}).Disknumber            
+                        }
+                        $csvtophysicaldisk = New-Object -TypeName PSObject -Property @{
+                            "CSVName" = $volume.Name
+                            "Size (GB)" = [int]($volume.SharedVolumeInfo.Partition.Size / 1GB)
+                            "CSVVolumePath" = $volume.SharedVolumeInfo.FriendlyVolumeName
+                            "Percent Free" = $volume.SharedVolumeInfo.Partition.PercentFree
+                            "CSVOwnerNode" = $volumeowner
+                            "CSVPhysicalDiskNumber" = $csvdisknumber
+                            "CSVPartitionNumber" = $volume.SharedVolumeInfo.PartitionNumber
+                            "FreeSpace (GB)" = [int]($volume.SharedVolumeInfo.Partition.Freespace / 1GB)
+                        }
+                        $csvtophysicaldisk
+                    }
+                }
+            }
+            catch {
+                Write-Host "ERROR - An issue was encountered getting physical disks of CSVs:" `
+                    -ForegroundColor Red
+                Write-Error $_
+            }
+        }#clusterEval
+        else {
+            Write-Warning "No cluster detected. This function is only applicable to clusters with CSVs."
+        }#clusterEval
+    }#administrator check
+    else {
+        Write-Warning -Message "Not running as administrator. No further action can be taken." 
+    }#administrator check
+}
+
+#endregion
+
+#region windowsDiagnosticFunctions
+
+<#
+.Synopsis
+    Scans specified path and gets total size as well as top 10 largest files
+.DESCRIPTION
+    Recursively scans all files in the specified path. It then gives a total
+    size in GB for all files found under the specified location as well as
+    the top 10 largest files discovered. The length of scan completion is
+    impacted by the size of the path specified as well as the number of files
+.EXAMPLE
+    Get-FileSizes -Path C:\ClusterStorage\Volume1\
+
+    This command recursively scans the specified path and will tally the total
+    size of all discovered files as well as the top 10 largest files.
+.OUTPUTS
+    Diag-V v1.0 - Processing pre-checks. This may take a few seconds...
+    Note - depending on how many files are in the path you specified this scan can take some time. Patience please...
+    Scan results for: C:\ClusterStorage\Volume1\
+    ----------------------------------------------
+    Total size of all files: 336 GB.
+    ----------------------------------------------
+    Top 10 Largest Files found:
+
+    Directory                                               Name                                                  Size(MB)
+    ---------                                               ----                                                  --------
+    C:\ClusterStorage\Volume1\VMs\VHDs                      PSHost_VMs.vhdx                                         281604
+    C:\ClusterStorage\Volume1\VMs\VHDs                      PSHost_VMs_915F1EA6-1D11-4E6B-A7DC-1C4E30AA0829.avhdx    33656
+    C:\ClusterStorage\Volume1\VMs\VHDs                      PSHost-1.vhdx                                            18212
+    C:\ClusterStorage\Volume1\VMs\VHDs                      PSHost-1_A2B10ECE-58EA-474C-A0FA-A66E2104A345.avhdx      10659
+    C:\ClusterStorage\Volume1\VMs\PSHost-1\Snapshots        29BFF5A2-3150-4B26-8A64-152193669694.VMRS                 0.09
+    C:\ClusterStorage\Volume1\VMs\PSHost-1\Virtual Machines 8070AD08-E165-4F8C-B249-6B41DDEEE449.VMRS                 0.07
+    C:\ClusterStorage\Volume1\VMs\PSHost-1\Virtual Machines 8070AD08-E165-4F8C-B249-6B41DDEEE449.vmcx                 0.07
+    C:\ClusterStorage\Volume1\VMs\PSHost-1\Snapshots        29BFF5A2-3150-4B26-8A64-152193669694.vmcx                 0.05
+                                                            PSHost-1                                                     0
+                                                            VHDs                                                         0
+
+
+    ----------------------------------------------
+.NOTES
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+.FUNCTIONALITY
+     Get the following information for the specified path:
+     Total size of all files found under the path
+     Top 10 largest files discovered
+#>
+function Get-FileSizes {
+    [cmdletbinding()]
+    Param (
+        #directory path that you wish to scan
+        [Parameter(Mandatory = $true,
+            HelpMessage = "Please enter a path (Ex: C:\ClusterStorage\Volume1)", 
+            ValueFromPipeline = $true, 
+            ValueFromPipelineByPropertyName = $true, Position = 0)
+        ]
+        [string]$Path
+    )
+    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
+    Write-Host "Note - depending on how many files are in the path you specified"`
+        "this scan can take some time. Patience please..." -ForegroundColor Gray
+    #test path and then load location
+    try {
+        Write-Verbose -Message "Testing path location..."
+        if (Test-Path $path -ErrorAction Stop) {
+            Write-Verbose -Message "Path verified."
+            Write-Verbose -Message "Getting files..."
+            $files = Get-ChildItem -Path $path -Recurse -Force `
+                -ErrorAction SilentlyContinue
+        }
+        else {
+            Write-Warning "The path you specified is not valid."
+            return
+        }
+    }
+    catch {
+        Write-Host "An error was encountered verifying the specified path:" -ForegroundColor Red
+        Write-Error $_
+    }
+    [double]$intSize = 0
+    try {
+        #get total size of all files
+        foreach ($objFile in $files) {
+            $i++
+            $intSize = $intSize + $objFile.Length
+            Write-Progress -activity "Adding File Sizes" -status "Percent added: " `
+                -PercentComplete (($i / $files.length) * 100)
+        }
+        $intSize = [math]::round($intSize / 1GB, 0)
+        #generate output
+        Write-Host "Scan results for: $path" -ForegroundColor Cyan
+        Write-Host "----------------------------------------------" `
+            -ForegroundColor Gray
+        Write-Host "Total size of all files: $intSize GB." `
+            -ForegroundColor Magenta
+        Write-Host "----------------------------------------------" `
+            -ForegroundColor Gray
+        Write-Host "Top 10 Largest Files found:" -ForegroundColor Cyan
+        $files | Select-Object Directory, Name, @{Label = 'Size(MB)'; Expression = {[math]::round($_.Length / 1MB, 2)}} `
+            | Sort-Object 'Size(MB)' -Descending | Select-Object -First 10 | Format-Table -AutoSize
+        Write-Host "----------------------------------------------" `
+            -ForegroundColor Gray
+    }
+    catch {
+        Write-Error $_
+    }
+}
+
+#endregion
+
+#endregion
+
 #region guiMenu
 
 <#
@@ -2181,7 +2427,7 @@ function showTheTopLevel {
     Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
     Write-Host "                    |___/          " -ForegroundColor Cyan
     Write-Host "##############################################" -ForegroundColor DarkGray
-    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "     A Hyper-V diagnostic utility - v$Script:version " -ForegroundColor DarkCyan
     Write-Host "##############################################" -ForegroundColor DarkGray
     Write-Host "                MAIN MENU" -ForegroundColor DarkCyan                                       
     Write-Host "##############################################" -ForegroundColor DarkGray
@@ -2229,7 +2475,7 @@ function showVMDiags {
     Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
     Write-Host "                    |___/          " -ForegroundColor Cyan
     Write-Host "##############################################" -ForegroundColor DarkGray
-    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "     A Hyper-V diagnostic utility - v$Script:version " -ForegroundColor DarkCyan
     Write-Host "##############################################" -ForegroundColor DarkGray
     Write-Host "               VM Diagnostics" -ForegroundColor DarkCyan                                       
     Write-Host "##############################################" -ForegroundColor DarkGray
@@ -2283,7 +2529,7 @@ function showVHDDiags {
     Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
     Write-Host "                    |___/          " -ForegroundColor Cyan
     Write-Host "##############################################" -ForegroundColor DarkGray
-    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "     A Hyper-V diagnostic utility - v$Script:version " -ForegroundColor DarkCyan
     Write-Host "##############################################" -ForegroundColor DarkGray
     Write-Host "             VHD Diagnostics" -ForegroundColor DarkCyan                                       
     Write-Host "##############################################" -ForegroundColor DarkGray
@@ -2321,7 +2567,7 @@ function showAllocationDiags {
     Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
     Write-Host "                    |___/          " -ForegroundColor Cyan
     Write-Host "##############################################" -ForegroundColor DarkGray
-    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "     A Hyper-V diagnostic utility - v$Script:version " -ForegroundColor DarkCyan
     Write-Host "##############################################" -ForegroundColor DarkGray
     Write-Host "          OverAllocation Diagnostics" -ForegroundColor DarkCyan                                       
     Write-Host "##############################################" -ForegroundColor DarkGray
@@ -2355,7 +2601,7 @@ function showCSVDiags {
     Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
     Write-Host "                    |___/          " -ForegroundColor Cyan
     Write-Host "##############################################" -ForegroundColor DarkGray
-    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "     A Hyper-V diagnostic utility - v$Script:version " -ForegroundColor DarkCyan
     Write-Host "##############################################" -ForegroundColor DarkGray
     Write-Host "             CSV Diagnostics" -ForegroundColor DarkCyan                                       
     Write-Host "##############################################" -ForegroundColor DarkGray
@@ -2394,7 +2640,7 @@ function showHyperVLogs {
     Write-Host "     |____/|_|\__,_|\__, |      \_/ " -ForegroundColor Cyan
     Write-Host "                    |___/          " -ForegroundColor Cyan
     Write-Host "##############################################" -ForegroundColor DarkGray
-    Write-Host "        A Hyper-V diagnostic utility" -ForegroundColor DarkCyan
+    Write-Host "     A Hyper-V diagnostic utility - v$Script:version " -ForegroundColor DarkCyan
     Write-Host "##############################################" -ForegroundColor DarkGray
     Write-Host "           Hyper-V Event Log Search" -ForegroundColor DarkCyan                                       
     Write-Host "##############################################" -ForegroundColor DarkGray
