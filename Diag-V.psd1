@@ -74,6 +74,7 @@
         'Get-BINSpaceInfo',
         'Get-VMAllVHDs',
         'Get-SharedVHDs',
+        'Test-HyperVAllocation',
         'Show-DiagVMenu'
     )
     
