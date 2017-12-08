@@ -33,12 +33,9 @@ With the module imported diagnostics can be run via the desired function name, a
   * Fixed error where RAM was not being tallied properly
   * Added code to allow diagnostics to run correctly on VMM platforms
 
+### Author
+Jake Morrison - Tech Thoughts - http://techthoughts.info
 ### Contributors
-**Authors:** 
-
-* Jake Morrison - Tech Thoughts - http://techthoughts.info
-
-**Contributors:**
 * Marco-Antonio Cervantez
 * Dillon Childers
 

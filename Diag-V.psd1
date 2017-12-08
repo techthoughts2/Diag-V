@@ -78,6 +78,7 @@
         'Test-HyperVAllocation',
         'Get-CSVtoPhysicalDiskMapping',
         'Get-FileSizes',
+        'Get-HyperVLogs',
         'Show-DiagVMenu'
     )
     
