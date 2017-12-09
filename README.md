@@ -22,8 +22,8 @@ With the module imported diagnostics can be run via the desired function name, a
 1. Download Zip file and extract
 Module can be installed manualy by downloading Zip file and extract in two places:
 2. Install module
-   * For all users: **%ProgramFiles%\WindowsPowerShell\Modules** (Recommended)
-   * For just you:  **%UserProfile%\Documents\WindowsPowerShell\Modules**
+   * For all users: **%ProgramFiles%\WindowsPowerShell\Modules\Diag-V** (Recommended)
+   * For just you:  **%UserProfile%\Documents\WindowsPowerShell\Modules\Diag-V**
 3. Open Administrator ISE or PowerShell console session
 3. Import module
    * **Import-Module Diag-V**
