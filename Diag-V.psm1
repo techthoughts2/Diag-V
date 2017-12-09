@@ -1670,7 +1670,7 @@ function Test-HyperVAllocation {
                     #lets evaluate good communication to all nodes now
                     Write-Verbose -Message "Performing connection test to node $node ..."
                     try {
-                        if (Test-Connection -ComputerName $node -ErrorAction Stop) {
+                        if (Test-Connection -ComputerName $node -Quiet -ErrorAction Stop) {
                             Write-Verbose -Message "Connection succesful."
                         }#nodeConnectionTest
                         else {
