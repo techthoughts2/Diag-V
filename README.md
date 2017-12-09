@@ -1,30 +1,66 @@
-# THIS BRANCH IS NOT PRODUCTION READY AT THIS TIME
-
 # Diag-V
 Hyper-V Diagnostic Utility
 
-### Synopsis
-Collection of several Hyper-V diagnostics that can be run via a simple choice menu.
+## Synopsis
+PowerShell module containing several Hyper-V related diagnostics to assist with managing standalone Hyper-V Servers and Hyper-V clusters
 
-### Description
+## Description
 Diag-V is a PowerShell Module collection of primarily Hyper-V diagnostic functions, as well as several windows diagnostic functions useful when interacting with Hyper-V servers. 
 
 With the module imported diagnostics can be run via the desired function name, alternatively, Diag-V can also present a simple choice menu that enables you to browse via console all diagnostics and execute the desired choice. 
 
-### Prerequisites
+## Prerequisites
 * Designed and tested on Server 2012R2 and Server 2016 Hyper-V servers running PowerShell 5.1
   * Most functions should work with PowerShell 4
 * Diag-V must be run as a user that has local administrator rights on the Hyper-V server
 * If running diagnostics that interact with all cluster nodes Diag-V must be run as a user that has local administrator right to all members of the cluster
 
-### How to run
-1.    
-2. 
-3. Type in number to select desired diagnostic and execute
+## How to run
+### Install from PowerShell Gallery
+1. TBD
+### Manual Install from GIT
+1. Download Zip file and extract
+Module can be installed manualy by downloading Zip file and extract in two places:
+2. Install module
+   * For all users: **%ProgramFiles%\WindowsPowerShell\Modules** (Recommended)
+   * For just you:  **%UserProfile%\Documents\WindowsPowerShell\Modules**
+3. Open Administrator ISE or PowerShell console session
+3. Import module
+   * **Import-Module Diag-V**
+4. Run desired diagnostic
+   * Directly by calling function name (see *Diagnsotic Functions* section below)
+   * Run GUI selection menu:
+     * **Show-DiagVMenu** - select desired diagnostic
 
-### Updates
-* **?? December 2017**
-  * TBD
+## Diagnostic Functions
+
+### VMs
+* **Get-VMStatus** - Displays status for all VMs on a standalone Hyper-V server or Hyper-V cluster
+* **Get-VMInfo** - Retrieves basic and advanced VM information for all VMs found on a standalone or cluster
+* **Get-VMReplicationStatus** - Gets VM replication configuration and replication status for all detected VMs
+* **Get-VMLocationPathInfo** - Identify the location of all of VM components.
+* **Get-IntegrationServicesCheck** - Displays IntegrationServicesVersion and enabled integration services for all VMs 
+* **Get-BINSpaceInfo** - Determine if hard drive space is being taken up by the AutomaticStopAction setting
+### VHDs
+* **Get-VMAllVHDs** - VHD(x) information displayed for all discovered VMs
+* **Get-SharedVHDs** - Evaluates if a VHDX is shared for all discovered VMs
+### Overallocation
+* **Test-HyperVAllocation** - Determines the current resource allocation health of Hyper-V Server or Hyper-V Cluster
+### CSVs
+* **Get-CSVtoPhysicalDiskMapping** - Resolves CSV to a physicalDisk drive
+### Basic Diagnostics
+* **Get-FileSizes** - Scans specified path and gets total size as well as top 10 largest files
+* **Get-HyperVLogs** - Parses Hyper-V event logs and retrieves log entries based on user provided options
+
+## Updates
+* **12 December 2017**
+  * *Complete re-write*
+    * Converted Diag-V from a ps1 PowerShell script to a fully supported PowerShell module
+    * Redesigned all diagnostic functions
+      * Improved error control
+      * General bug fixes
+      * Better readability
+    * Added new Hyper-V log parser function
 * **04 Dec 2015**
   * Improved Cluster detection error control
   * Re-ordered the code of the diagnostics
@@ -33,10 +69,10 @@ With the module imported diagnostics can be run via the desired function name, a
   * Fixed error where RAM was not being tallied properly
   * Added code to allow diagnostics to run correctly on VMM platforms
 
-### Author
+## Author
 Jake Morrison - Tech Thoughts - http://techthoughts.info
-### Contributors
+## Contributors
 * Marco-Antonio Cervantez
 * Dillon Childers
 
-### Notes
+## Notes

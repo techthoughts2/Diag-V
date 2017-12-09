@@ -8,22 +8,25 @@ $Script:version = "1.0"
 
 <#
 .Synopsis
-   Evaluates if local device is a member of a cluster or a standalone server
+    Evaluates if local device is a member of a cluster or a standalone server
 .DESCRIPTION
-   Evaluates several factors to determine if device is a member of a cluster or acting as a standalone server. The cluster service is evaluated, and if present the cluster nodes will be tested to determine if the local device is a member. If the cluster service is not running the cluster registry location is evaluated to determine if the server's cluster membership status.
+    Evaluates several factors to determine if device is a member of a cluster or acting as a standalone server. 
+    The cluster service is evaluated, and if present the cluster nodes will be tested to determine if the local 
+    device is a member. If the cluster service is not running the cluster registry location is evaluated to 
+    determine if the server's cluster membership status.
 .EXAMPLE
     Test-IsACluster
 
     Returns boolean if local device is part of a cluster
 .OUTPUTS
-   Boolean value
+    Boolean value
 .COMPONENT
     Diag-V
 .NOTES
-   Author: Jake Morrison
-   http://techthoughts.info
-
-   The design of this function intends the function to be run on the device that is being evaluated
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    The design of this function intends the function to be run on the device that is being evaluated
+.FUNCTIONALITY
+    Tests if device is standalone or part of a cluster
 #>
 function Test-IsACluster {
     [CmdletBinding()]
@@ -55,7 +58,7 @@ function Test-IsACluster {
                     }
                     Write-Verbose -Message "Cluster node evaulation complete."
                 }
-            }
+            }#clusterServiceRunning
             else {
                 Write-Verbose -Message "Cluster service is not running. Cluster cmdlets not possible. Switching to registry evaluation..."
                 $clusterRegistryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\ClusSvc\Parameters"
@@ -69,11 +72,11 @@ function Test-IsACluster {
                         Write-Verbose -Message "Hostname was not found in cluster registry settings."
                     }
                 }
-            }
-        }
+            }#clusterServiceRunning
+        }#clusterServiceCheck
         else {
             Write-Verbose -Message "No cluster service was found."
-        }
+        }#clusterServiceCheck
     }
     catch {
         Write-Verbose -Message "There was an error determining if this server is part of a cluster."
@@ -83,20 +86,21 @@ function Test-IsACluster {
 }
 <#
 .Synopsis
-   Tests if PowerShell Session is running as Admin
+    Tests if PowerShell Session is running as Admin
 .DESCRIPTION
-   Evaluates if current PowerShell session is running under the context of an Administrator
+    Evaluates if current PowerShell session is running under the context of an Administrator
 .EXAMPLE
     Test-RunningAsAdmin
 
     This will verify if the current PowerShell session is running under the context of an Administrator
 .OUTPUTS
-   Boolean value
+    Boolean value
 .COMPONENT
     Diag-V
 .NOTES
-   Author: Jake Morrison
-   http://techthoughts.info
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+.FUNCTIONALITY
+    Evaluates if PowerShell session is running as Administrator and returns true/false based on finding
 #>
 function Test-RunningAsAdmin {
     [CmdletBinding()]
@@ -124,9 +128,6 @@ function Test-RunningAsAdmin {
     Import-CimXml iterates through INSTANCE/PROPERTY data to find the desired information
 .DESCRIPTION
     Import-CimXml iterates through INSTANCE/PROPERTY data to find the desired information
-.EXAMPLE
-
-
 .OUTPUTS
     Custom object return    
 .NOTES
@@ -160,7 +161,7 @@ filter Import-CimXml {
 
 <#
 .Synopsis
-    Name, State, CPUUsage, Memory usage, Uptime, and Status of all VMs on a cluster or standalone hyp
+    Displays status for all VMs on a standalone Hyper-V server or Hyper-V cluster
 .DESCRIPTION
     Gets the status of all discovered VMs. Automatically detects if running on a standalone hyp or hyp cluster. If standalone is detected it will display VM status information for all VMs on the hyp. If a cluster is detected it will display VM status information for each node in the cluster.
 .EXAMPLE
@@ -196,11 +197,12 @@ filter Import-CimXml {
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
-	it will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
-     Get the following VM information for all detected Hyp nodes:
+     Gets the following VM information for all detected Hyp nodes:
      Name
      State
      CPUUsage
@@ -324,13 +326,12 @@ function Get-VMStatus {
                             -ForegroundColor Red
                         Write-Error $_
                     }
-                }
+                }#nodesForEach
                 #------------------------------------------------------------------------
             }#nodeNULLCheck
             else {
                 Write-Warning -Message "Device appears to be configured as a cluster but no cluster nodes were returned by Get-ClusterNode"
             }#nodeNULLCheck
-            
         }#cluster eval
         else {
             #standalone server - execute code for standalone server
@@ -387,47 +388,45 @@ function Get-VMStatus {
 }
 <#
 .Synopsis
-    Name, CPU, DynamicMemoryEnabled, MemoryMinimum(MB), MemoryMaximum(GB), VHDType, VHDSize, VHDMaxSize cluster or standalone hyp
+    Retrieves basic and advanced VM information for all VMs found on a standalone or cluster
 .DESCRIPTION
-    Gets the VMs configruation info for all VMs. Automatically detects if running on a 
+    Gets the VMs configuration info for all VMs. Automatically detects if running on a 
     standalone hyp or hyp cluster. If standalone is detected it will display VM 
     configuration information for all VMs on the hyp. If a cluster is detected it will 
-    display VM configuration information for each node in the cluster.
+    display VM configuration information for each node in the cluster. This function goes a
+    lot further than a simple Get-VM and provides in depth information on the VM configuration.
 .EXAMPLE
     Get-VMInfo
 
     This command will automatically detect a standalone hyp or hyp cluster and 
-    will retrieve VM configuration information for all detected nodes.
+    will retrieve VM configuration information for all detected VMs.
 .OUTPUTS
-    HYP1
-
-    Name: PSHost-1
-
-
-    Name                 : PSHost-1
-    CPU                  : 8
-    DynamicMemoryEnabled : False
-    MemoryMinimum(MB)    : 1024
-    MemoryMaximum(GB)    : 24
-    VHDType-0            : Differencing
-    VHDSize(GB)-0        : 10
-    MaxSize(GB)-0        : 60
-    VHDType-1            : Differencing
-    VHDSize(GB)-1        : 33
-    MaxSize(GB)-1        : 275
-
-
-
     ----------------------------------------------
-    HYP2
-    No VMs are present on this node.
+
+    Name: TestVM-1
+
+    Name                 : TestVM-1
+    CPU                  : 2
+    DynamicMemoryEnabled : True
+    MemoryMinimum(MB)    : 1024
+    MemoryMaximum(GB)    : 8
+    IsClustered          : False
+    Version              : 8.0
+    ReplicationHealth    : NotApplicable
+    OS Name              : Windows Server 2016 Datacenter
+    FQDN                 : WIN-JHKGN3JEA77
+    VHDType-0            : Dynamic
+    VHDSize(GB)-0        : 25
+    MaxSize(GB)-0        : 60
+
     ----------------------------------------------
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
-    it will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
     Get the following VM information for all detected Hyp nodes:
     Name
@@ -436,8 +435,10 @@ function Get-VMStatus {
     MemoryMinimum(MB)
     MemoryMaximum(GB)
     IsClustered
+    Version
     ReplicationHealth
     OSName
+    FQDN
     VHDType
     VHDSize
     VHDMaxSize
@@ -516,7 +517,10 @@ function Get-VMInfo {
                                     
                                     $clustered = $vm | Select-Object -ExpandProperty IsClustered
                                     $object | Add-Member -MemberType NoteProperty -name 'IsClustered' -Value $clustered -Force
-                                    
+
+                                    $vmVersion = $vm | Select-Object -ExpandProperty Version
+                                    $object | Add-Member -MemberType NoteProperty -name 'Version' -Value $vmVersion -Force
+
                                     $repHealth = $vm | Select-Object -ExpandProperty ReplicationHealth
                                     $object | Add-Member -MemberType NoteProperty -name 'ReplicationHealth' -Value $repHealth -Force
                                     
@@ -622,6 +626,9 @@ function Get-VMInfo {
                     
                     $clustered = $vm | Select-Object -ExpandProperty IsClustered
                     $object | Add-Member -MemberType NoteProperty -name 'IsClustered' -Value $clustered -Force
+
+                    $vmVersion = $vm | Select-Object -ExpandProperty Version
+                    $object | Add-Member -MemberType NoteProperty -name 'Version' -Value $vmVersion -Force
                     
                     $repHealth = $vm | Select-Object -ExpandProperty ReplicationHealth
                     $object | Add-Member -MemberType NoteProperty -name 'ReplicationHealth' -Value $repHealth -Force
@@ -659,9 +666,12 @@ function Get-VMInfo {
 }
 <#
 .Synopsis
-    Name, Status, ReplicationState, ReplicationHealth, ReplicationMode cluster or standalone hyp
+    Gets VM replication configuration and replication status for all detected VMs
 .DESCRIPTION
-    Gets the VMs replication status info for all VMs. Automatically detects if running on a standalone hyp or hyp cluster. If standalone is detected it will display VM replication status info for all VMs on the hyp. If a cluster is detected it will display VM replication status information for each node in the cluster.
+    Gets the VMs replication status info for all VMs. Automatically detects if running 
+    on a standalone hyp or hyp cluster. If standalone is detected it will display VM 
+    replication status info for all VMs on the hyp. If a cluster is detected it will 
+    display VM replication status information for each node in the cluster.
 .EXAMPLE
     Get-VMReplicationStatus
 
@@ -679,9 +689,10 @@ function Get-VMInfo {
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
-	it will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
      Get the following VM information for all detected Hyp nodes:
      Name
@@ -745,8 +756,7 @@ function Get-VMReplicationStatus {
         }#clusterEval
         else {
             #standalone server - execute code for standalone server
-            Write-Host "Standalone server detected. Executing standalone diagnostic..." `
-                -ForegroundColor Yellow -BackgroundColor Black
+            Write-Verbose -Message "Standalone server detected. Executing standalone diagnostic..."
             #-----------------Get VM Data Now---------------------
             Write-Verbose -Message "Getting VM Information..."
             $quickCheck = Get-VM | Where-Object { $_.ReplicationState -ne "Disabled" } | Measure-Object | Select-Object -ExpandProperty count
@@ -768,15 +778,16 @@ function Get-VMReplicationStatus {
 }
 <#
 .Synopsis
-    A VM is comprised of multiple components. Each can reside in a different location. This script will identify the location of all of those components
+    A VM has several components which can reside in a different location. This script will identify the location of all of VM components.
 .DESCRIPTION
-    A VM is comprised of a few components besides just .vhd/.vhdx. This will retrieve the location paths for the VM's configuration files, Snapshot Files, and Smart Paging files. If on a standalone it will display this information for all VMs on the standalone hyp. If a cluster is detected it will display this information for all VMs found on each node.
+    A VM is comprised of a few components besides just .vhd/.vhdx. This will retrieve the location paths for the VM's configuration files, 
+    Snapshot Files, and Smart Paging files. If on a standalone it will display this information for all VMs on the standalone hyp. 
+    If a cluster is detected it will display this information for all VMs found on each node.
 .EXAMPLE
     Get-VMLocationPathInfo
 
     This command will display the file paths for all VM components.
 .OUTPUTS
-    Cluster detected. Executing cluster appropriate diagnostic...
     ----------------------------------------------
     HypV1
     No VMs are present on this node.
@@ -795,17 +806,18 @@ function Get-VMReplicationStatus {
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
-    it will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
-     Get the following VM information for all detected Hyp nodes:
-     VMName
-     ComputerName
-     State
-     ConfigurationLocation
-     SnapshotFileLocation
-     SmartPagingFilePath
+    Get the following VM information for all detected Hyp nodes:
+    VMName
+    ComputerName
+    State
+    ConfigurationLocation
+    SnapshotFileLocation
+    SmartPagingFilePath
 #>
 function Get-VMLocationPathInfo {
     [CmdletBinding()]
@@ -848,12 +860,12 @@ function Get-VMLocationPathInfo {
                                     -ForegroundColor White -BackgroundColor Black      
                             }
                             #--------------END Get VM Data ---------------------
-                        }
+                        }#nodeConnectionTest
                         else {
                             Write-Verbose -Message "Connection unsuccesful."
                             Write-Host "Node: $node could not be reached - skipping this node" `
                                 -ForegroundColor Red
-                        }  
+                        }#nodeConnectionTest
                     }
                     catch {
                         Write-Host "An error was encountered with $node - skipping this node" `
@@ -898,7 +910,10 @@ function Get-VMLocationPathInfo {
 .Synopsis
     Displays IntegrationServicesVersion and enabled integration services for all VMs 
 .DESCRIPTION
-    Gets the IntegrationServicesVersion and enabled integration services for all VMs. Automatically detects if running on a standalone hyp or hyp cluster. If standalone is detected it will display VM integration services information for all VMs on the hyp. If a cluster is detected it will display VM integration services information for all VMs found on each node.
+    Gets the IntegrationServicesVersion and enabled integration services for all VMs. Automatically detects 
+    if running on a standalone hyp or hyp cluster. If standalone is detected it will display VM integration 
+    services information for all VMs on the hyp. If a cluster is detected it will display VM integration 
+    services information for all VMs found on each node.
 .EXAMPLE
     Get-IntegrationServicesCheck
 
@@ -927,9 +942,10 @@ function Get-VMLocationPathInfo {
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
-    it will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
      Get the following VM information for all detected Hyp nodes:
      IntegrationServicesVersion
@@ -1070,9 +1086,10 @@ function Get-IntegrationServicesCheck {
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
-    it will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
     Get the following VM information for all detected Hyp nodes:
     VMName
@@ -1215,8 +1232,10 @@ function Get-BINSpaceInfo {
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
      Get the following VM VHD information for all detected Hyp nodes:
      VhdType
@@ -1427,28 +1446,16 @@ function Get-VMAllVHDs {
 
     Displays SupportPersistentReservations information for each VHD for every VM discovered. If SupportPersistentReservations is true, the VHD is shared
 .OUTPUTS
-    Standalone server detected. Executing standalone diagnostic...
-    ----------------------------------------------
-    2008R2Clust2
-
-    VhdType Size(GB) MaxSize(GB) Path                                                            
-    ------- -------- ----------- ----                                                            
-    Dynamic       14          60 \\sofs-csv\VMs\2008R2Clust2\Virtual Hard Disks\2008R2Clust2.vhdx
-    ----------------------------------------------
-    Web1
-
-    VhdType Size(GB) MaxSize(GB) Path                                            
-    ------- -------- ----------- ----                                            
-    Dynamic       12          40 \\sofs-csv\VMs\Web1\Virtual Hard Disks\Web1.vhdx
-    ----------------------------------------------
-    VMs are currently utilizing:  48 GB
-    VMs could POTENTIALLY Utilize:  180 GB
-    ----------------------------------------------
+    VMName   SupportPersistentReservations Path                                  
+    ------   ----------------------------- ----                                  
+    TestVM-1                         False C:\rs-pkgs\LocalVMs\VHDs\TestVM-1.vhdx
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
      Get the following VM VHD information for all detected Hyp nodes:
      VMName
@@ -1461,6 +1468,7 @@ function Get-SharedVHDs {
     Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
+        $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
             #we are definitely dealing with a cluster - execute code for cluster
             Write-Verbose -Message "Cluster detected. Executing cluster appropriate diagnostic..."
@@ -1542,9 +1550,11 @@ function Get-SharedVHDs {
 .DESCRIPTION
     For single Hyper-V instances this function will pull available
     CPU and Memory physical resources. It will then tally all VM CPU and memory
-    allocations and contrast that info with available physical resources
+    allocations and contrast that info with available physical chassis resources
 
     A cpu ratio higher than 4:1 (vCPU:Logical Processors) will be flagged as bad
+    This ratio can be adjusted easily the the code below as there is no best practice
+    published around the most ideal CPU ratio.
     A static memory higher than 1:1 will be flagged as bad
     There is no best practice published around dynamic maximum memory so the function
     will only advise a warning if max memory is higher than available physical memory.
@@ -1556,52 +1566,80 @@ function Get-SharedVHDs {
 
     Available storage space will also be calculated. For clusters CSV locations will be
     checked. For standalone Hyps any drive larger than 10GB and not C: will be checked.
-    In keeping with best practices anything with less than 20% free space will fail the
-    health check.
+    Drives under 1TB with less than 15% will be flagged as bad. Drives over 1TB with less
+    than 10% will be flagged as bad.
 .EXAMPLE
     Test-HyperVAllocation
 
     If executed on a standalone Hyper-V instance it will retrieve CPU/RAM physical resources
     If exectured on a Hyper-V cluster it will retrieve CPU/RAM physical resrouces for
     all nodes in the cluster and comapares those available resources to resources assigned
-    to VMs on each Hyper-V instance.
+    to VMs on each Hyper-V instance. Storage utilization will also be evaluated.
 .OUTPUTS
-    -----------------------------
-    SystemName: HYP2
-    -----------------------------
-    Cores: 24
-    Logical Processors: 48
-    Total Memory: 256 GB
-    Free Memory: 248 GB
-    Number of VMs: 1
-    Number of VM Procs: 2
-    -----------------------------
-    Memory resources are still available:             97 % free
-    -----------------------------
+    ----------------------------------------------------------------------
+    SystemName: HYP1
+    ----------------------------------------------------------------------
+    Cores: 8
+    Logical Processors: 16
+    Total Memory: 32 GB
+    Avail Memory for VMs: 24 GB (8GB reserved for Hyper-V Host)
+    Current Free Memory: 6 GB
+    Total number of VMs: 1
+    Total number of VM vCPUs: 8
+    ----------------------------------------------------------------------
+    Memory resources are still available:             19 % free
+    ----------------------------------------------------------------------
     Virtual Processors are not overprovisioned        1 : 1
-    -----------------------------
-    Total Startup memory required for Dynamic VMs:    0 GB 
-    Total Static memory required for Static VMs:      29 GB 
-    -----------------------------
-    Total minimum RAM (Startup+Static) required:      29 GB 
-    Minimum RAM: 29 GB does not exceed available RAM: 256 GB
-    -----------------------------
+    ----------------------------------------------------------------------
+    Total Startup memory required for Dynamic VMs:    0 GB
+    Total Static memory required for Static VMs:      24 GB
+    ----------------------------------------------------------------------
+    Total minimum RAM (Startup+Static) required:      24 GB
+    Minimum RAM: 24 GB is exactly at available RAM: 24 GB
+    ----------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    SystemName: HYP2
+    ----------------------------------------------------------------------
+    Cores: 8
+    Logical Processors: 16
+    Total Memory: 32 GB
+    Avail Memory for VMs: 24 GB (8GB reserved for Hyper-V Host)
+    Current Free Memory: 31 GB
+    Total number of VMs: 0
+    Total number of VM vCPUs:
+    ----------------------------------------------------------------------
+    Memory resources are still available:             97 % free
+    ----------------------------------------------------------------------
+    Virtual Processors are not overprovisioned        1 : 1
+    ----------------------------------------------------------------------
+    Total Startup memory required for Dynamic VMs:    0 GB
+    Total Static memory required for Static VMs:      0 GB
+    ----------------------------------------------------------------------
+    Total minimum RAM (Startup+Static) required:      0 GB
+    Minimum RAM: 0 GB does not exceed available RAM: 24 GB
+    ----------------------------------------------------------------------
+    ----------------------------------------------------------------------
+    N+1 Allocation Evaluation:
+    ----------------------------------------------------------------------
     VMs would survive a one node failure
-    Total VM RAM minumum: 56 GB - Total Cluster RAM available with one node down: 256 GB
-    -----------------------------
+    Total VM RAM minumum: 24 GB - Total Cluster RAM available with one node down: 24 GB
+    ----------------------------------------------------------------------
     Storage Allocation Information
-    -----------------------------
-    C:\ClusterStorage\Volume2 has the recommended 20% free space.
-    Free Space: 100 GB
-    Percent Free: 99.87756
-    -----------------------------
+    ----------------------------------------------------------------------
+    C:\ClusterStorage\Volume1 has the recommended 15% free space.
+    Total Size: 500 GB
+    Free Space: 164 GB
+    Percent Free: 32.7383
+    ----------------------------------------------------------------------
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
     You can change the CPU ratio cutoff from 4:1 to say 6:1 or 8:1 by editing the
     Highlighted section below to suit your requirements
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
      Get the following information for each Hyper-V instance found
      System Name
@@ -1767,9 +1805,9 @@ function Test-HyperVAllocation {
                     write-host "----------------------------------------------------------------------" -ForegroundColor Gray
                     Write-Host "Cores:" $totalNumCores
                     Write-Host "Logical Processors:" $totalNumLogicProcs
-                    Write-Host "Total Memory:" $totalMemory GB
-                    Write-Host "Free Memory:" $freeMemory GB "(8GB reserved for Hyper-V Host)"
-                    Write-Host "Avail Memory for VMs: $availVMMemory GB"
+                    Write-Host "Total Memory:" $totalMemory "GB"
+                    Write-Host "Avail Memory for VMs: $availVMMemory GB (8GB reserved for Hyper-V Host)"
+                    Write-Host "Current Free Memory:" $freeMemory "GB"
                     Write-Host "Total number of VMs:" $vmCount
                     Write-Host "Total number of VM vCPUs:" $totalVMProcCount
                     write-host "----------------------------------------------------------------------" -ForegroundColor Gray
@@ -2016,9 +2054,9 @@ function Test-HyperVAllocation {
             write-host "----------------------------------------------------------------------" -ForegroundColor Gray
             Write-Host "Cores:" $totalNumCores
             Write-Host "Logical Processors:" $totalNumLogicProcs
-            Write-Host "Total Memory:" $totalMemory GB
-            Write-Host "Free Memory:" $freeMemory GB "(8GB reserved for Hyper-V Host)"
-            Write-Host "Avail Memory for VMs: $availVMMemory GB"
+            Write-Host "Total Memory:" $totalMemory "GB"
+            Write-Host "Avail Memory for VMs: $availVMMemory GB (8GB reserved for Hyper-V Host)"
+            Write-Host "Current Free Memory:" $freeMemory "GB"
             Write-Host "Total number of VMs:" $vmCount
             Write-Host "Total number of VM vCPUs:" $totalVMProcCount
             write-host "----------------------------------------------------------------------" -ForegroundColor Gray
@@ -2299,6 +2337,8 @@ function Get-CSVtoPhysicalDiskMapping {
     Diag-V
 .NOTES
     Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
      Get the following information for the specified path:
      Total size of all files found under the path
@@ -2432,11 +2472,13 @@ function Get-FileSizes {
     Error                          2                                              
     Critical                       1                                              
     LogAlways                      0
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
      Retrieves Hyper-V Event Logs information
 #>
 function Get-HyperVLogs {
-    [cmdletbinding(DefaultParameterSetName = ’All’)]
+    [cmdletbinding(DefaultParameterSetName = 'All')]
     param
     (
         [Parameter(Mandatory = $false, ParameterSetName = 'Time')]
@@ -2532,16 +2574,14 @@ function Get-HyperVLogs {
 
 <#
 .Synopsis
-    Collection of several Hyper-V diagnostics that can be run via a simple choice menu
+    Console based GUI menu that gives quick access to a collection of several Hyper-V diagnostics
 .DESCRIPTION
-    Diag-V is a collection of various Hyper-V diagnostics. It presents the user
-    a simple choice menu that allows the user to select and execute the desired
-    diagnostic. Each diagnostic is a fully independent function which can be
-    copied and run independent of Diag-V if desired.
+    Presents all Diag-V diagnostics that can be run via a simple choice menu.
+    User can then select and execute the desired diagnostic.
 .EXAMPLE
     Show-DiagVMenu
 
-    
+    Displays a console menu that provides access to all Diag-V functions.
 .OUTPUTS
     Output will vary depending on the selected diagnostic.
 
@@ -2566,8 +2606,9 @@ function Get-HyperVLogs {
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison
-    TechThoughts - http://techthoughts.info
+    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
+    How to use Diag-V: http://techthoughts.info/diag-v/
 .FUNCTIONALITY
     Get-VMStatus
     ------------------------------
@@ -2590,6 +2631,8 @@ function Get-HyperVLogs {
     Get-CSVtoPhysicalDiskMapping
     ------------------------------
     Get-FileSizes
+    ------------------------------
+    Get-HyperVLogs
 #>
 function Show-DiagVMenu {
     #all this serves to do is to launch the parent menu choice option
@@ -2836,18 +2879,19 @@ function showBasicDiags {
 
     if ($topLevel -eq 1) {
         Write-Host "Get-HyperVLogs function requires several parameters that you must specify. This text menu is not able to launch it." -ForegroundColor DarkCyan
-        Write-Host "Here are a few examples:" -ForegroundColor DarkCyan
+        Write-Host "Here are a few examples for you can reference when deciding how you want to run this function:" -ForegroundColor DarkCyan
         Write-Host "Get-HyperVLogs" -ForegroundColor Cyan
         Write-Host "Get-HyperVLogs -Newest 15 -Verbose" -ForegroundColor Cyan
-        Write-Host "Get-HyperVLogs -FilterText Switch -Newest 2 -ErrorsOnly -Verbose" -ForegroundColor Cyan
-        Write-Host "Get-HyperVLogs -StartDate 11/01/17 -ErrorsOnly" -ForegroundColor Cyan
+        Write-Host "Get-HyperVLogs -FilterText Switch -Newest 2 -WarningErrorCritical -Verbose" -ForegroundColor Cyan
+        Write-Host "Get-HyperVLogs -StartDate 11/01/17 -WarningErrorCritical" -ForegroundColor Cyan
         Write-Host "Get-HyperVLogs -StartDate 11/01/17 -EndDate 12/01/17" -ForegroundColor Cyan
         Write-Host "Get-HyperVLogs -LastMinutes 90 -Newest 20 -FilterText Switch" -ForegroundColor Cyan
+        Write-Host "Get-Help Get-HyperVLogs -Detailed" -ForegroundColor Magenta
     }
     elseif ($topLevel -eq 2) {
         Get-FileSizes
     }
-    elseif ($MenuChoice -eq 3) {
+    elseif ($topLevel -eq 3) {
         showTheTopLevel
     }
     else {
