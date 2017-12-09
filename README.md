@@ -16,8 +16,15 @@ With the module imported diagnostics can be run via the desired function name, a
 * If running diagnostics that interact with all cluster nodes Diag-V must be run as a user that has local administrator right to all members of the cluster
 
 ## How to run
-### Install from PowerShell Gallery
-1. TBD
+### Install from PowerShell Gallery (Recommended)
+1. Open Administrator ISE or PowerShell console session
+2. ```Install-Module -Name "Diag-V" -Repository PSGallery```
+3. Import module
+   * **Import-Module Diag-V**
+4. Run desired diagnostic
+   * Directly by calling function name (see *Diagnsotic Functions* section below)
+   * Run GUI selection menu:
+     * **Show-DiagVMenu** - select desired diagnostic
 ### Manual Install from GIT
 1. Download Zip file and extract
 Module can be installed manualy by downloading Zip file and extract in two places:
@@ -76,3 +83,5 @@ Jake Morrison - Tech Thoughts - http://techthoughts.info
 * Dillon Childers
 
 ## Notes
+
+A complete write-up on Diag-V as well as a video demonstration can be found on the Tech Thoughts blog: http://techthoughts.info/diag-v/
