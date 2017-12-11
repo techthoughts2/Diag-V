@@ -1,6 +1,6 @@
 #region variables
 
-$Script:version = "1.0"
+$Script:version = "2.0"
 
 #endregion
 
