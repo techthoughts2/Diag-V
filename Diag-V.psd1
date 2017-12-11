@@ -12,7 +12,7 @@
     RootModule        = 'Diag-V.psm1'
     
     # Version number of this module.
-    ModuleVersion     = '1.0'
+    ModuleVersion     = '2.0'
     
     # ID used to uniquely identify this module
     GUID              = 'd0a9150d-b6a4-4b17-a325-e3a24fed0aa9'
@@ -56,8 +56,8 @@
     
             # Tags applied to this module. These help with module discovery in online galleries.
             Tags = 'Hyper-V', 'Diag-V', 'Diagnostic', 'Tests', 'VM', 'VMs', 'VHDs', 'VHDXs', 'VHDX', 
-            'VHD', 'CSV', 'Overallocation', 'Overprovisioning', 'Virtual Machines', 
-            'Virtual Machine'
+            'VHD', 'CSV', 'Overallocation', 'Overprovisioning', 'VirtualMachines', 
+            'VirtualMachine'
     
             # A URL to the license for this module.
             # LicenseUri = ''
@@ -69,7 +69,7 @@
             # IconUri = ''
     
             # ReleaseNotes of this module
-            # ReleaseNotes = ''
+            ReleaseNotes = 'Complete re-write from original script version. Converted Diag-V from a ps1 PowerShell script to a fully supported PowerShell module. Redesigned all diagnostic functions: Improved error control, General bug fixes, Better readability, Added new Hyper-V log parser function'
     
         } # End of PSData hashtable
     
