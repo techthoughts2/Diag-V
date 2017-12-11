@@ -27,7 +27,6 @@ With the module imported diagnostics can be run via the desired function name, a
      * ```Show-DiagVMenu``` - select desired diagnostic
 ### Manual Install from GIT
 1. Download Zip file and extract
-Module can be installed manualy by downloading Zip file and extract in two places:
 2. Install module
    * For all users: **%ProgramFiles%\WindowsPowerShell\Modules\Diag-V** (Recommended)
    * For just you:  **%UserProfile%\Documents\WindowsPowerShell\Modules\Diag-V**
@@ -35,7 +34,7 @@ Module can be installed manualy by downloading Zip file and extract in two place
 3. Import module
    * ```Import-Module Diag-V```
 4. Run desired diagnostic
-   * Directly by calling function name (see *Diagnsotic Functions* section below)
+   * Directly by calling function name (see *Diagnostic Functions* section below)
    * Run GUI selection menu:
      * ```Show-DiagVMenu``` - select desired diagnostic
 
