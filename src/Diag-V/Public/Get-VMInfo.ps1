@@ -1,3 +1,5 @@
+#CONVERT THE WMI STUFF TO CIMINSTANCE!!!!!!!!!!!!!!!!
+
 <#
 .Synopsis
     Retrieves basic and advanced VM information for all VMs found on a standalone or cluster
@@ -58,6 +60,46 @@
 function Get-VMInfo {
     [CmdletBinding()]
     param ()
+
+
+    <#
+    .Synopsis
+        Import-CimXml iterates through INSTANCE/PROPERTY data to find the desired information
+    .DESCRIPTION
+        Import-CimXml iterates through INSTANCE/PROPERTY data to find the desired information
+    .EXAMPLE
+
+
+    .PARAMETER Uri
+        Uri you wish to resolve
+    .OUTPUTS
+        System.Management.Automation.PSObject
+    .NOTES
+        Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    .COMPONENT
+        Diag-V - https://github.com/techthoughts2/Diag-V
+    #>
+    filter Import-CimXml {
+        # Filter for parsing XML data
+
+        # Create new XML object from input
+        $CimXml = [Xml]$_
+        $CimObj = New-Object System.Management.Automation.PSObject
+
+        # Iterate over the data and pull out just the value name and data for each entry
+        foreach ($CimProperty in $CimXml.SelectNodes("/INSTANCE/PROPERTY[@NAME='Name']")) {
+            $CimObj | Add-Member -MemberType NoteProperty -Name $CimProperty.NAME -Value $CimProperty.VALUE
+        }
+
+        foreach ($CimProperty in $CimXml.SelectNodes("/INSTANCE/PROPERTY[@NAME='Data']")) {
+            $CimObj | Add-Member -MemberType NoteProperty -Name $CimProperty.NAME -Value $CimProperty.VALUE
+            #return $CimProperty.VALUE
+        }
+
+        return $CimObj
+    }#Import-CimXml
+
+
     Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {

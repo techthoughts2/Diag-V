@@ -11,68 +11,78 @@
 
     Returns boolean if local device is part of a cluster
 .OUTPUTS
-    Boolean value
-.COMPONENT
-    Diag-V
+    System.Boolean
 .NOTES
-    Author: Jake Morrison - TechThoughts - http://techthoughts.info
+    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
     The design of this function intends the function to be run on the device that is being evaluated
-.FUNCTIONALITY
-    Tests if device is standalone or part of a cluster
+.COMPONENT
+    Diag-V - https://github.com/techthoughts2/Diag-V
 #>
 function Test-IsACluster {
     [CmdletBinding()]
     param ()
+    #-------------------------------
     #assume device is not a cluster
     [bool]$clusterEval = $false
     $nodes = $null
     $clusterCheck = $null
     $clusterNodeNames = $null
-    try {
-        $hostName = $env:COMPUTERNAME
-        Write-Verbose -Message "HostName is: $hostName"
-        Write-Verbose -Message "Verifying presence of cluster service..."
-        $clusterCheck = get-service ClusSvc -ErrorAction SilentlyContinue
-        if ($clusterCheck -ne $null) {
-            Write-Verbose -Message "Cluster Service found."
-            Write-Verbose -Message "Checking cluster service status..."
-            $clusterServiceStatus = Get-Service ClusSvc | Select-Object -ExpandProperty Status
-            if ($clusterServiceStatus -eq "Running") {
-                Write-Verbose -Message "Cluster serivce running."
-                Write-Verbose -Message "Evaluating cluster nodes..."
-                $nodes = Get-ClusterNode -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
-                if ($nodes -ne $null) {
-                    foreach ($node in $nodes) {
-                        if ($hostName -eq $node) {
-                            $clusterEval = $true
-                            Write-Verbose -Message "Hostname was found among cluster nodes."
-                        }
-                    }
-                    Write-Verbose -Message "Cluster node evaulation complete."
-                }
-            }#clusterServiceRunning
-            else {
-                Write-Verbose -Message "Cluster service is not running. Cluster cmdlets not possible. Switching to registry evaluation..."
-                $clusterRegistryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\ClusSvc\Parameters"
-                $clusterNodeNames = Get-ItemProperty -Path $clusterRegistryPath -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NodeNames -ErrorAction Stop
-                if ($clusterNodeNames -ne $null) {
-                    if ($clusterNodeNames -like "*$hostName*") {
+    #-------------------------------
+    $hostName = $env:COMPUTERNAME
+    Write-Verbose -Message "HostName is: $hostName"
+    Write-Verbose -Message 'Verifying presence of cluster service...'
+    $clusterCheck = Get-Service -Name ClusSvc -ErrorAction SilentlyContinue
+    if ($null -ne $clusterCheck) {
+        Write-Verbose -Message 'Cluster Service found.'
+        Write-Verbose -Message 'Checking cluster service status...'
+        if ($clusterCheck.Status -eq "Running") {
+            Write-Verbose -Message 'Cluster serivce running.'
+            Write-Verbose -Message 'Evaluating cluster nodes...'
+            $nodes = Get-ClusterNode -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+            if ($null -ne $nodes) {
+                Write-Verbose -Message 'Cluster nodes detected. Evaluating if this device is among them...'
+                foreach ($node in $nodes) {
+                    if ($hostName -eq $node) {
                         $clusterEval = $true
-                        Write-Verbose -Message "Hostname was found in cluster registy settings"
-                    }
+                        Write-Verbose -Message 'Hostname was found among cluster nodes.'
+                        Write-Verbose -Message "Cluster evaluation: $clusterEval"
+                    }#if_hostname
                     else {
-                        Write-Verbose -Message "Hostname was not found in cluster registry settings."
-                    }
-                }
-            }#clusterServiceRunning
-        }#clusterServiceCheck
+                        Write-Verbose -Message 'Hostname was not found among cluster nodes.'
+                    }#else_hostname
+                }#foreach_node
+                Write-Verbose -Message 'Cluster node evaulation complete.'
+            }#if_nodes_null
+            else {
+                Write-Verbose -Message 'No cluster nodes were found. This is not a cluster.'
+                Write-Verbose -Message "Cluster evaluation: $clusterEval"
+            }#else_nodes_null
+        }#if_clusterServiceRunning
         else {
-            Write-Verbose -Message "No cluster service was found."
-        }#clusterServiceCheck
-    }
-    catch {
-        Write-Verbose -Message "There was an error determining if this server is part of a cluster."
-        Write-Error $_
-    }
+            Write-Verbose -Message 'Cluster service is not running. Cluster cmdlets not possible. Switching to registry evaluation...'
+            $clusterRegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\ClusSvc\Parameters'
+            $clusterNodeNames = Get-ItemProperty -Path $clusterRegistryPath -ErrorAction SilentlyContinue | Select-Object -ExpandProperty NodeNames -ErrorAction Stop
+            if ($null -ne $clusterNodeNames) {
+                foreach ($node in $clusterNodeNames) {
+                    if ($clusterNodeNames -eq $hostName) {
+                        $clusterEval = $true
+                        Write-Verbose -Message 'Hostname was found in cluster registy settings'
+                        Write-Verbose -Message "Cluster evaluation: $clusterEval"
+                    }#if_hostname
+                    else {
+                        Write-Verbose -Message 'Hostname was not found in cluster registry settings.'
+                    }#else_hostname
+                }#foreach_node
+            }#if_nodeNames
+            else {
+                Write-Verbose -Message 'No cluster names were returned from the registy. This is not a cluster.'
+                Write-Verbose -Message "Cluster evaluation: $clusterEval"
+            }#else_nodeNames
+        }#else_clusterServiceRunning
+    }#clusterServiceCheck
+    else {
+        Write-Verbose -Message 'No cluster service was found.'
+        Write-Verbose -Message "Cluster evaluation: $clusterEval"
+    }#clusterServiceCheck
     return $clusterEval
-}
+}#Test-IsACluster
