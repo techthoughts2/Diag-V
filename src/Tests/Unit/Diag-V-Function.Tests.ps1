@@ -120,7 +120,7 @@ InModuleScope Diag-V {
                     }
                 }#endMock
                 Test-IsACluster | Should -Be $true
-            }
+            }#it
             It 'should return $true if the cluster service is stopped and a a node is returned from registry that matches the hostname' {
                 Mock Get-Service -MockWith {
                     [PSCustomObject]@{
@@ -143,10 +143,13 @@ InModuleScope Diag-V {
                     }
                 }#endMock
                 Test-IsACluster | Should -Be $true
-            }
-            #Get-Service
-
-        }#context
+            }#it
+        }#context_Test-IsACluster
+        <#
+        Context 'Test-RunningAsAdmin' {
+            #not sure how to mock [Security.Principal.WindowsPrincipal] at this time
+        }#Test-RunningAsAdmin
+        #>
     }#describe_SupportingFunctions
     Describe 'Diag-V Function Tests' -Tag Unit {
         Context 'A-Function' {
