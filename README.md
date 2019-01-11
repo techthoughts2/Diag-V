@@ -5,9 +5,9 @@ Hyper-V Diagnostic Utility
 PowerShell module containing several Hyper-V related diagnostics to assist with managing standalone Hyper-V Servers and Hyper-V clusters
 
 ## Description
-Diag-V is a PowerShell Module collection of primarily Hyper-V diagnostic functions, as well as several windows diagnostic functions useful when interacting with Hyper-V servers. 
+Diag-V is a PowerShell Module collection of primarily Hyper-V diagnostic functions, as well as several windows diagnostic functions useful when interacting with Hyper-V servers.
 
-With the module imported diagnostics can be run via the desired function name, alternatively, Diag-V can also present a simple choice menu that enables you to browse via console all diagnostics and execute the desired choice. 
+With the module imported diagnostics can be run via the desired function name, alternatively, Diag-V can also present a simple choice menu that enables you to browse via console all diagnostics and execute the desired choice.
 
 ## Prerequisites
 * Designed and tested on Server 2012R2 and Server 2016 Hyper-V servers running PowerShell 5.1
@@ -45,7 +45,7 @@ With the module imported diagnostics can be run via the desired function name, a
 * **Get-VMInfo** - Retrieves basic and advanced VM information for all VMs found on a standalone or cluster
 * **Get-VMReplicationStatus** - Gets VM replication configuration and replication status for all detected VMs
 * **Get-VMLocationPathInfo** - Identify the location of all of VM components.
-* **Get-IntegrationServicesCheck** - Displays IntegrationServicesVersion and enabled integration services for all VMs 
+* **Get-IntegrationServicesCheck** - Displays IntegrationServicesVersion and enabled integration services for all VMs
 * **Get-BINSpaceInfo** - Determine if hard drive space is being taken up by the AutomaticStopAction setting
 ### VHDs
 * **Get-VMAllVHDs** - VHD(x) information displayed for all discovered VMs
@@ -84,3 +84,8 @@ Jake Morrison - Tech Thoughts - http://techthoughts.info
 ## Notes
 
 A complete write-up on Diag-V as well as a video demonstration can be found on the Tech Thoughts blog: http://techthoughts.info/diag-v/
+
+```powershell
+Get-VM : CredSSP authentication is currently disabled in the client configuration. Change the client
+configuration and try the request again.
+```
