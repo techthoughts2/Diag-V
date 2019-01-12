@@ -2,7 +2,7 @@
 .Synopsis
     Displays status for all VMs on a standalone Hyper-V server or Hyper-V cluster
 .DESCRIPTION
-    Gets the status of all discovered VMs. Automatically detects if running on a standalone hyp or hyp cluster. If standalone is detected it will display VM status information for all VMs on the hyp. If a cluster is detected it will display VM status information for each node in the cluster.
+    Gets the status of all discovered VMs. Cluster and standalone hyp detection is done automatically. If a cluster detection, all VMs in the cluster will be processed.
 .EXAMPLE
     Get-VMStatus
 

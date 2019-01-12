@@ -1,132 +1,180 @@
 <#
 .Synopsis
-    Evaluates each VM to determine if Hard Drive space is being taken up by the AutomaticStopAction setting
+    Evaluates each VM to determine if Hard Drive space is being taken up by the AutomaticStopAction setting.
 .DESCRIPTION
-    Checks each VMs RAM and AutomaticStopAction setting - then tallies the amount of total hard drive space being taken up by the associated BIN files.
+    Checks each VMs RAM and AutomaticStopAction setting - then tallies the amount of total hard drive space being taken up by the associated BIN files. Useful for identifying potential storage savings by adjusting the AutomaticStopAction. Cluster and standalone hyp detection is done automatically. If a cluster detection, all VMs in the cluster will be processed.
 .EXAMPLE
-    Get-BINSpaceInfo
+    Get-BINSpaceInfo -InfoType StorageSavings
 
-    Gets all VMs, their RAM, and their AutomaticStopAction setting
+    Gets all VMs, their RAM, and their AutomaticStopAction setting. Based on findings, an estimated total potential Storage Savings is calculated and returned for each Hyp.
+.EXAMPLE
+    Get-BINSpaceInfo -InfoType VMInfo
+
+    Gets all VMs, their RAM, and their AutomaticStopAction setting. The information for each VM related to BIN is then returned.
+.EXAMPLE
+    Get-BINSpaceInfo -InfoType VMInfo -Credential $credential
+
+    Gets all VMs, their RAM, and their AutomaticStopAction setting. The information for each VM related to BIN is then returned. This is processed with the provided credential.
+.PARAMETER InfoType
+    StorageSavings for calculating space savings, VMInfo for VM BIN configuration information
+.PARAMETER Credential
+    PSCredential object for storing provided creds
 .OUTPUTS
-    VMName   Memory Assigned AutomaticStopAction
-    ------   --------------- -------------------
-    TestVM-1 0                          ShutDown
 
-
-    ----------------------------------------------
-    Total Hard drive space being taken up by BIN files:  GB
-    ----------------------------------------------
-    ----------------------------------------------
 .COMPONENT
     Diag-V
 .NOTES
-    Author: Jake Morrison - TechThoughts - http://techthoughts.info
-    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
-    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
-    How to use Diag-V: http://techthoughts.info/diag-v/
+    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
+    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
+    See the README for more details.
+.COMPONENT
+    Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
     Get the following VM information for all detected Hyp nodes:
     VMName
     Memory Assigned
     AutomaticStopAction
+.LINK
+    http://techthoughts.info/diag-v/
 #>
 function Get-BINSpaceInfo {
     [CmdletBinding()]
-    param ()
-    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
+    param (
+        [Parameter(Mandatory = $true,
+            HelpMessage = 'StorageSavings for calculating space savings, VMInfo for VM BIN configuration information')]
+        [ValidateSet('StorageSavings', 'VMInfo')]
+        [string]$InfoType,
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'PSCredential object for storing provided creds')]
+        [pscredential]$Credential
+    )
+    Write-Verbose -Message 'Processing pre-checks. This may take a few seconds...'
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
+        $vmCollection = @()
+        $objCollection = @()
+        $vmMemory = 0
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
-            #we are definitely dealing with a cluster - execute code for cluster
             Write-Verbose -Message "Cluster detected. Executing cluster appropriate diagnostic..."
-            Write-Verbose "Getting all cluster nodes in the cluster..."
-            $nodes = Get-ClusterNode -ErrorAction SilentlyContinue
-            if ($nodes -ne $null) {
-                #-----------------------------------------------------------------------
-                $vmMemory = 0
+            Write-Verbose -Message "Getting all cluster nodes in the cluster..."
+            $nodes = Get-ClusterNode  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+            if ($null -ne $nodes) {
+                Write-Warning -Message "Getting VM Information. This can take a few moments..."
                 Foreach ($node in $nodes) {
-                    try {
-                        #lets make sure we can actually reach the other nodes in the cluster
-                        #before trying to pull information from them
+                    $rawVM = $null
+                    $connTest = $false
+                    if ($env:COMPUTERNAME -ne $node) {
                         Write-Verbose -Message "Performing connection test to node $node ..."
-                        if (Test-Connection $node -Count 1 -ErrorAction SilentlyContinue) {
-                            Write-Verbose -Message "Connection succesful."
-                            Write-Host $node.name -ForegroundColor White -BackgroundColor Black
-                            #-----------------Get VM Data Now---------------------
-                            $quickCheck = Get-VM -ComputerName $node.name | Measure-Object | `
-                                Select-Object -ExpandProperty count
-                            if ($quickCheck -ne 0) {
-                                $VMInfo = get-vm -computername $node.name
-                                $VMInfo | Select-Object VMName, @{ Label = "Memory Assigned"; Expression = { '{0:N0}' -F ($_.MemoryAssigned / 1GB) } }, `
-                                    AutomaticStopAction | Format-Table -AutoSize
-                                foreach ($vm in $VMInfo) {
-                                    if ($vm.AutomaticStopAction -eq "Save") {
-                                        $vmMemory += [math]::round($vm.MemoryAssigned / 1GB, 0)
-                                    }
-                                }
-                            }
+                        $connTest = Test-NetConnection -ComputerName $node -InformationLevel Quiet
+                    }#if_local
+                    else {
+                        Write-Verbose -Message 'Local device.'
+                        $connTest = $true
+                    }#else_local
+                    if ($connTest -ne $false) {
+                        Write-Verbose -Message 'Connection succesful.'
+                        Write-Verbose -Message "Getting VM Information from node $node..."
+                        try {
+                            if ($Credential -and $env:COMPUTERNAME -ne $node) {
+                                $rawVM = Get-VM -ComputerName $node -Credential $Credential -ErrorAction Stop
+                            }#if_Credential
                             else {
-                                Write-Host "No VMs are present on this node." `
-                                    -ForegroundColor White -BackgroundColor Black
-                            }
-                        }#nodeConnectionTest
+                                $rawVM = Get-VM -ComputerName $node -ErrorAction Stop
+                            }#else_Credential
+                        }#try_Get-VM
+                        catch {
+                            Write-Warning "An issue was encountered getting VM information from $node :"
+                            Write-Error $_
+                            return
+                        }#catch_Get-VM
+                        if ($rawVM) {
+                            $object = New-Object -TypeName PSObject
+                            Write-Verbose -Message 'Processing VM return data...'
+                            #####################################
+                            foreach ($vm in $rawVM) {
+                                #_____________________________________________________________
+                                $vmname = ""
+                                $vmname = $vm.name
+                                Write-Verbose -Message "Retrieving information for VM: $vmname"
+                                if ($vm.AutomaticStopAction -eq "Save") {
+                                    $vmMemory += [math]::round($vm.MemoryAssigned / 1GB, 0)
+                                }
+                                #_____________________________________________________________
+                                Write-Verbose -Message 'VM Information processed.'
+                                #_____________________________________________________________
+                            }#foreachVM
+                            $vmCollection += $rawVM
+                            $computerName = $vm | Select-Object -ExpandProperty ComputerName
+                            $object | Add-Member -MemberType NoteProperty -name ComputerName -Value $node -Force
+                            $object | Add-Member -MemberType NoteProperty -name StorageSavings -Value "$vmMemory GB" -Force
+                            $objCollection += $object
+                            #####################################
+                        }#if_rawVM
                         else {
-                            Write-Verbose -Message "Connection unsuccesful."
-                            Write-Host "Node: $node could not be reached - skipping this node" `
-                                -ForegroundColor Red
-                        }#nodeConnectionTest
-                        #--------------END Get VM Data ---------------------
-                    }
-                    catch {
-                        Write-Host "An error was encountered with $node - skipping this node" `
-                            -ForegroundColor Red
-                        Write-Error $_
-                    }
-                    Write-Host "----------------------------------------------" `
-                        -ForegroundColor Gray
-                }#nodesForEach
-                Write-Host "Total Hard drive space being taken up by BIN files: $vmMemory GB" `
-                    -ForegroundColor Magenta
-                Write-Host "----------------------------------------------" `
-                    -ForegroundColor Gray
-                #-----------------------------------------------------------------------
-            }#nodeNULLCheck
+                            Write-Verbose "No VMs were returned from $node"
+                        }#else_rawVM
+                    }#if_connection
+                    else {
+                        Write-Warning -Message "Connection test to $node unsuccesful."
+                    }#else_connection
+                }#foreach_Node
+            }#if_nodeNULLCheck
             else {
-                Write-Warning -Message "Device appears to be configured as a cluster but no cluster nodes were returned by Get-ClusterNode"
-            }#nodeNULLCheck
-        }#clusterEval
+                Write-Warning -Message 'Device appears to be configured as a cluster but no cluster nodes were returned by Get-ClusterNode'
+                return
+            }#else_nodeNULLCheck
+        }#if_cluster
         else {
-            #standalone server - execute code for standalone server
-            Write-Verbose -Message "Standalone server detected. Executing standalone diagnostic..."
-            #-----------------Get VM Data Now---------------------
-            $quickCheck = Get-VM | Measure-Object | Select-Object -ExpandProperty count
-            if ($quickCheck -ne 0) {
-                $VMInfo = get-vm
-                $VMInfo | Select-Object VMName, @{ Label = "Memory Assigned"; Expression = { '{0:N0}' -F ($_.MemoryAssigned / 1GB) } }, `
-                    AutomaticStopAction | Format-Table -AutoSize
-                foreach ($vm in $VMInfo) {
+            $object = New-Object -TypeName PSObject
+            Write-Verbose -Message 'Standalone server detected. Executing standalone diagnostic...'
+            Write-Verbose -Message 'Getting VM Information...'
+            try {
+                $rawVM = Get-VM -ErrorAction Stop
+            }#try_Get-VM
+            catch {
+                Write-Warning 'An issue was encountered getting VM information:'
+                Write-Error $_
+                return
+            }#catch_Get-VM
+            if ($rawVM) {
+                Write-Verbose -Message 'Processing VM return data...'
+                #####################################
+                foreach ($vm in $rawVM) {
+                    #_____________________________________________________________
+                    $vmname = ""
+                    $vmname = $vm.name
+                    Write-Verbose -Message "Retrieving infomration for VM: $vmname"
                     if ($vm.AutomaticStopAction -eq "Save") {
                         $vmMemory += [math]::round($vm.MemoryAssigned / 1GB, 0)
                     }
-                }
-                Write-Host "----------------------------------------------" `
-                    -ForegroundColor Gray
-                Write-Host "Total Hard drive space being taken up by BIN files: $vmMemory GB" `
-                    -ForegroundColor Magenta
-                Write-Host "----------------------------------------------" `
-                    -ForegroundColor Gray
-            }
+                    #_____________________________________________________________
+                    Write-Verbose -Message 'VM Information processed.'
+                    #_____________________________________________________________
+                }#foreachVM
+                $vmCollection += $rawVM
+                $computerName = $vm | Select-Object -ExpandProperty ComputerName
+                $object | Add-Member -MemberType NoteProperty -name ComputerName -Value $env:COMPUTERNAME -Force
+                $object | Add-Member -MemberType NoteProperty -name StorageSavings -Value "$vmMemory GB" -Force
+                $objCollection = $object
+                #####################################
+            }#if_rawVM
             else {
-                Write-Host "No VMs are present on this node." `
-                    -ForegroundColor White -BackgroundColor Black
-            }
-            #--------------END Get VM Data ---------------------
+                Write-Verbose -Message 'No VMs were found on this device.'
+            }#else_rawVM
         }#clusterEval
-        Write-Host "----------------------------------------------" `
-            -ForegroundColor Gray
     }#administrator check
     else {
         Write-Warning -Message "Not running as administrator. No further action can be taken."
     }#administrator check
-}
+    switch ($InfoType) {
+        'StorageSavings' {
+            $final = $objCollection
+        }#StorageSavings
+        'VMInfo' {
+            $final = $vmCollection | Select-Object ComputerName, VMName, AutomaticStopAction, @{ Label = "Memory Assigned"; Expression = { '{0:N0}' -F ($_.MemoryAssigned / 1GB) } }
+        }#VMInfo
+    }#switch_InfoType
+    return $final
+}#Get-BINSpaceInfo
