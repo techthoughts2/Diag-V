@@ -11,13 +11,13 @@ Describe 'Module Tests' -Tag Unit {
             Test-ModuleManifest -Path $PathToManifest | Should Not BeNullOrEmpty
             $? | Should Be $true
         }#manifestTest
-        It 'root module PoshGram.psm1 should exist' {
+        It 'root module Diag-V.psm1 should exist' {
             $PathToModule | Should Exist
             $? | Should Be $true
         }#psm1Exists
-        It 'manifest should contain PoshGram.psm1' {
+        It 'manifest should contain Diag-V.psm1' {
             $PathToManifest |
-                Should -FileContentMatchExactly "PoshGram.psm1"
+                Should -FileContentMatchExactly "Diag-V.psm1"
         }#validPSM1
     }#context_ModuleTests
 }#describe_ModuleTests

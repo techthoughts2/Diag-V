@@ -32,6 +32,8 @@
     Uptime
     Status
     IsClustered
+.LINK
+    http://techthoughts.info/diag-v/
 #>
 function Get-VMStatus {
     [CmdletBinding()]
@@ -51,36 +53,38 @@ function Get-VMStatus {
             $nodes = Get-ClusterNode  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
             if ($null -ne $nodes) {
                 Foreach ($node in $nodes) {
-                    Write-Verbose -Message "Performing connection test to node $node ..."
+                    $rawVM = $null
+                    $connTest = $false
                     if ($env:COMPUTERNAME -ne $node) {
-                        if (Test-NetConnection -ComputerName $node -InformationLevel Quiet) {
-                            Write-Verbose -Message 'Connection succesful.'
-                            Write-Verbose -Message "Getting VM Information from node $node..."
-                            try {
-                                if ($Credential) {
-                                    $rawVM = Get-VM -ComputerName $node -Credential $Credential -ErrorAction Stop
-                                    $vmCollection += $rawVM
-                                }#if_Credential
-                                else {
-                                    $rawVM = Get-VM -ComputerName $node -ErrorAction Stop
-                                    $vmCollection += $rawVM
-                                }#else_Credential
-                            }#try_Get-VM
-                            catch {
-                                Write-Warning "An issue was encountered getting VM information from $node :"
-                                Write-Error $_
-                                return
-                            }#catch_Get-VM
-                        }#if_connection
-                        else {
-                            Write-Warning -Message "Connection test to $node unsuccesful."
-                        }#else_connection
+                        Write-Verbose -Message "Performing connection test to node $node ..."
+                        $connTest = Test-NetConnection -ComputerName $node -InformationLevel Quiet
                     }#if_local
-                    else{
+                    else {
                         Write-Verbose -Message 'Local device.'
-                        $rawVM = Get-VM -ErrorAction Stop
-                        $vmCollection += $rawVM
+                        $connTest = $true
                     }#else_local
+                    if ($connTest -ne $false) {
+                        Write-Verbose -Message 'Connection succesful.'
+                        Write-Verbose -Message "Getting VM Information from node $node..."
+                        try {
+                            if ($Credential) {
+                                $rawVM = Get-VM -ComputerName $node -Credential $Credential -ErrorAction Stop
+                                $vmCollection += $rawVM
+                            }#if_Credential
+                            else {
+                                $rawVM = Get-VM -ComputerName $node -ErrorAction Stop
+                                $vmCollection += $rawVM
+                            }#else_Credential
+                        }#try_Get-VM
+                        catch {
+                            Write-Warning "An issue was encountered getting VM information from $node :"
+                            Write-Error $_
+                            return
+                        }#catch_Get-VM
+                    }#if_connection
+                    else {
+                        Write-Warning -Message "Connection test to $node unsuccesful."
+                    }#else_connection
                 }#foreach_Node
             }#if_nodeNULLCheck
             else {

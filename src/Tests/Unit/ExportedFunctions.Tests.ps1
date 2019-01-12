@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------
 Set-Location -Path $PSScriptRoot
 #-------------------------------------------------------------------------
-$ModuleName = 'PoshGram'
+$ModuleName = 'Diag-V'
 $PathToManifest = [System.IO.Path]::Combine('..', '..', $ModuleName, "$ModuleName.psd1")
 #-------------------------------------------------------------------------
 if (Get-Module -Name $ModuleName -ErrorAction 'SilentlyContinue') {

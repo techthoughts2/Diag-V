@@ -13,6 +13,8 @@
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
+.LINK
+    http://techthoughts.info/diag-v/
 #>
 function Test-RunningAsAdmin {
     [CmdletBinding()]
