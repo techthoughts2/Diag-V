@@ -2,111 +2,129 @@
 .Synopsis
     Gets VM replication configuration and replication status for all detected VMs
 .DESCRIPTION
-    Gets the VMs replication status info for all VMs. Automatically detects if running
-    on a standalone hyp or hyp cluster. If standalone is detected it will display VM
-    replication status info for all VMs on the hyp. If a cluster is detected it will
-    display VM replication status information for each node in the cluster.
+    Gets the VMs replication status info for all VMs. Automatically detects if running on a standalone hyp or hyp cluster. If standalone is detected it will display VM replication status info for all VMs on the hyp. If a cluster is detected it will display VM replication status information for each node in the cluster.
 .EXAMPLE
     Get-VMReplicationStatus
 
     This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM replication status information for all detected nodes.
-.OUTPUTS
-    Standalone server detected. Executing standalone diagnostic...
+.EXAMPLE
+    Get-VMReplicationStatus | Where-Object {$_.VMName -eq 'Server1'}
 
-	Name         Status             ReplicationState ReplicationHealth ReplicationMode
-	----         ------             ---------------- ----------------- ---------------
-	ARK_DC       Operating normally      Replicating            Normal         Primary
-	ARK_DHCP     Operating normally      Replicating            Normal         Primary
-	ARK_MGMT_MDT Operating normally      Replicating            Normal         Primary
-	ARK_WDS      Operating normally      Replicating            Normal         Primary
-    ARKWSUS      Operating normally      Replicating            Normal         Primary
-.COMPONENT
-    Diag-V
+    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM replication status information for Server1 only.
+.EXAMPLE
+    Get-VMReplicationStatus -Credential $credential
+
+    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM replication status information for all detected nodes using the provided credentials.
+.PARAMETER Credential
+    PSCredential object for storing provided creds
+.OUTPUTS
+    Selected.Microsoft.HyperV.PowerShell.VirtualMachine
 .NOTES
-    Author: Jake Morrison - TechThoughts - http://techthoughts.info
-    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
-    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
-    How to use Diag-V: http://techthoughts.info/diag-v/
+    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
+    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
+    See the README for more details.
+.COMPONENT
+    Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
-     Get the following VM information for all detected Hyp nodes:
-     Name
-	 Status
-	 ReplicationState
-	 ReplicationHealth
-	 ReplicationMode
+    Get the following VM information for all detected Hyp nodes:
+    ComputerName
+    Name
+    Status
+    ReplicationState
+    ReplicationHealth
+    ReplicationMode
+.LINK
+    http://techthoughts.info/diag-v/
 #>
 function Get-VMReplicationStatus {
     [CmdletBinding()]
-    param ()
-    Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
+    param (
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'PSCredential object for storing provided creds')]
+        [pscredential]$Credential
+    )
+    Write-Verbose -Message 'Processing pre-checks. This may take a few seconds...'
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
+        $vmCollection = @()
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
-            #we are definitely dealing with a cluster - execute code for cluster
             Write-Verbose -Message "Cluster detected. Executing cluster appropriate diagnostic..."
-            $nodes = Get-ClusterNode -ErrorAction SilentlyContinue
-            if ($nodes -ne $null) {
-                #------------------------------------------------------------------------
+            Write-Verbose -Message "Getting all cluster nodes in the cluster..."
+            $nodes = Get-ClusterNode  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+            if ($null -ne $nodes) {
+                Write-Warning -Message "Getting VM Information. This can take a few moments..."
                 Foreach ($node in $nodes) {
-                    try {
-                        #lets make sure we can actually reach the other nodes in the cluster
-                        #before trying to pull information from them
+                    $rawVM = $null
+                    $connTest = $false
+                    if ($env:COMPUTERNAME -ne $node) {
                         Write-Verbose -Message "Performing connection test to node $node ..."
-                        if (Test-Connection $node -Count 1 -ErrorAction SilentlyContinue) {
-                            Write-Verbose -Message "Connection succesful."
-                            Write-Host $node.name -ForegroundColor White -BackgroundColor Black
-                            #-----------------Get VM Data Now---------------------
-                            Write-Verbose -Message "Getting VM Information..."
-                            $quickCheck = Get-VM -ComputerName $node.name | Where-Object { $_.ReplicationState -ne "Disabled" } | Measure-Object | `
-                                Select-Object -ExpandProperty count
-                            if ($quickCheck -ne 0) {
-                                #####################################
-                                Get-VM | Where-Object { $_.ReplicationState -ne "Disabled" } | Select-Object Name, Status, ReplicationState, ReplicationHealth, ReplicationMode `
-                                    | Format-Table -AutoSize
-                                #####################################
-                            }
+                        $connTest = Test-NetConnection -ComputerName $node -InformationLevel Quiet
+                    }#if_local
+                    else {
+                        Write-Verbose -Message 'Local device.'
+                        $connTest = $true
+                    }#else_local
+                    if ($connTest -ne $false) {
+                        Write-Verbose -Message 'Connection succesful.'
+                        Write-Verbose -Message "Getting VM Information from node $node..."
+                        try {
+                            if ($Credential -and $env:COMPUTERNAME -ne $node) {
+                                $rawVM = Get-VM -ComputerName $node -Credential $Credential -ErrorAction Stop
+                            }#if_Credential
                             else {
-                                Write-Host "No VMs were detected that have active replication" -ForegroundColor White `
-                                    -BackgroundColor Black
-                            }
-                            Write-Host "----------------------------------------------" `
-                                -ForegroundColor Gray
-                            #--------------END Get VM Data ---------------------
-                        }#nodeConnectionTest
+                                $rawVM = Get-VM -ComputerName $node -ErrorAction Stop
+                            }#else_Credential
+                        }#try_Get-VM
+                        catch {
+                            Write-Warning "An issue was encountered getting VM information from $node :"
+                            Write-Error $_
+                            return
+                        }#catch_Get-VM
+                        if ($rawVM) {
+                                $vmCollection += $rawVM
+                        }#if_rawVM
                         else {
-                            Write-Verbose -Message "Connection unsuccesful."
-                            Write-Host "Node: $node could not be reached - skipping this node" `
-                                -ForegroundColor Red
-                        }#nodeConnectionTest
-                    }
-                    catch {
-                        Write-Host "An error was encountered with $node - skipping this node" `
-                            -ForegroundColor Red
-                        Write-Error $_
-                    }
-                }#nodesForEach
-            }#nodesNULLCheck
-        }#clusterEval
-        else {
-            #standalone server - execute code for standalone server
-            Write-Verbose -Message "Standalone server detected. Executing standalone diagnostic..."
-            #-----------------Get VM Data Now---------------------
-            Write-Verbose -Message "Getting VM Information..."
-            $quickCheck = Get-VM | Where-Object { $_.ReplicationState -ne "Disabled" } | Measure-Object | Select-Object -ExpandProperty count
-            if ($quickCheck -ne 0) {
-                #####################################
-                Get-VM | Where-Object { $_.ReplicationState -ne "Disabled" } | Select-Object Name, Status, ReplicationState, ReplicationHealth, ReplicationMode `
-                    | Format-Table -AutoSize
-                #####################################
-            }
+                            Write-Verbose "No VMs were returned from $node"
+                        }#else_rawVM
+                    }#if_connection
+                    else {
+                        Write-Warning -Message "Connection test to $node unsuccesful."
+                    }#else_connection
+                }#foreach_Node
+            }#if_nodeNULLCheck
             else {
-                Write-Host "No VMs were detected that have active replication" -ForegroundColor White `
-                    -BackgroundColor Black
-            }
+                Write-Warning -Message 'Device appears to be configured as a cluster but no cluster nodes were returned by Get-ClusterNode'
+                return
+            }#else_nodeNULLCheck
+        }#if_cluster
+        else {
+            Write-Verbose -Message 'Standalone server detected. Executing standalone diagnostic...'
+            Write-Verbose -Message 'Getting VM Information...'
+            try {
+                $rawVM = Get-VM -ErrorAction Stop
+            }#try_Get-VM
+            catch {
+                Write-Warning 'An issue was encountered getting VM information:'
+                Write-Error $_
+                return
+            }#catch_Get-VM
+            if ($rawVM) {
+                $vmCollection += $rawVM
+            }#if_rawVM
+            else {
+                Write-Verbose -Message 'No VMs were found on this device.'
+            }#else_rawVM
         }#clusterEval
     }#administrator check
     else {
         Write-Warning -Message "Not running as administrator. No further action can be taken."
     }#administrator check
-}
+    $repEval = $vmCollection | Where-Object { $_.ReplicationState -ne "Disabled" } | Select-Object ComputerName,VMName,Status,ReplicationState,ReplicationHealth,ReplicationMode
+    if (-not ($repEval)) {
+        Write-Warning -Message 'No VMs were found that have replication enabled.'
+    }#if_repEval
+    $final = $repEval
+    return $final
+}#Get-VMReplicationStatus

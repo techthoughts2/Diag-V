@@ -28,8 +28,8 @@
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
     Get the following VM information for all detected Hyp nodes:
-    VMName
     ComputerName
+    VMName
     State
     ConfigurationLocation
     SnapshotFileLocation
@@ -121,7 +121,6 @@ function Get-VMLocationPathInfo {
     else {
         Write-Warning -Message "Not running as administrator. No further action can be taken."
     }#administrator check
-    #$final = $vmCollection | Select-Object ComputerName,VMName,State,Path,ConfigurationLocation,SnapshotFileLocation,SmartPagingFilePath | Format-List -GroupBy VMName
     $final = $vmCollection | Select-Object ComputerName,VMName,State,Path,ConfigurationLocation,SnapshotFileLocation,SmartPagingFilePath
     return $final
 }#Get-VMLocationPathInfo

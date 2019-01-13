@@ -30,6 +30,7 @@
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
     Get the following VM information for all detected Hyp nodes:
+    ComputerName
     Name
     CPU
     DynamicMemoryEnabled
