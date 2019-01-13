@@ -12,7 +12,7 @@
     RootModule        = 'Diag-V.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '3.0'
+    ModuleVersion     = '3.2'
 
     # ID used to uniquely identify this module
     GUID              = 'd0a9150d-b6a4-4b17-a325-e3a24fed0aa9'
@@ -24,7 +24,7 @@
     CompanyName       = 'Tech Thoughts'
 
     # Copyright statement for this module
-    Copyright         = '(c) 2017-2018 Jacob Morrison. All rights reserved.'
+    Copyright         = '(c) 2019 Jacob Morrison. All rights reserved.'
 
     # Description of the functionality provided by this module
     Description       = 'A Hyper-V Diagnostic Utility'
@@ -45,8 +45,7 @@
         'Test-HyperVAllocation',
         'Get-CSVtoPhysicalDiskMapping',
         'Get-FileSizes',
-        'Get-HyperVLogs',
-        'Show-DiagVMenu'
+        'Get-HyperVLogs'
     )
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
@@ -55,10 +54,23 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags = 'Hyper-V', 'Diag-V', 'Diagnostic', 'Tests', 'VM', 'VMs', 'VHDs', 'VHDXs', 'VHDX',
-            'VHD', 'CSV', 'Overallocation', 'Overprovisioning', 'VirtualMachines',
-            'VirtualMachine'
-
+            Tags = @(
+                'Hyper-V',
+                'Diag-V',
+                'Diagnostic',
+                'Tests',
+                'VM',
+                'VMs',
+                'VHDs',
+                'VHDXs',
+                'VHDX',
+                'VHD',
+                'CSV',
+                'Overallocation',
+                'Overprovisioning',
+                'VirtualMachines',
+                'VirtualMachine'
+            )
             # A URL to the license for this module.
             # LicenseUri = ''
 

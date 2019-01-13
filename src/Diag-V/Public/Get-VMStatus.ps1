@@ -6,11 +6,11 @@
 .EXAMPLE
     Get-VMStatus
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information for all detected nodes.
+    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information from all detected nodes.
 .EXAMPLE
     Get-VMStatus -Credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information for all detected nodes using the provided credentials.
+    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information from all detected nodes using the provided credentials.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
