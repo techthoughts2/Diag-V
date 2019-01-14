@@ -296,6 +296,30 @@ InModuleScope Diag-V {
                 }#endMock
                 Get-VMStatus | Should -Not -BeNullOrEmpty
             }#it
+            It 'should return VM information if a standalone is detected and successful with NoFormat specified' {
+                #because of the format-table in this function all we can do really is check for a non null value
+                Mock Test-RunningAsAdmin -MockWith {
+                    $true
+                }#endMock
+                Mock Test-IsACluster -MockWith {
+                    $false
+                }#endMock
+                Mock Get-VM -MockWith {
+                    [PSCustomObject]@{
+                        Name         = 'DemoVM'
+                        ComputerName = 'HYP0'
+                        State        = 'Running'
+                        CPUUsage     = '2'
+                        MemoryMB     = '2048'
+                        Uptime       = '51.05:14:44.6730000'
+                        Status       = 'Operating normally'
+                    }
+                }#endMock
+                Get-VMStatus -NoFormat `
+                    | Where-Object {$_.Name -eq 'DemoVM'} `
+                    | Select-Object -ExpandProperty Name `
+                    | Should -BeExactly 'DemoVM'
+            }#it
             It 'should still at least return VM information from local device if a cluster is detected and VM data is successful, but no other node can be reached' {
                 #because of the format-table in this function all we can do really is check for a non null value
                 Mock Test-RunningAsAdmin -MockWith {
@@ -826,14 +850,7 @@ InModuleScope Diag-V {
                 }#endMock
                 Get-VMLocationPathInfo | Should -BeNullOrEmpty
             }#it
-            It 'should return null if a standalone is detected but no VMs are found with StorageSavings specified' {
-                Mock Test-IsACluster -MockWith {
-                    $false
-                }#endMock
-                Mock Get-VM -MockWith {}
-                Get-VMLocationPathInfo | Should -BeNullOrEmpty
-            }#it
-            It 'should return null if a standalone is detected but no VMs are found with VMInfo specified' {
+            It 'should return null if a standalone is detected but no VMs are found' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
@@ -970,14 +987,7 @@ InModuleScope Diag-V {
                 }#endMock
                 Get-VMReplicationStatus | Should -BeNullOrEmpty
             }#it
-            It 'should return null if a standalone is detected but no VMs are found with StorageSavings specified' {
-                Mock Test-IsACluster -MockWith {
-                    $false
-                }#endMock
-                Mock Get-VM -MockWith {}
-                Get-VMReplicationStatus | Should -BeNullOrEmpty
-            }#it
-            It 'should return null if a standalone is detected but no VMs are found with VMInfo specified' {
+            It 'should return null if a standalone is detected but no VMs are found' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
@@ -988,12 +998,216 @@ InModuleScope Diag-V {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
-                $eval = Get-VMReplicationStatus -Credential $Credential | Select-Object -First 1
+                $eval = Get-VMReplicationStatus | Select-Object -First 1
                 $eval | Select-Object -ExpandProperty ComputerName | Should -BeExactly 'HYP0'
                 $eval | Select-Object -ExpandProperty VMName | Should -BeExactly 'DemoVM'
                 $eval | Select-Object -ExpandProperty ReplicationState | Should -BeExactly 'FakeStatus'
                 $eval | Select-Object -ExpandProperty ReplicationMode | Should -BeExactly 'FakeStatus'
                 $eval | Select-Object -ExpandProperty ReplicationHealth | Should -BeExactly 'FakeStatus'
+            }#it
+        }#context
+        Context 'Get-IntegrationServicesCheck' {
+            BeforeEach {
+                Mock Test-RunningAsAdmin -MockWith {
+                    $true
+                }#endMock
+                Mock Test-IsACluster -MockWith {
+                    $true
+                }#endMock
+                Mock Get-ClusterNode -MockWith {
+                    [PSCustomObject]@{
+                        Name = @(
+                            "Server0",
+                            'Server1',
+                            'Server2'
+                        )
+                    }
+                }
+                Mock Test-NetConnection -MockWith {
+                    $true
+                }
+                Mock Get-VM -MockWith {
+                    [PSCustomObject]@{
+                        ComputerName                = 'HYP0'
+                        VMName                      = 'DemoVM'
+                        ProcessorCount              = 32
+                        DynamicMemoryEnabled        = $true
+                        MemoryMinimum               = 4294967296
+                        MemoryMaximum               = 16978542592
+                        IsClustered                 = $false
+                        Version                     = '8.0'
+                        ReplicationHealth           = 'FakeStatus'
+                        State                       = 'Running'
+                        CPUUsage                    = '2'
+                        MemoryMB                    = '2048'
+                        Uptime                      = '51.05:14:44.6730000'
+                        Status                      = 'Operating normally'
+                        AutomaticStopAction         = 'Save'
+                        MemoryAssigned	            = 2147483648
+                        Path                        = 'E:\vms\'
+                        ConfigurationLocation       = 'E:\vms\'
+                        SnapshotFileLocation	    = 'E:\vms\'
+                        SmartPagingFilePath         = 'E:\vms\'
+                        ReplicationState	        = 'FakeStatus'
+                        ReplicationMode	            = 'FakeStatus'
+                        IntegrationServicesVersion  = '0.0'
+                    }
+                }#endMock
+                $results = @()
+                $object = New-Object -TypeName PSObject
+                $object | Add-Member -MemberType NoteProperty -name VMName -Value 'Server1' -Force
+                $object | Add-Member -MemberType NoteProperty -name Name -Value 'Guest Service Interface' -Force
+                $object | Add-Member -MemberType NoteProperty -name Enabled -Value $false -Force
+                $object | Add-Member -MemberType NoteProperty -name PrimaryStatusDescription -Value 'OK' -Force
+                $object | Add-Member -MemberType NoteProperty -name SecondaryStatusDescription -Value '' -Force
+                $results += $object
+                $object = New-Object -TypeName PSObject
+                $object | Add-Member -MemberType NoteProperty -name VMName -Value 'Server1' -Force
+                $object | Add-Member -MemberType NoteProperty -name Name -Value 'Heartbeat' -Force
+                $object | Add-Member -MemberType NoteProperty -name Enabled -Value $true -Force
+                $object | Add-Member -MemberType NoteProperty -name PrimaryStatusDescription -Value 'OK' -Force
+                $object | Add-Member -MemberType NoteProperty -name SecondaryStatusDescription -Value '' -Force
+                $results += $object
+                $object = New-Object -TypeName PSObject
+                $object | Add-Member -MemberType NoteProperty -name VMName -Value 'Server1' -Force
+                $object | Add-Member -MemberType NoteProperty -name Name -Value 'Key-Value Pair Exchange' -Force
+                $object | Add-Member -MemberType NoteProperty -name Enabled -Value $true -Force
+                $object | Add-Member -MemberType NoteProperty -name PrimaryStatusDescription -Value 'OK' -Force
+                $object | Add-Member -MemberType NoteProperty -name SecondaryStatusDescription -Value '' -Force
+                $results += $object
+                $object = New-Object -TypeName PSObject
+                $object | Add-Member -MemberType NoteProperty -name VMName -Value 'Server1' -Force
+                $object | Add-Member -MemberType NoteProperty -name Name -Value 'Shutdown' -Force
+                $object | Add-Member -MemberType NoteProperty -name Enabled -Value $true -Force
+                $object | Add-Member -MemberType NoteProperty -name PrimaryStatusDescription -Value 'OK' -Force
+                $object | Add-Member -MemberType NoteProperty -name SecondaryStatusDescription -Value '' -Force
+                $results += $object
+                $object = New-Object -TypeName PSObject
+                $object | Add-Member -MemberType NoteProperty -name VMName -Value 'Server1' -Force
+                $object | Add-Member -MemberType NoteProperty -name Name -Value 'Time Synchronization' -Force
+                $object | Add-Member -MemberType NoteProperty -name Enabled -Value $true -Force
+                $object | Add-Member -MemberType NoteProperty -name PrimaryStatusDescription -Value 'OK' -Force
+                $object | Add-Member -MemberType NoteProperty -name SecondaryStatusDescription -Value '' -Force
+                $results += $object
+                $object = New-Object -TypeName PSObject
+                $object | Add-Member -MemberType NoteProperty -name VMName -Value 'Server1' -Force
+                $object | Add-Member -MemberType NoteProperty -name Name -Value 'VSS' -Force
+                $object | Add-Member -MemberType NoteProperty -name Enabled -Value $true -Force
+                $object | Add-Member -MemberType NoteProperty -name PrimaryStatusDescription -Value 'No Contact' -Force
+                $object | Add-Member -MemberType NoteProperty -name SecondaryStatusDescription -Value '' -Force
+                $results += $object
+                Mock Get-VMIntegrationService -MockWith {
+                    $results
+                }
+            }#beforeEach
+            It 'should return null if not running as admin' {
+                Mock Test-RunningAsAdmin -MockWith {
+                    $false
+                }#endMock
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return null if a cluster is detected but no nodes are returned' {
+                Mock Get-ClusterNode -MockWith {}
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return null if no VMs have replication enabled' {
+                Mock Get-VM -MockWith {
+                    [PSCustomObject]@{
+                        ReplicationState	    = 'Disabled'
+                    }
+                }#endMock
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }
+            It 'should return null if a cluster is detected but an error is encountered getting VMs' {
+                Mock Get-VM -MockWith {
+                    Throw 'Bullshit Error'
+                }#endMock
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return null if a cluster is detected but an error is encountered getting VMIntegrationService info' {
+                Mock Get-VMIntegrationService -MockWith {
+                    Throw 'Bullshit Error'
+                }#endMock
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return null if a cluster is detected but no VMs are found on any node' {
+                Mock Get-VM -MockWith {}
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should still at least return information from local device if a cluster is detected and VM data is successful, but no other node can be reached' {
+                Mock Get-ClusterNode -MockWith {
+                    [PSCustomObject]@{
+                        Name = @(
+                            "$env:COMPUTERNAME",
+                            'Server1',
+                            'Server2'
+                        )
+                    }
+                }
+                Mock Test-NetConnection -MockWith {
+                    $false
+                }
+                Get-IntegrationServicesCheck -NoFormat | Select-Object -First 1 -ExpandProperty Name | Should -BeExactly 'Guest Service Interface'
+            }#it
+            It 'should return valid results if a cluster is detected, credentials are provided, and no issues are encountered' {
+                $Credential = New-Object -TypeName System.Management.Automation.PSCredential('username', (ConvertTo-SecureString 'password' -AsPlainText -Force))
+                Mock Get-ClusterNode -MockWith {
+                    [PSCustomObject]@{
+                        Name = @(
+                            "$env:COMPUTERNAME",
+                            'Server1',
+                            'Server2'
+                        )
+                    }
+                }
+                Mock Test-NetConnection -MockWith {
+                    $true
+                }
+                $eval = Get-IntegrationServicesCheck -Credential $Credential -NoFormat | Select-Object -First 1
+                $eval | Select-Object -ExpandProperty VMName | Should -BeExactly 'Server1'
+                $eval | Select-Object -ExpandProperty Name | Should -BeExactly 'Guest Service Interface'
+                $eval | Select-Object -ExpandProperty Enabled | Should -BeExactly $false
+            }#it
+            It 'should return null if a standalone is detected but an error is encountered getting VMs' {
+                Mock Test-IsACluster -MockWith {
+                    $false
+                }#endMock
+                Mock Get-VM -MockWith {
+                    Throw 'Bullshit Error'
+                }#endMock
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return null if a standalone is detected but an error is encountered getting VMs integration info' {
+                Mock Test-IsACluster -MockWith {
+                    $false
+                }#endMock
+                Mock Get-VMIntegrationService -MockWith {
+                    Throw 'Bullshit Error'
+                }#endMock
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return null if a standalone is detected but no VMs are found with StorageSavings specified' {
+                Mock Test-IsACluster -MockWith {
+                    $false
+                }#endMock
+                Mock Get-VM -MockWith {}
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return null if a standalone is detected but no VMs are found' {
+                Mock Test-IsACluster -MockWith {
+                    $false
+                }#endMock
+                Mock Get-VM -MockWith {}
+                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
+            }#it
+            It 'should return valid results if a standalone is detected, and no issues are encountered' {
+                Mock Test-IsACluster -MockWith {
+                    $false
+                }#endMock
+                $eval = Get-IntegrationServicesCheck -NoFormat | Select-Object -First 1
+                $eval | Select-Object -ExpandProperty VMName | Should -BeExactly 'Server1'
+                $eval | Select-Object -ExpandProperty Name | Should -BeExactly 'Guest Service Interface'
+                $eval | Select-Object -ExpandProperty Enabled | Should -BeExactly $false
             }#it
         }#context
         Context 'A-Function' {

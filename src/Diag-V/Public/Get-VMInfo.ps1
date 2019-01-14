@@ -2,7 +2,7 @@
 .Synopsis
     Retrieves basic and advanced VM information for all VMs found on a standalone or cluster
 .DESCRIPTION
-    Gets VS configuration information for all discovered VMs. This function goes a lot further than a simple Get-VM and provides in depth information of the VM configuration. Cluster and standalone hyp detection is done automatically. If a cluster detection, all VMs in the cluster will be processed.
+    Gets VS configuration information for all discovered VMs. This function goes a lot further than a simple Get-VM and provides in depth information of the VM configuration. Cluster and standalone hyp detection is done automatically. If a cluster is detected, all VMs in the cluster will be processed.
 .EXAMPLE
     Get-VMInfo
 
@@ -85,11 +85,11 @@ function Get-VMInfo {
         $vmCollection = @()
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
-            Write-Verbose -Message "Cluster detected. Executing cluster appropriate diagnostic..."
-            Write-Verbose -Message "Getting all cluster nodes in the cluster..."
+            Write-Verbose -Message 'Cluster detected. Executing cluster appropriate diagnostic...'
+            Write-Verbose -Message 'Getting all cluster nodes in the cluster...'
             $nodes = Get-ClusterNode  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
             if ($null -ne $nodes) {
-                Write-Warning -Message "Getting VM Information. This can take a few moments..."
+                Write-Warning -Message 'Getting VM Information. This can take a few moments...'
                 Foreach ($node in $nodes) {
                     $rawVM = $null
                     $connTest = $false
@@ -124,7 +124,7 @@ function Get-VMInfo {
                                 #_____________________________________________________________
                                 $vmname = ""
                                 $vmname = $vm.name
-                                Write-Verbose -Message "Retrieving infomration for VM: $vmname on node: $node"
+                                Write-Verbose -Message "Retrieving information for VM: $vmname on node: $node"
                                 #_____________________________________________________________
                                 #resets
                                 $object = New-Object -TypeName PSObject
@@ -271,7 +271,7 @@ function Get-VMInfo {
                     #_____________________________________________________________
                     $vmname = ""
                     $vmname = $vm.name
-                    Write-Verbose -Message "Retrieving infomration for VM: $vmname"
+                    Write-Verbose -Message "Retrieving information for VM: $vmname"
                     #_____________________________________________________________
                     #resets
                     $object = New-Object -TypeName PSObject
@@ -373,8 +373,10 @@ function Get-VMInfo {
         }#clusterEval
     }#administrator check
     else {
-        Write-Warning -Message "Not running as administrator. No further action can be taken."
+        Write-Warning -Message 'Not running as administrator. No further action can be taken.'
+        return
     }#administrator check
+    Write-Verbose -Message 'Processing results for return'
     $final = $vmCollection
     return $final
 }#Get-VMInfo

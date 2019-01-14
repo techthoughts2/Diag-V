@@ -2,7 +2,7 @@
 .Synopsis
     Evaluates each VM to determine if Hard Drive space is being taken up by the AutomaticStopAction setting.
 .DESCRIPTION
-    Checks each VMs RAM and AutomaticStopAction setting - then tallies the amount of total hard drive space being taken up by the associated BIN files. Useful for identifying potential storage savings by adjusting the AutomaticStopAction. Cluster and standalone hyp detection is done automatically. If a cluster detection, all VMs in the cluster will be processed.
+    Checks each VMs RAM and AutomaticStopAction setting - then tallies the amount of total hard drive space being taken up by the associated BIN files. Useful for identifying potential storage savings by adjusting the AutomaticStopAction. Cluster and standalone hyp detection is done automatically. If a cluster is detected, all VMs in the cluster will be processed.
 .EXAMPLE
     Get-BINSpaceInfo -InfoType StorageSavings
 
@@ -57,11 +57,11 @@ function Get-BINSpaceInfo {
         $vmMemory = 0
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
-            Write-Verbose -Message "Cluster detected. Executing cluster appropriate diagnostic..."
-            Write-Verbose -Message "Getting all cluster nodes in the cluster..."
+            Write-Verbose -Message 'Cluster detected. Executing cluster appropriate diagnostic...'
+            Write-Verbose -Message 'Getting all cluster nodes in the cluster...'
             $nodes = Get-ClusterNode  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
             if ($null -ne $nodes) {
-                Write-Warning -Message "Getting VM Information. This can take a few moments..."
+                Write-Warning -Message 'Getting VM Information. This can take a few moments...'
                 Foreach ($node in $nodes) {
                     $rawVM = $null
                     $connTest = $false
@@ -145,7 +145,7 @@ function Get-BINSpaceInfo {
                     #_____________________________________________________________
                     $vmname = ""
                     $vmname = $vm.name
-                    Write-Verbose -Message "Retrieving infomration for VM: $vmname"
+                    Write-Verbose -Message "Retrieving information for VM: $vmname"
                     if ($vm.AutomaticStopAction -eq "Save") {
                         $vmMemory += [math]::round($vm.MemoryAssigned / 1GB, 0)
                     }
@@ -166,7 +166,8 @@ function Get-BINSpaceInfo {
         }#clusterEval
     }#administrator check
     else {
-        Write-Warning -Message "Not running as administrator. No further action can be taken."
+        Write-Warning -Message 'Not running as administrator. No further action can be taken.'
+        return
     }#administrator check
     switch ($InfoType) {
         'StorageSavings' {

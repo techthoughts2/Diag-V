@@ -2,7 +2,7 @@
 .Synopsis
     A VM has several components which can reside in a different location. This script will identify the location of all of VM components.
 .DESCRIPTION
-    A VM is comprised of a few components besides just .vhd/.vhdx. This will retrieve the location paths for the VM's configuration files, Snapshot Files, and Smart Paging files. Cluster and standalone hyp detection is done automatically. If a cluster detection, all VMs in the cluster will be processed.
+    A VM is comprised of a few components besides just .vhd/.vhdx. This will retrieve the location paths for the VM's configuration files, Snapshot Files, and Smart Paging files. Cluster and standalone hyp detection is done automatically. If a cluster is detected, all VMs in the cluster will be processed.
 .EXAMPLE
     Get-VMLocationPathInfo
 
@@ -50,11 +50,11 @@ function Get-VMLocationPathInfo {
         $vmCollection = @()
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
-            Write-Verbose -Message "Cluster detected. Executing cluster appropriate diagnostic..."
-            Write-Verbose -Message "Getting all cluster nodes in the cluster..."
+            Write-Verbose -Message 'Cluster detected. Executing cluster appropriate diagnostic...'
+            Write-Verbose -Message 'Getting all cluster nodes in the cluster...'
             $nodes = Get-ClusterNode  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
             if ($null -ne $nodes) {
-                Write-Warning -Message "Getting VM Information. This can take a few moments..."
+                Write-Warning -Message 'Getting VM Information. This can take a few moments...'
                 Foreach ($node in $nodes) {
                     $rawVM = $null
                     $connTest = $false
@@ -119,7 +119,8 @@ function Get-VMLocationPathInfo {
         }#clusterEval
     }#administrator check
     else {
-        Write-Warning -Message "Not running as administrator. No further action can be taken."
+        Write-Warning -Message 'Not running as administrator. No further action can be taken.'
+        return
     }#administrator check
     $final = $vmCollection | Select-Object ComputerName,VMName,State,Path,ConfigurationLocation,SnapshotFileLocation,SmartPagingFilePath
     return $final
