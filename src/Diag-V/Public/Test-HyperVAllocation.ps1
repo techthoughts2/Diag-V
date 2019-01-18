@@ -1,373 +1,346 @@
 <#
 .Synopsis
-    Determines the current resource allocation health of Hyper-V Server or Hyper-V Cluster
+    Performs a Hyper-V system evaluation for each Hyper-V node found and returns a resource allocation health report.
 .DESCRIPTION
-    For single Hyper-V instances this function will pull available
-    CPU and Memory physical resources. It will then tally all VM CPU and memory
-    allocations and contrast that info with available physical chassis resources
-
-    A cpu ratio higher than 4:1 (vCPU:Logical Processors) will be flagged as bad
-    This ratio can be adjusted easily the the code below as there is no best practice
-    published around the most ideal CPU ratio.
-    A static memory higher than 1:1 will be flagged as bad
-    There is no best practice published around dynamic maximum memory so the function
-    will only advise a warning if max memory is higher than available physical memory.
-
-    The same functionality is supported for clustered Hyper-V instances.
-    The function will poll each node in the cluster and provide info on each node.
-    The cluster function will also calculate the simulation loss of one node to determine
-    if VMs could survive and start with one node down.
-
-    Available storage space will also be calculated. For clusters CSV locations will be
-    checked. For standalone Hyps any drive larger than 10GB and not C: will be checked.
-    Drives under 1TB with less than 15% will be flagged as bad. Drives over 1TB with less
-    than 10% will be flagged as bad.
+    For single Hyper-V instances or Hyper-V clusters all Hyp nodes will be identified and evaluated. Available chassis resources will be gathered and will be compared to all VM CPU and memory allocations. Calculations will then be performed to determine the overall health of the node from a CPU/RAM perspective. Available storage space will also be calculated. For clusters CSV locations will be checked. For standalone Hyps any drive larger than 10GB and not C: will be checked. Drives under 1TB with less than 15% will be flagged as unhealthy. Drives over 1TB with less than 10% will be flagged as unhealty. If a cluster is deteceted and additional caluclation will be performed that simulates the loss of one node to determine if VMs could survive and start with one node down.
 .EXAMPLE
     Test-HyperVAllocation
 
-    If executed on a standalone Hyper-V instance it will retrieve CPU/RAM physical resources
-    If exectured on a Hyper-V cluster it will retrieve CPU/RAM physical resrouces for
-    all nodes in the cluster and comapares those available resources to resources assigned
-    to VMs on each Hyper-V instance. Storage utilization will also be evaluated.
+    Detects if running on a standalone Hyper-V instance or Hyper-V cluster. Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations.
+.EXAMPLE
+    Test-HyperVAllocation -Credential $credential
+
+    Detects if running on a standalone Hyper-V instance or Hyper-V cluster. Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations. The provided credentials are used.
+.EXAMPLE
+    Test-HyperVAllocation -Verbose
+
+    Detects if running on a standalone Hyper-V instance or Hyper-V cluster. Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations with Verbose output.
+.PARAMETER Credential
+    PSCredential object for storing provided creds
 .OUTPUTS
-    ----------------------------------------------------------------------
-    SystemName: HYP1
-    ----------------------------------------------------------------------
-    Cores: 8
-    Logical Processors: 16
-    Total Memory: 32 GB
-    Avail Memory for VMs: 24 GB (8GB reserved for Hyper-V Host)
-    Current Free Memory: 6 GB
-    Total number of VMs: 1
-    Total number of VM vCPUs: 8
-    ----------------------------------------------------------------------
-    Memory resources are still available:             19 % free
-    ----------------------------------------------------------------------
-    Virtual Processors are not overprovisioned        1 : 1
-    ----------------------------------------------------------------------
-    Total Startup memory required for Dynamic VMs:    0 GB
-    Total Static memory required for Static VMs:      24 GB
-    ----------------------------------------------------------------------
-    Total minimum RAM (Startup+Static) required:      24 GB
-    Minimum RAM: 24 GB is exactly at available RAM: 24 GB
-    ----------------------------------------------------------------------
-    ----------------------------------------------------------------------
-    SystemName: HYP2
-    ----------------------------------------------------------------------
-    Cores: 8
-    Logical Processors: 16
-    Total Memory: 32 GB
-    Avail Memory for VMs: 24 GB (8GB reserved for Hyper-V Host)
-    Current Free Memory: 31 GB
-    Total number of VMs: 0
-    Total number of VM vCPUs:
-    ----------------------------------------------------------------------
-    Memory resources are still available:             97 % free
-    ----------------------------------------------------------------------
-    Virtual Processors are not overprovisioned        1 : 1
-    ----------------------------------------------------------------------
-    Total Startup memory required for Dynamic VMs:    0 GB
-    Total Static memory required for Static VMs:      0 GB
-    ----------------------------------------------------------------------
-    Total minimum RAM (Startup+Static) required:      0 GB
-    Minimum RAM: 0 GB does not exceed available RAM: 24 GB
-    ----------------------------------------------------------------------
-    ----------------------------------------------------------------------
-    N+1 Allocation Evaluation:
-    ----------------------------------------------------------------------
-    VMs would survive a one node failure
-    Total VM RAM minumum: 24 GB - Total Cluster RAM available with one node down: 24 GB
-    ----------------------------------------------------------------------
-    Storage Allocation Information
-    ----------------------------------------------------------------------
-    C:\ClusterStorage\Volume1 has the recommended 15% free space.
-    Total Size: 500 GB
-    Free Space: 164 GB
-    Percent Free: 32.7383
-    ----------------------------------------------------------------------
-.COMPONENT
-    Diag-V
+    System.Management.Automation.PSCustomObject
 .NOTES
-    Author: Jake Morrison - TechThoughts - http://techthoughts.info
-    Function will automatically detect standalone or cluster and will run the appropriate diagnostic
-    You can change the CPU ratio cutoff from 4:1 to say 6:1 or 8:1 by editing the
-    Highlighted section below to suit your requirements
-    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
-    How to use Diag-V: http://techthoughts.info/diag-v/
+    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
+    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
+    See the README for more details.
+    This was really hard to make.
+.COMPONENT
+    Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
-     Get the following information for each Hyper-V instance found
-     System Name
-     Logical Processors
-     Total Memory
-     Free Memory
-     Total number of VMs
-     Total number of VM vCPUs
-     CPU provisioning status
-     Memory provisioning status
-     Free space status
+    Gets the following VM information for all detected Hyp nodes:
+    SystemName
+    Cores
+    LogicalProcessors
+    TotalMemory(GB)
+    AvailMemory(-8GBSystem)
+    FreeRAM(GB)
+    FreeRAM(%)
+    TotalVMCount
+    TotalvCPUs
+    vCPURatio
+    DynamicStartupRequired
+    StaticRAMRequired
+    TotalRAMRequired
+    RAMAllocation
+    DynamicMaxPotential
+    DynamicMaxAllocation
+
+    Drive/CSV
+    Size(GB)
+    FreeSpace(GB)
+    FreeSpace(%)
+    DriveHealth
+
+    N+1RAMEvaluation (clusters only)
+.LINK
+    http://techthoughts.info/diag-v/
 #>
 function Test-HyperVAllocation {
     [CmdletBinding()]
-    param ()
+    param (
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'PSCredential object for storing provided creds')]
+        [pscredential]$Credential
+    )
+    Write-Verbose -Message 'Processing pre-checks. This may take a few seconds...'
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
-        Write-Host "Diag-V v$Script:version - Processing pre-checks. This may take a few seconds..."
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
-            #we are definitely dealing with a cluster - execute code for cluster
-            Write-Verbose -Message "Cluster detected. Executing cluster appropriate diagnostic..."
-            Write-Verbose "Getting all cluster nodes in the cluster..."
-            $nodes = Get-ClusterNode -ErrorAction SilentlyContinue
-            if ($nodes -ne $null) {
-                foreach ($node in $nodes) {
-                    #in order for this function to work we must be able to communicate with all nodes
-                    #lets evaluate good communication to all nodes now
-                    Write-Verbose -Message "Performing connection test to node $node ..."
-                    try {
-                        if (Test-Connection -ComputerName $node -Quiet -ErrorAction Stop) {
-                            Write-Verbose -Message "Connection succesful."
-                        }#nodeConnectionTest
-                        else {
-                            Write-Verbose -Message "Connection unsuccesful."
-                            Write-Host "Not all nodes could be reached - please address $node" -ForegroundColor Red
-                            return
-                        }#nodeConnectionTest
-                    }
-                    catch {
-                        Write-Host "Error encountered testing connection to cluster nodes:" -ForegroundColor Red
-                        Write-Error $_
-                    }
-                }#nodesForEach
-                #--------------------------------------------------------------------
-                #######################CLUSTER DIAG########################
-                #--------------------------------------------------------------------
-                Write-Verbose -Message "Beginning cluster allocation diagnostics..."
-                #--------------------------
-                $totalClusterRAM = $null
-                $totalVMClusterRAM = $null
+            Write-Verbose -Message 'Cluster detected. Executing cluster appropriate diagnostic...'
+            Write-Verbose -Message 'Getting all cluster nodes in the cluster...'
+            $nodes = Get-ClusterNode  -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+            if ($null -ne $nodes) {
+                Write-Warning -Message 'Getting VM Information. This can take a few moments...'
+                #__________________
+                $results = @()
+                $totalClusterRAM = 0
+                $totalVMClusterRAM = 0
                 $nodeCount = 0
-                #--------------------------
+                #__________________
                 Foreach ($node in $nodes) {
-                    Write-Verbose -Message "Processing $node"
-                    #--------------------------
-                    #resets
-                    $w32ProcInfo = $null
-                    $w32OSInfo = $null
-                    $name = $null
-                    $numCores = $null
-                    $numLogicProcs = $null
-                    $totalNumCores = $null
-                    $totalNumLogicProcs = $null
-                    [double]$totalMemory = $null
-                    [double]$freeMemory = $null
-                    $nodeCount += 1
-                    #---------------------------------------------------------------------
-                    #get WMI data loaded up
-                    #--------------------------------------------------------------------
-                    try {
-                        $w32ProcInfo = Get-WmiObject -Namespace "root\cimv2" -Class win32_processor -Impersonation 3 -ComputerName $node -ErrorAction Stop
-                        $w32OSInfo = Get-WmiObject -Namespace "root\cimv2" -Class Win32_OperatingSystem  -Impersonation 3 -ComputerName $node -ErrorAction Stop
-                    }
-                    catch {
-                        Write-Host "An error was encountered getting WMI info from $node" -ForegroundColor Red
-                        Write-Error $_
-                        Return
-                    }
-                    #--------------------------------------------------------------------
-                    #load specific WMI data into variables
-                    #--------------------------------------------------------------------
-                    $name = $node
-                    $numCores = $w32ProcInfo.numberOfCores
-                    foreach ($core in $numCores) {
-                        $totalNumCores += $core
-                    }
-                    $numLogicProcs = $w32ProcInfo.NumberOfLogicalProcessors
-                    foreach ($proc in $numLogicProcs) {
-                        $totalNumLogicProcs += $proc
-                    }
-                    $totalMemory = [math]::Round($w32OSInfo.TotalVisibleMemorySize / 1MB, 0)
-                    #8GB of memory is RESERVED for the host
-                    $availVMMemory = $totalMemory - 8
-                    $freeMemory = [math]::Round($w32OSInfo.FreePhysicalMemory / 1MB, 0)
-                    $totalClusterRAM += $availVMMemory
-                    #--------------------------------------------------------------------
-                    #--------------------------------------------------------------------
-                    #load VM data and count number of VMs and VMs processors
-                    #--------------------------------------------------------------------
-                    $vms = $null
-                    $vmCount = $null
-                    $vmProcCount = $null
-                    $totalVMProcCount = $null
-                    try {
-                        $vms = Get-VM -ComputerName $node -ErrorAction Stop
-                        $vmCount = $vms | Measure-Object | Select-Object -ExpandProperty count
-                        $vmProcCount = $vms | Get-VMProcessor -ErrorAction Stop | Select-Object -ExpandProperty count
-                    }
-                    catch {
-                        Write-Host "An error was encountered getting VM info from $node" -ForegroundColor Red
-                        Write-Error $_
-                        Return
-                    }
-                    foreach ($proc in $vmProcCount) {
-                        $totalVMProcCount += $proc
-                    }
-                    #--------------------------------------------------------------------
-                    #null all counts to permit multiple script runs
-                    #--------------------------------------------------------------------
-                    $memorystartup = 0
-                    $MemoryMaximum = 0
-                    $totalstartupmem = 0
-                    $totalmaxmem = 0
-                    $static = 0
-                    $staticmemory = 0
-                    #--------------------------------------------------------------------
-                    #calculate memory usage dynamic/static for each VM to generate totals
-                    #--------------------------------------------------------------------
-                    try {
-                        foreach ($vm in $vms) {
-                            if ((Get-VMMemory -ComputerName $node -vmname $vm.Name -ErrorAction Stop).DynamicMemoryEnabled -eq "True") {
-                                $memoryStartup = [math]::Round(($VM | select-object MemoryStartup).MemoryStartup / 1GB, 0)
-                                $memoryMaximum = [math]::Round(($VM | select-object MemoryMaximum).memorymaximum / 1GB, 0)
-                                $totalstartupmem += $memoryStartup
-                                $totalmaxmem += $memoryMaximum
-                            }
-                            else {
-                                $static = [math]::Round(($VM  | select-object MemoryStartup).MemoryStartup / 1GB, 0)
-                                $staticmemory += $static
-                            }
-                        }
-                    }
-                    catch {
-                        Write-Host "An error was encountered getting VM Memory info from $node" -ForegroundColor Red
-                        Write-Error $_
-                        Return
-                    }
-                    $totalramrequired = $totalstartupmem + $staticmemory
-                    $totalVMClusterRAM += $totalramrequired
-                    #account for no static and no dynamic situations
-                    if ($totalstartupmem -eq $null) {
+                    $connTest = $false
+                    if ($env:COMPUTERNAME -ne $node) {
+                        Write-Verbose -Message "Performing connection test to node $node ..."
+                        $connTest = Test-NetConnection -ComputerName $node -InformationLevel Quiet
+                    }#if_local
+                    else {
+                        Write-Verbose -Message 'Local device.'
+                        $connTest = $true
+                    }#else_local
+                    if ($connTest -ne $false) {
+                        Write-Verbose -Message 'Connection succesful.'
+                        #######################################################################################
+                        #######################################################################################
+                        #######################################################################################
+                        #--------------------------------------------------------------------
+                        #null all counts to permit multiple script runs
+                        #--------------------------------------------------------------------
+                        $nodeCount += 1
+                        #__________________
+                        $name = $null
+                        $numCores = 0
+                        $totalNumCores = 0
+                        $numLogicProcs = 0
+                        $totalNumLogicProcs = 0
+                        $totalMemory = 0
+                        $availVMMemory = 0
+                        $freeMemory = 0
+                        #__________________
+                        $vmCount = 0
+                        $vmProcCount = 0
+                        $procRatio = 0
+                        $cpuRatio = 0
+                        $totalVMProcCount = 0
+                        $finalRatio = ''
+                        #__________________
+                        $memorystartup = 0
+                        $MemoryMaximum = 0
                         $totalstartupmem = 0
-                    }
-                    if ($staticmemory -eq $null) {
+                        $totalDynamicMaxMem = 0
+                        $static = 0
                         $staticmemory = 0
-                    }
-                    #--------------------------------------------------------------------
-                    #output basic information about server
-                    #--------------------------------------------------------------------
-                    write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                    Write-Host "SystemName:" $name -ForegroundColor Cyan
-                    write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                    Write-Host "Cores:" $totalNumCores
-                    Write-Host "Logical Processors:" $totalNumLogicProcs
-                    Write-Host "Total Memory:" $totalMemory "GB"
-                    Write-Host "Avail Memory for VMs: $availVMMemory GB (8GB reserved for Hyper-V Host)"
-                    Write-Host "Current Free Memory:" $freeMemory "GB"
-                    Write-Host "Total number of VMs:" $vmCount
-                    Write-Host "Total number of VM vCPUs:" $totalVMProcCount
-                    write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                    #--------------------------------------------------------------------
-                    #current memory usage status:
-                    #--------------------------------------------------------------------
-                    #total memory vs free memory - less than 10% free is considered bad
-                    $memPercent = [math]::round($freeMemory / $totalMemory, 2) * 100
-                    if ($memPercent -lt 10) {
-                        Write-Host "This system is low on memory resources:           $memPercent % free" -ForegroundColor Red
-                    }
-                    else {
-                        Write-Host "Memory resources are still available:             $memPercent % free" -ForegroundColor Green
-                    }
-                    write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                    #--------------------------------------------------------------------
-                    #cpu ratio output
-                    #--------------------------------------------------------------------
-                    #$vmProcCount = 49
-                    if ($totalVMProcCount -gt $totalNumLogicProcs) {
-                        $cpuRatio = ($totalNumLogicProcs / $totalVMProcCount)
-                        $procRatio = [math]::round($totalVMProcCount / $totalNumLogicProcs)
-                        #--------DEFAULT IS 4:1 which is 1/4 = .25------------------------
-                        if ($cpuRatio -lt .25) {
-                            #adjust above this line to achieve desired ratio------------------
-                            $procRatio += 1
-                            Write-Host "Overprovisioned on Virtual processors."       $procRatio ": 1" -ForegroundColor Red
-                        }
+                        #__________________
+                        $ramHealth = ''
+                        $maxDynamicRamPotential = ''
+                        ##########################################################################################
+                        #Get ALL the Raw data up front and fail fast
+                        #---------------------------------------------------------------------
+                        #get Cim data loaded up
+                        #---------------------------------------------------------------------
+                        Write-Verbose -Message "Getting Cmi Information from node $node..."
+                        if ($Credential -and $env:COMPUTERNAME -ne $node) {
+                            try {
+                                $cimS = New-CimSession -ComputerName $node -Credential $Credential -ErrorAction Stop
+                                $w32ProcInfo = Get-CimInstance -class win32_processor -CimSession $cimS -ErrorAction Stop
+                                $w32OSInfo = Get-CimInstance -class Win32_OperatingSystem -CimSession $cimS -ErrorAction Stop
+                            }#try_Get-CimInstance
+                            catch {
+                                Write-Warning -Message "Unable to establish CIM session to $node"
+                                Write-Error $_
+                                return
+                            }#catch_Get-CimInstance
+                        }#if_Credential
                         else {
-                            Write-Host "Virtual Processors not overprovisioned"       $procRatio ": 1" -ForegroundColor Green
-                        }
-                    }
-                    else {
-                        Write-Host "Virtual Processors are not overprovisioned        1 : 1" -ForegroundColor Green
-                    }
-                    #--------------------------------------------------------------------
-                    #memory ratio information
-                    #--------------------------------------------------------------------
-                    write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                    write-host "Total Startup memory required for Dynamic VMs:    $totalstartupmem GB "
-                    write-host "Total Static memory required for Static VMs:      $staticmemory GB "
-                    write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                    write-host "Total minimum RAM (Startup+Static) required:      $totalramrequired GB "
-                    if ($totalramrequired -lt $availVMMemory) {
-                        Write-Host "Minimum RAM: $totalramrequired GB does not exceed available RAM: $availVMMemory GB" -ForegroundColor Green
-                    }
-                    elseif ($totalramrequired -eq $availVMMemory) {
-                        Write-Host "Minimum RAM: $totalramrequired GB is exactly at available RAM: $availVMMemory GB" -ForegroundColor Yellow
-                    }
-                    else {
-                        Write-Host "Minimum RAM: $totalramrequired GB exceeds available RAM: $availVMMemory GB" -ForegroundColor Red
-                    }
-                    write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                    if ($totalmaxmem -ne 0) {
-                        write-host "Total *Potential* Maximum memory for Dynamic VMs: $totalmaxmem GB"
-                        if ($totalmaxmem -lt $availVMMemory) {
-                            Write-Host "Maximum potential RAM: $totalmaxmem GB does not exceed available RAM: $availVMMemory GB" -ForegroundColor Green
-                        }
+                            try {
+                                $w32ProcInfo = Get-CimInstance -class win32_processor -ComputerName $node -ErrorAction Stop
+                                $w32OSInfo = Get-CimInstance -class Win32_OperatingSystem -ComputerName $node -ErrorAction Stop
+                            }#try_Get-CimInstance
+                            catch {
+                                Write-Warning -Message "An error was encountered getting Cim info from $node"
+                                Write-Error $_
+                                return
+                            }#catch_Get-CimInstance
+                        }#else_Credential
+                        if ($null -eq $w32ProcInfo -or $null -eq $w32OSInfo) {
+                            Write-Warning -Message "Data was not sucessfully from the Host OS on $node."
+                            return
+                        }#if_CimNullCheck
+                        #---------------------------------------------------------------------
+                        #get VM data loaded up
+                        #---------------------------------------------------------------------
+                        Write-Verbose -Message "Getting VM Information from node $node..."
+                        try {
+                            if ($Credential -and $env:COMPUTERNAME -ne $node) {
+                                $vms = Get-VM -ComputerName $node -Credential $Credential -ErrorAction Stop
+                            }#if_Credential
+                            else {
+                                $vms = Get-VM -ComputerName $node -ErrorAction Stop
+                            }#else_Credential
+                        }#try_Get-VM
+                        catch {
+                            Write-Warning "An issue was encountered getting VM information from $node :"
+                            Write-Error $_
+                            return
+                        }#catch_Get-VM
+                        ##########################################################################################
+                        Write-Verbose -Message 'We are now beginning to process data we have previously retrieved...'
+                        $object = New-Object -TypeName PSObject
+                        ##########################################################################################
+                        $name = $w32OSInfo.CSName
+                        Write-Verbose -Message "name: $name"
+                        $object | Add-Member -MemberType NoteProperty -name SystemName -Value $name -Force
+                        #________________________________________________________________________
+                        $numCores = $w32ProcInfo.numberOfCores
+                        Write-Verbose -Message "numCores: $numCores"
+                        foreach ($core in $numCores) {
+                            $totalNumCores += $core
+                        }#foreach_numCores
+                        Write-Verbose -Message "totalNumCores: $totalNumCores"
+                        $object | Add-Member -MemberType NoteProperty -name Cores -Value $totalNumCores -Force
+                        #________________________________________________________________________
+                        $numLogicProcs = $w32ProcInfo.NumberOfLogicalProcessors
+                        Write-Verbose -Message "numLogicProcs: $numLogicProcs"
+                        foreach ($proc in $numLogicProcs) {
+                            $totalNumLogicProcs += $proc
+                        }#foreach_numLogicProcs
+                        Write-Verbose -Message "totalNumLogicProcs: $totalNumLogicProcs"
+                        $object | Add-Member -MemberType NoteProperty -name 'LogicalProcessors' -Value $totalNumLogicProcs -Force
+                        ##########################################################################################
+                        $totalMemory = [math]::round($w32OSInfo.TotalVisibleMemorySize / 1MB, 0)
+                        Write-Verbose -Message "totalMemory: $totalMemory"
+                        $object | Add-Member -MemberType NoteProperty -name 'TotalMemory(GB)' -Value $totalMemory -Force
+                        ##########################################################################################
+                        foreach ($vm in $vms) {
+                            $vmProcCount += $vm.ProcessorCount
+                            Write-Verbose "Getting memory information from VM $vm"
+                            if ($vm.DynamicMemoryEnabled -eq $true) {
+                                Write-Verbose "Dynamic Deteced..."
+                                $memorystartup = [math]::Round(($VM | Select-Object MemoryStartup).MemoryStartup / 1GB, 0)
+                                $memoryMaximum = [math]::Round(($VM | Select-Object MemoryMaximum).MemoryMaximum / 1GB, 0)
+
+                                $totalstartupmem += $memoryStartup
+                                $totalDynamicMaxMem += $memoryMaximum
+                            }#if_Dynamic
+                            else {
+                                Write-Verbose "Static Deteced..."
+                                $static = [math]::Round(($VM | Select-Object MemoryStartup).MemoryStartup / 1GB, 0)
+                                Write-Verbose "Adding static memory of $static"
+                                $staticmemory += $static
+                            }#else_Static
+                        }#foreach_VM
+                        Write-Verbose -Message "vmProcCount: $vmProcCount"
+                        #________________________________________________________________________
+                        #8GB of memory is RESERVED for the host
+                        $availVMMemory = $totalMemory - 8
+                        $totalClusterRAM += $availVMMemory
+                        Write-Verbose -Message "availVMMemory: $availVMMemory"
+                        $object | Add-Member -MemberType NoteProperty -name 'AvailMemory(-8GBSystem)' -Value $availVMMemory -Force
+                        #________________________________________________________________________
+                        $freeMemory = [math]::round($w32OSInfo.FreePhysicalMemory / 1MB, 0)
+                        Write-Verbose -Message "freeMemory: $freeMemory"
+                        $object | Add-Member -MemberType NoteProperty -name 'FreeRAM(GB)' -Value $freeMemory -Force
+                        #________________________________________________________________________
+                        $memPercent = [math]::round($freeMemory / $totalMemory, 2) * 100
+                        Write-Verbose -Message "memPercent: $memPercent"
+                        $object | Add-Member -MemberType NoteProperty -name 'FreeRAM(%)' -Value $memPercent -Force
+                        ##########################################################################################
+                        $vmCount = $vms | Measure-Object | Select-Object -ExpandProperty count
+                        Write-Verbose -Message "vmCount: $vmCount"
+                        $object | Add-Member -MemberType NoteProperty -name 'TotalVMCount' -Value $vmCount -Force
+                        #might adjust nomenclature here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        $totalVMProcCount = $vmProcCount
+                        Write-Verbose -Message "totalVMProcCount: $totalVMProcCount"
+                        $object | Add-Member -MemberType NoteProperty -name 'TotalvCPUs' -Value $totalVMProcCount -Force
+                        #________________________________________________________________________
+                        if ($totalVMProcCount -eq 0) {
+                            $finalRatio = 'NA'
+                        }#if_vCPU_0
+                        elseif ($totalVMProcCount -gt $totalNumLogicProcs) {
+                            $cpuRatio = ($totalNumLogicProcs / $totalVMProcCount)
+                            $procRatio = [math]::round($totalVMProcCount / $totalNumLogicProcs)
+                            $finalRatio = "$procRatio : 1"
+                        }#elseif_vCPU-gt
                         else {
-                            Write-Host "Maximum potential RAM: $totalmaxmem GB exceeds available RAM: $availVMMemory GB" -ForegroundColor Yellow
-                        }
-                    }
-                    #--------------------------------------------------------------------
-                }#nodesForEach
-                #calculating a node loss and its impact
-                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                Write-Host "N+1 Allocation Evaluation:"
-                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                $x = $totalClusterRAM / $nodeCount
-                $clusterNodeDownUseable = $totalClusterRAM - $x
-                if ($totalVMClusterRAM -gt $clusterNodeDownUseable) {
-                    Write-Host "VMs would NOT survive a one node failure" -ForegroundColor Red
-                    Write-Host "Total VM RAM minumum: $totalVMClusterRAM GB - Total Cluster RAM available with one node down: $clusterNodeDownUseable GB" -ForegroundColor Cyan
-                }
-                else {
-                    Write-Host "VMs would survive a one node failure" -ForegroundColor Green
-                    Write-Host "Total VM RAM minumum: $totalVMClusterRAM GB - Total Cluster RAM available with one node down: $clusterNodeDownUseable GB" -ForegroundColor Cyan
-                }
-                #--------------------------------------------------------------------
+                            $finalRatio = '1 : 1'
+                        }#else_vCPU
+                        Write-Verbose -Message "cpuRatio: $cpuRatio"
+                        Write-Verbose -Message "procRatio: $procRatio"
+                        Write-Verbose -Message "finalRatio: $finalRatio"
+                        $object | Add-Member -MemberType NoteProperty -name 'vCPURatio' -Value $finalRatio -Force
+                        ##########################################################################################
+                        #account for no static and no dynamic situations
+                        if ($null -eq $totalstartupmem) {
+                            $totalstartupmem = 0
+                        }#nullCheck
+                        if ($null -eq $staticmemory) {
+                            $staticmemory = 0
+                        }#nullCheck
+                        Write-Verbose -Message "totalstartupmem: $totalstartupmem"
+                        $object | Add-Member -MemberType NoteProperty -name 'DynamicStartupRequired' -Value $totalstartupmem -Force
+                        Write-Verbose -Message "staticmemory: $staticmemory"
+                        $object | Add-Member -MemberType NoteProperty -name 'StaticRAMRequired' -Value $staticmemory -Force
+                        #________________________________________________________________________
+                        $totalramrequired = $totalstartupmem + $staticmemory
+                        $totalVMClusterRAM += $totalramrequired
+                        Write-Verbose -Message "totalramrequired: $totalramrequired"
+                        $object | Add-Member -MemberType NoteProperty -name 'TotalRAMRequired' -Value $totalramrequired -Force
+                        #________________________________________________________________________
+                        if ($totalramrequired -lt $availVMMemory) {
+                            Write-Verbose -Message "Minimum RAM: $totalramrequired GB does not exceed available RAM: $availVMMemory GB"
+                            $ramHealth = 'Healthy'
+                        }#if_Healthy
+                        elseif ($totalramrequired -eq $availVMMemory) {
+                            Write-Verbose -Message "Minimum RAM: $totalramrequired GB is exactly at available RAM: $availVMMemory GB"
+                            $ramHealth = 'Warning'
+                        }#elseif_Warning
+                        else {
+                            Write-Verbose -Message "Minimum RAM: $totalramrequired GB exceeds available RAM: $availVMMemory GB"
+                            $ramHealth = 'UNHEALTHY'
+                        }#else_Unhealthy
+                        Write-Verbose -Message "ramHealth: $ramHealth"
+                        $object | Add-Member -MemberType NoteProperty -name 'RAMAllocation' -Value $ramHealth -Force
+                        #________________________________________________________________________
+                        Write-Verbose -Message "totalDynamicMaxMem: $totalDynamicMaxMem"
+                        $object | Add-Member -MemberType NoteProperty -name 'DynamicMaxPotential' -Value $totalDynamicMaxMem -Force
+                        #________________________________________________________________________
+                        if ($totalDynamicMaxMem -ne 0) {
+                            if ($totalDynamicMaxMem -lt $availVMMemory) {
+                                Write-Verbose -Message "Maximum potential RAM: $totalDynamicMaxMem GB does not exceed available RAM: $availVMMemory GB"
+                                $maxDynamicRamPotential = 'Good'
+                            }#if_Good
+                            else {
+                                Write-Verbose -Message "Maximum potential RAM: $totalDynamicMaxMem GB exceeds available RAM: $availVMMemory GB"
+                                $maxDynamicRamPotential = 'Warning'
+                            }#else_Warning
+                        }#if_Totalmax-ne-0
+                        else {
+                            Write-Verbose -Message 'No Dynamic VMs detected.'
+                            $maxDynamicRamPotential = 'NA'
+                        }#else_noDynamic
+                        Write-Verbose -Message "maxDynamicRamPotential: $maxDynamicRamPotential"
+                        $object | Add-Member -MemberType NoteProperty -name 'DynamicMaxAllocation' -Value $maxDynamicRamPotential -Force
+                        ##########################################################################################
+                        $results += $object
+                        #######################################################################################
+                        #######################################################################################
+                        #######################################################################################
+                    }#if_connection
+                    else {
+                        Write-Warning -Message "Connection test to $node unsuccesful."
+                        return
+                    }#else_connection
+                }#foreach_Node
+                #######################################################################################
+                #######################################################################################
+                #######################################################################################
                 #CSV Storage Space checks - we will check CSV locations only for clustered Hyps
                 #--------------------------------------------------------------------
-                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-                Write-Host "Storage Allocation Information"
-                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
                 try {
                     $clusterName = "."
-                    $clusterSharedVolume = Get-ClusterSharedVolume -Cluster $clusterName `
-                        -ErrorAction SilentlyContinue
-                    if ($clusterSharedVolume -eq $null) {
-                        Write-Host "No CSVs discovered - no storage information pulled" `
-                            -ForegroundColor Yellow
-                    }
-                    else {
+                    $clusterSharedVolume = Get-ClusterSharedVolume -Cluster $clusterName -ErrorAction Stop
+                    if ($null -ne $clusterSharedVolume) {
                         foreach ($volume in $clusterSharedVolume) {
-                            <#
-                            $volumeowner = $volume.OwnerNode.Name
-                            $csvVolume = $volume.SharedVolumeInfo.Partition.Name
-                            $cimSession = New-CimSession -ComputerName $volumeowner
-                            $volumeInfo = Get-Disk -CimSession $cimSession | Get-Partition | `
-                                Select-Object DiskNumber, @{Name = "Volume"; `
-                                    Expression = {Get-Volume -Partition $_ | `
-                                        Select-Object -ExpandProperty ObjectId}
-                            }
-                            $csvdisknumber = ($volumeinfo | Where-Object `
-                                { $_.Volume -eq $csvVolume}).Disknumber
-                            #>
+                            #____________________________________________________
+                            $diskName = ''
+                            $spaceFree = 0
+                            $percentFree = 0
+                            $size = 0
+                            $expectations = 20
+                            $object = New-Object -TypeName PSObject
+                            $driveHealth = ''
+                            #____________________________________________________
                             $diskName = $volume.SharedVolumeInfo.FriendlyVolumeName
                             $percentFree = $volume.SharedVolumeInfo.Partition.PercentFree
                             $spaceFree = [int]($volume.SharedVolumeInfo.Partition.Freespace / 1GB)
@@ -382,208 +355,284 @@ function Test-HyperVAllocation {
                             elseif ($size -gt 1000) {
                                 $expectations = 10
                             }
+
+                            Write-Verbose -Message "diskName: $diskName"
+                            Write-Verbose -Message "size: $size"
+                            Write-Verbose -Message "spaceFree: $spaceFree"
+                            Write-Verbose -Message "percentFree: $percentFree"
+                            Write-Verbose -Message "expectations: $expectations"
+
+                            $object | Add-Member -MemberType NoteProperty -name CSV -Value $diskName -Force
+                            $object | Add-Member -MemberType NoteProperty -name 'Size(GB)' -Value $size -Force
+                            $object | Add-Member -MemberType NoteProperty -name 'FreeSpace(GB)' -Value $spaceFree -Force
+                            $object | Add-Member -MemberType NoteProperty -name 'FreeSpace(%)' -Value $percentFree -Force
+
                             if ($percentFree -lt $expectations) {
-                                Write-Host $diskName "is below the recommended $expectations% free space." -ForegroundColor Red
-                                Write-Host "Total Size: $size GB" -ForegroundColor Gray
-                                Write-Host "Free Space: $spaceFree GB" -ForegroundColor Red
-                                Write-Host "Percent Free: $percentFree" -ForegroundColor Red
-                                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
+                                $driveHealth = 'UNHEALTHY'
                             }
                             else {
-                                Write-Host $diskName "has the recommended $expectations% free space." -ForegroundColor Green
-                                Write-Host "Total Size: $size GB" -ForegroundColor Gray
-                                Write-Host "Free Space: $spaceFree GB" -ForegroundColor Gray
-                                Write-Host "Percent Free: $percentFree" -ForegroundColor Gray
-                                write-host "----------------------------------------------------------------------" -ForegroundColor Gray
+                                $driveHealth = 'HEALTHY'
                             }
-                        }
-                    }
-
-                }
+                            Write-Verbose -Message "driveHealth: $driveHealth"
+                            $object | Add-Member -MemberType NoteProperty -name 'DriveHealth' -Value $driveHealth -Force
+                            $results += $object
+                        }#foreach_CSV
+                    }#if_null_csvs
+                    else {
+                        Write-Verbose -Message "No CSVs discovered - no storage information pulled"
+                    }#else_null_csvs
+                }#try_Get-ClusterSharedVolume
                 catch {
-                    Write-Host "ERROR - An issue was encountered getting CSVs spacing information:" `
-                        -ForegroundColor Red
-                    return
+                    Write-Warning -Message "An error was encountered getting CSVs spacing information from $node"
+                    Write-Error $_
+                }#catch_Get-ClusterSharedVolume
+                #######################################################################################
+                #######################################################################################
+                #######################################################################################
+                Write-Verbose -Message 'Calculating a node loss and its impact...'
+                $object = New-Object -TypeName PSObject
+                $n1Eval = $false #assume the worst
+                $x = $totalClusterRAM / $nodeCount
+                $clusterNodeDownUseable = $totalClusterRAM - $x
+                Write-Verbose -Message "totalClusterRAM: $totalClusterRAM"
+                Write-Verbose -Message "totalVMClusterRAM: $totalVMClusterRAM"
+                Write-Verbose -Message "nodeCount: $nodeCount"
+                if ($totalVMClusterRAM -gt $clusterNodeDownUseable) {
+                    Write-Verbose -Message 'VMs would NOT survive a one node failure'
                 }
-                #--------------------------------------------------------------------
-                #######################END CLUSTER DIAG########################
-                #--------------------------------------------------------------------
-            }#nodeNULLCheck
+                else {
+                    $n1Eval = $true
+                    Write-Verbose -Message 'VMs would survive a one node failure'
+                }
+                $object | Add-Member -MemberType NoteProperty -name 'N+1RAMEvaluation' -Value $n1Eval -Force
+                $results += $object
+                #######################################################################################
+                #######################################################################################
+                #######################################################################################
+            }#if_nodeNULLCheck
             else {
-                Write-Warning -Message "Device appears to be configured as a cluster but no cluster nodes were returned by Get-ClusterNode"
-            }#nodeNULLCheck
-        }#clusterEval
+                Write-Warning -Message 'Device appears to be configured as a cluster but no cluster nodes were returned by Get-ClusterNode'
+                return
+            }#else_nodeNULLCheck
+        }#if_cluster
         else {
-            #standalone server - execute code for standalone server
-            #######################STANDALONE DIAG########################
-            #---------------------------------------------------------------------
-            #get WMI data loaded up
-            #--------------------------------------------------------------------
-            try {
-                $w32ProcInfo = Get-WmiObject -class win32_processor -ErrorAction Stop
-                $w32OSInfo = Get-WMIObject -class Win32_OperatingSystem -ErrorAction Stop
-            }
-            catch {
-                Write-Host "An error was encountered getting WMI info from $node" -ForegroundColor Red
-                Write-Error $_
-                Return
-            }
-            #--------------------------------------------------------------------
-            #load specific WMI data into variables
-            #--------------------------------------------------------------------
-            $name = $w32ProcInfo.systemname
-            $numCores = $w32ProcInfo.numberOfCores
-            foreach ($core in $numCores) {
-                $totalNumCores += $core
-            }
-            $numLogicProcs = $w32ProcInfo.NumberOfLogicalProcessors
-            foreach ($proc in $numLogicProcs) {
-                $totalNumLogicProcs += $proc
-            }
-            $totalMemory = [math]::round($w32OSInfo.TotalVisibleMemorySize / 1MB, 0)
-            #8GB of memory is RESERVED for the host
-            $availVMMemory = $totalMemory - 8
-            $freeMemory = [math]::round($w32OSInfo.FreePhysicalMemory / 1MB, 0)
-            #--------------------------------------------------------------------
-            #load VM data and count number of VMs and VMs processors
-            #--------------------------------------------------------------------
-            try {
-                $vms = Get-VM -ErrorAction Stop
-                $vmCount = $vms | Measure-Object | Select-Object -ExpandProperty count
-                $vmProcCount = $vms | Get-VMProcessor | Select-Object -ExpandProperty count
-            }
-            catch {
-                Write-Host "An error was encountered getting VM info" -ForegroundColor Red
-                Write-Error $_
-                Return
-            }
-            foreach ($proc in $vmProcCount) {
-                $totalVMProcCount += $proc
-            }
+            Write-Verbose -Message 'Standalone server detected. Executing standalone diagnostic...'
+            #######################################################################################
+            #######################################################################################
+            #######################################################################################
+            #######################################################################################
+            #######################################################################################
             #--------------------------------------------------------------------
             #null all counts to permit multiple script runs
             #--------------------------------------------------------------------
+            $results = @()
+            #__________________
+            $name = $null
+            $numCores = 0
+            $totalNumCores = 0
+            $numLogicProcs = 0
+            $totalNumLogicProcs = 0
+            $totalMemory = 0
+            $availVMMemory = 0
+            $freeMemory = 0
+            #__________________
+            $vmCount = 0
+            $vmProcCount = 0
+            $procRatio = 0
+            $cpuRatio = 0
+            $totalVMProcCount = 0
+            $finalRatio = ''
+            #__________________
             $memorystartup = 0
             $MemoryMaximum = 0
             $totalstartupmem = 0
-            $totalmaxmem = 0
+            $totalDynamicMaxMem = 0
             $static = 0
             $staticmemory = 0
-            #--------------------------------------------------------------------
-            #calculate memory usage dynamic/static for each VM to generate totals
-            #--------------------------------------------------------------------
+            #__________________
+            $ramHealth = ''
+            $maxDynamicRamPotential = ''
+            ##########################################################################################
+            #Get ALL the Raw data up front and fail fast
+            $node = $env:COMPUTERNAME
+            #---------------------------------------------------------------------
+            #get Cim data loaded up
+            #---------------------------------------------------------------------
             try {
-                foreach ($vm in $vms) {
-                    if ((Get-VMMemory -vmname $vm.Name -ErrorAction Stop).DynamicMemoryEnabled -eq "True") {
-                        $memorystartup = [math]::Round(($VM | select-object MemoryStartup).MemoryStartup / 1GB, 0)
-                        $memoryMaximum = [math]::Round(($VM | select-object MemoryMaximum).memorymaximum / 1GB, 0)
-
-                        $totalstartupmem += $memoryStartup
-                        $totalmaxmem += $memoryMaximum
-                    }
-                    else {
-                        $static = [math]::Round(($VM  | select-object MemoryStartup).MemoryStartup / 1GB, 0)
-                        $staticmemory += $static
-                    }
-                }
-            }
+                $w32ProcInfo = Get-CimInstance -class win32_processor -ErrorAction Stop
+                $w32OSInfo = Get-CimInstance -class Win32_OperatingSystem -ErrorAction Stop
+                $drives = Get-CimInstance win32_logicaldisk -ErrorAction Stop | Where-Object {$_.DeviceID -ne "C:"}
+            }#try_Get-CimInstance
             catch {
-                Write-Host "An error was encountered getting VM Memory info from $node" -ForegroundColor Red
+                Write-Warning -Message "An error was encountered getting Cim info from $node"
                 Write-Error $_
-                Return
-            }
-            $totalramrequired = $totalstartupmem + $staticmemory
-            #account for no static and no dynamic situations
-            if ($totalstartupmem -eq $null) {
-                $totalstartupmem = 0
-            }
-            if ($staticmemory -eq $null) {
-                $staticmemory = 0
-            }
-            #--------------------------------------------------------------------
-            #output basic information about server
-            #--------------------------------------------------------------------
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            Write-Host "SystemName:" $name -ForegroundColor Cyan
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            Write-Host "Cores:" $totalNumCores
-            Write-Host "Logical Processors:" $totalNumLogicProcs
-            Write-Host "Total Memory:" $totalMemory "GB"
-            Write-Host "Avail Memory for VMs: $availVMMemory GB (8GB reserved for Hyper-V Host)"
-            Write-Host "Current Free Memory:" $freeMemory "GB"
-            Write-Host "Total number of VMs:" $vmCount
-            Write-Host "Total number of VM vCPUs:" $totalVMProcCount
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            #--------------------------------------------------------------------
-            #current memory usage status:
-            #--------------------------------------------------------------------
-            #total memory vs free memory - less than 10% free is considered bad
+                return
+            }#catch_Get-CimInstance
+            if ($null -eq $w32ProcInfo -or $null -eq $w32OSInfo) {
+                Write-Warning -Message "Data was not sucessfully from the Host OS."
+                return
+            }#if_CimNullCheck
+            #---------------------------------------------------------------------
+            #get VM data loaded up
+            #---------------------------------------------------------------------
+            try {
+                $vms = Get-VM -ErrorAction Stop
+            }#try_Get-VM
+            catch {
+                Write-Warning -Message "An error was encountered getting VM info from $node"
+                Write-Error $_
+                return
+            }#catch_Get-VM
+            ##########################################################################################
+            Write-Verbose -Message 'We are now beginning to process data we have previously retrieved...'
+            $object = New-Object -TypeName PSObject
+            ##########################################################################################
+            $name = $w32OSInfo.CSName
+            Write-Verbose -Message "name: $name"
+            $object | Add-Member -MemberType NoteProperty -name SystemName -Value $name -Force
+            #________________________________________________________________________
+            $numCores = $w32ProcInfo.numberOfCores
+            Write-Verbose -Message "numCores: $numCores"
+            foreach ($core in $numCores) {
+                $totalNumCores += $core
+            }#foreach_numCores
+            Write-Verbose -Message "totalNumCores: $totalNumCores"
+            $object | Add-Member -MemberType NoteProperty -name Cores -Value $totalNumCores -Force
+            #________________________________________________________________________
+            $numLogicProcs = $w32ProcInfo.NumberOfLogicalProcessors
+            Write-Verbose -Message "numLogicProcs: $numLogicProcs"
+            foreach ($proc in $numLogicProcs) {
+                $totalNumLogicProcs += $proc
+            }#foreach_numLogicProcs
+            Write-Verbose -Message "totalNumLogicProcs: $totalNumLogicProcs"
+            $object | Add-Member -MemberType NoteProperty -name 'LogicalProcessors' -Value $totalNumLogicProcs -Force
+            ##########################################################################################
+            $totalMemory = [math]::round($w32OSInfo.TotalVisibleMemorySize / 1MB, 0)
+            Write-Verbose -Message "totalMemory: $totalMemory"
+            $object | Add-Member -MemberType NoteProperty -name 'TotalMemory(GB)' -Value $totalMemory -Force
+            ##########################################################################################
+            foreach ($vm in $vms) {
+                $vmProcCount += $vm.ProcessorCount
+                Write-Verbose "Getting memory information from VM $vm"
+                if ($vm.DynamicMemoryEnabled -eq $true) {
+                    Write-Verbose "Dynamic Deteced..."
+                    $memorystartup = [math]::Round(($VM | Select-Object MemoryStartup).MemoryStartup / 1GB, 0)
+                    $memoryMaximum = [math]::Round(($VM | Select-Object MemoryMaximum).MemoryMaximum / 1GB, 0)
+
+                    $totalstartupmem += $memoryStartup
+                    $totalDynamicMaxMem += $memoryMaximum
+                }#if_Dynamic
+                else {
+                    Write-Verbose "Static Deteced..."
+                    $static = [math]::Round(($VM | Select-Object MemoryStartup).MemoryStartup / 1GB, 0)
+                    Write-Verbose "Adding static memory of $static"
+                    $staticmemory += $static
+                }#else_Static
+            }#foreach_VM
+            Write-Verbose -Message "vmProcCount: $vmProcCount"
+            #________________________________________________________________________
+            #8GB of memory is RESERVED for the host
+            $availVMMemory = $totalMemory - 8
+            Write-Verbose -Message "availVMMemory: $availVMMemory"
+            $object | Add-Member -MemberType NoteProperty -name 'AvailMemory(-8GBSystem)' -Value $availVMMemory -Force
+            #________________________________________________________________________
+            $freeMemory = [math]::round($w32OSInfo.FreePhysicalMemory / 1MB, 0)
+            Write-Verbose -Message "freeMemory: $freeMemory"
+            $object | Add-Member -MemberType NoteProperty -name 'FreeRAM(GB)' -Value $freeMemory -Force
+            #________________________________________________________________________
             $memPercent = [math]::round($freeMemory / $totalMemory, 2) * 100
-            if ($memPercent -lt 10) {
-                Write-Host "This system is low on memory resources:           $memPercent % free" -ForegroundColor Red
-            }
-            else {
-                Write-Host "Memory resources are still available:             $memPercent % free" -ForegroundColor Green
-            }
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            #--------------------------------------------------------------------
-            #cpu ratio output
-            #--------------------------------------------------------------------
-            #$vmProcCount = 49
-            if ($totalVMProcCount -gt $totalNumLogicProcs) {
+            Write-Verbose -Message "memPercent: $memPercent"
+            $object | Add-Member -MemberType NoteProperty -name 'FreeRAM(%)' -Value $memPercent -Force
+            ##########################################################################################
+            $vmCount = $vms | Measure-Object | Select-Object -ExpandProperty count
+            Write-Verbose -Message "vmCount: $vmCount"
+            $object | Add-Member -MemberType NoteProperty -name 'TotalVMCount' -Value $vmCount -Force
+            #might adjust nomenclature here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            $totalVMProcCount = $vmProcCount
+            Write-Verbose -Message "totalVMProcCount: $totalVMProcCount"
+            $object | Add-Member -MemberType NoteProperty -name 'TotalvCPUs' -Value $totalVMProcCount -Force
+            #________________________________________________________________________
+            if ($totalVMProcCount -eq 0) {
+                $finalRatio = 'NA'
+            }#if_vCPU_0
+            elseif ($totalVMProcCount -gt $totalNumLogicProcs) {
                 $cpuRatio = ($totalNumLogicProcs / $totalVMProcCount)
                 $procRatio = [math]::round($totalVMProcCount / $totalNumLogicProcs)
-                #$procRatio2 = [math]::round($procRatio / $cpuRatio)
-                #------------HERE YOU CAN CHANGE CPU RATIO TO DESIRED RATIO-------
-                #--------DEFAULT IS 4:1 which is 1/4 = .25------------------------
-                if ($cpuRatio -lt .25) {
-                    #adjust above this line to achieve desired ratio------------------
-                    $procRatio += 1
-                    Write-Host "Overprovisioned on Virtual processors."       $procRatio ": 1" -ForegroundColor Red
-                }
-                else {
-                    Write-Host "Virtual Processors not overprovisioned"       $procRatio ": 1" -ForegroundColor Green
-                }
-            }
+                $finalRatio = "$procRatio : 1"
+            }#elseif_vCPU-gt
             else {
-                Write-Host "Virtual Processors are not overprovisioned        1 : 1" -ForegroundColor Green
-            }
-            #--------------------------------------------------------------------
-            #memory ratio information
-            #--------------------------------------------------------------------
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            write-host "Total Startup memory required for Dynamic VMs:    $totalstartupmem GB "
-            write-host "Total Static memory required for Static VMs:      $staticmemory GB "
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            write-host "Total minimum RAM (Startup+Static) required:      $totalramrequired GB "
+                $finalRatio = '1 : 1'
+            }#else_vCPU
+            Write-Verbose -Message "cpuRatio: $cpuRatio"
+            Write-Verbose -Message "procRatio: $procRatio"
+            Write-Verbose -Message "finalRatio: $finalRatio"
+            $object | Add-Member -MemberType NoteProperty -name 'vCPURatio' -Value $finalRatio -Force
+            ##########################################################################################
+            #account for no static and no dynamic situations
+            if ($null -eq $totalstartupmem) {
+                $totalstartupmem = 0
+            }#nullCheck
+            if ($null -eq $staticmemory) {
+                $staticmemory = 0
+            }#nullCheck
+            Write-Verbose -Message "totalstartupmem: $totalstartupmem"
+            $object | Add-Member -MemberType NoteProperty -name 'DynamicStartupRequired' -Value $totalstartupmem -Force
+            Write-Verbose -Message "staticmemory: $staticmemory"
+            $object | Add-Member -MemberType NoteProperty -name 'StaticRAMRequired' -Value $staticmemory -Force
+            #________________________________________________________________________
+            $totalramrequired = $totalstartupmem + $staticmemory
+            Write-Verbose -Message "totalramrequired: $totalramrequired"
+            $object | Add-Member -MemberType NoteProperty -name 'TotalRAMRequired' -Value $totalramrequired -Force
+            #________________________________________________________________________
             if ($totalramrequired -lt $availVMMemory) {
-                Write-Host "Minimum RAM: $totalramrequired GB does not exceed available RAM: $availVMMemory GB" -ForegroundColor Green
-            }
+                Write-Verbose -Message "Minimum RAM: $totalramrequired GB does not exceed available RAM: $availVMMemory GB"
+                $ramHealth = 'Healthy'
+            }#if_Healthy
             elseif ($totalramrequired -eq $availVMMemory) {
-                Write-Host "Minimum RAM: $totalramrequired GB is exactly at available RAM: $availVMMemory GB" -ForegroundColor Yellow
-            }
+                Write-Verbose -Message "Minimum RAM: $totalramrequired GB is exactly at available RAM: $availVMMemory GB"
+                $ramHealth = 'Warning'
+            }#elseif_Warning
             else {
-                Write-Host "Minimum RAM: $totalramrequired GB exceeds available RAM: $availVMMemory GB" -ForegroundColor Red
-            }
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            if ($totalmaxmem -ne 0) {
-                write-host "Total *Potential* Maximum memory for Dynamic VMs: $totalmaxmem GB"
-                if ($totalmaxmem -lt $availVMMemory) {
-                    Write-Host "Maximum potential RAM: $totalmaxmem GB does not exceed available RAM: $availVMMemory GB" -ForegroundColor Green
-                }
+                Write-Verbose -Message "Minimum RAM: $totalramrequired GB exceeds available RAM: $availVMMemory GB"
+                $ramHealth = 'UNHEALTHY'
+            }#else_Unhealthy
+            Write-Verbose -Message "ramHealth: $ramHealth"
+            $object | Add-Member -MemberType NoteProperty -name 'RAMAllocation' -Value $ramHealth -Force
+            #________________________________________________________________________
+            Write-Verbose -Message "totalDynamicMaxMem: $totalDynamicMaxMem"
+            $object | Add-Member -MemberType NoteProperty -name 'DynamicMaxPotential' -Value $totalDynamicMaxMem -Force
+            #________________________________________________________________________
+            if ($totalDynamicMaxMem -ne 0) {
+                if ($totalDynamicMaxMem -lt $availVMMemory) {
+                    Write-Verbose -Message "Maximum potential RAM: $totalDynamicMaxMem GB does not exceed available RAM: $availVMMemory GB"
+                    $maxDynamicRamPotential = 'Good'
+                }#if_Good
                 else {
-                    Write-Host "Maximum potential RAM: $totalmaxmem GB exceeds available RAM: $availVMMemory GB" -ForegroundColor Yellow
-                }
-            }
-            #--------------------------------------------------------------------
-            #Storage Space checks - we will check all drives greater than 10GB that are no C:
-            #--------------------------------------------------------------------
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            Write-Host "Storage Allocation Information"
-            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
-            $drives = Get-WmiObject win32_logicaldisk -ErrorAction SilentlyContinue | Where-Object {$_.DeviceID -ne "C:"}
-            if ($drives -ne $null) {
+                    Write-Verbose -Message "Maximum potential RAM: $totalDynamicMaxMem GB exceeds available RAM: $availVMMemory GB"
+                    $maxDynamicRamPotential = 'Warning'
+                }#else_Warning
+            }#if_Totalmax-ne-0
+            else {
+                Write-Verbose -Message 'No Dynamic VMs detected.'
+                $maxDynamicRamPotential = 'NA'
+            }#else_noDynamic
+            Write-Verbose -Message "maxDynamicRamPotential: $maxDynamicRamPotential"
+            $object | Add-Member -MemberType NoteProperty -name 'DynamicMaxAllocation' -Value $maxDynamicRamPotential -Force
+            ##########################################################################################
+            $results += $object
+            ##########################################################################################
+            if ($null -ne $drives) {
                 foreach ($drive in $drives) {
+                    #____________________________________________________
+                    $totalSize = 0
+                    $driveLetter = ''
+                    $spaceFree = 0
+                    $percentFree = 0
+                    $size = 0
+                    $expectations = 20
+                    $object = New-Object -TypeName PSObject
+                    $driveHealth = ''
+                    #____________________________________________________
                     $totalSize = [int]($drive.Size / 1GB)
                     if ($totalSize -gt 10) {
                         $driveLetter = $drive.DeviceID
@@ -593,39 +642,52 @@ function Test-HyperVAllocation {
                         #15% For less than 1TB
                         #10 % For greater than 1TB
                         $size = [math]::Round($drive.Size / 1GB, 0)
-                        $expectations = 20
                         if ($size -le 1000) {
                             $expectations = 15
                         }
                         elseif ($size -gt 1000) {
                             $expectations = 10
                         }
+                        Write-Verbose -Message "driveLetter: $driveLetter"
+                        Write-Verbose -Message "totalSize: $totalSize"
+                        Write-Verbose -Message "spaceFree: $spaceFree"
+                        Write-Verbose -Message "percentFree: $percentFree"
+                        Write-Verbose -Message "size: $size"
+                        Write-Verbose -Message "expectations: $expectations"
+
+                        $object | Add-Member -MemberType NoteProperty -name Drive -Value $driveLetter -Force
+                        $object | Add-Member -MemberType NoteProperty -name 'Size(GB)' -Value $totalSize -Force
+                        $object | Add-Member -MemberType NoteProperty -name 'FreeSpace(GB)' -Value $spaceFree -Force
+                        $object | Add-Member -MemberType NoteProperty -name 'FreeSpace(%)' -Value $percentFree -Force
+
                         if ($percentFree -lt $expectations) {
-                            Write-Host $driveLetter "is below the recommended $expectations% free space." -ForegroundColor Red
-                            Write-Host "Total Size: $size GB" -ForegroundColor Gray
-                            Write-Host "Free Space: $spaceFree GB" -ForegroundColor Red
-                            Write-Host "Percent Free: $percentFree" -ForegroundColor Red
-                            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
+                            $driveHealth = 'UNHEALTHY'
                         }
                         else {
-                            Write-Host $driveLetter "has the recommended $expectations% free space." -ForegroundColor Green
-                            Write-Host "Total Size: $size GB" -ForegroundColor Gray
-                            Write-Host "Free Space: $spaceFree GB" -ForegroundColor Gray
-                            Write-Host "Percent Free: $percentFree" -ForegroundColor Gray
-                            write-host "----------------------------------------------------------------------" -ForegroundColor Gray
+                            $driveHealth = 'HEALTHY'
                         }
-                    }
-                }
-            }
+                        Write-Verbose -Message "driveHealth: $driveHealth"
+                        $object | Add-Member -MemberType NoteProperty -name 'DriveHealth' -Value $driveHealth -Force
+                    }#if_Drive-gt10
+                    $results += $object
+                }#foreach_Drive
+            }#drive_nullCheck
             else {
-                Write-Host "No additional storage other than OS drive deteceted" `
-                    -ForegroundColor Yellow
-            }
-            #######################STANDALONE DIAG########################
-            #--------------------------------------------------------------------
+                Write-Verbose -Message "No additional storage other than OS drive deteceted"
+            }#else_nullCheck
+            ##########################################################################################
+            #return $results
+
+            #######################################################################################
+            #######################################################################################
+            #######################################################################################
+            #######################################################################################
+            #######################################################################################
         }#clusterEval
     }#administrator check
     else {
-        Write-Warning -Message "Not running as administrator. No further action can be taken."
+        Write-Warning -Message 'Not running as administrator. No further action can be taken.'
+        return
     }#administrator check
-}
+    return $results
+}#Test-HyperVAllocation

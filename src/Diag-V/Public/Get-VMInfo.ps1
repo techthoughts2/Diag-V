@@ -128,6 +128,7 @@ function Get-VMInfo {
                                 #_____________________________________________________________
                                 #resets
                                 $object = New-Object -TypeName PSObject
+                                $cimS = $null
                                 $VmCIM = $null
                                 $msvmName = $null
                                 $kvp = $null
