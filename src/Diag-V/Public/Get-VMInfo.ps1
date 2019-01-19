@@ -312,8 +312,7 @@ function Get-VMInfo {
                         $fqdn = "Unknown"
                     }
                     #_____________________________________________________________
-                    $name = $vm | Select-Object -ExpandProperty Name
-                    $object | Add-Member -MemberType NoteProperty -name Name -Value $name -Force
+                    $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
 
                     $cpu = $vm | Select-Object -ExpandProperty ProcessorCount
                     $object | Add-Member -MemberType NoteProperty -name CPU -Value $cpu -Force

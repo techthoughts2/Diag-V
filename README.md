@@ -1,12 +1,9 @@
 # Diag-V
 
 [![Minimum Supported PowerShell Version](https://img.shields.io/badge/PowerShell-5.1-blue.svg)](https://github.com/PowerShell/PowerShell)
-[![PowerShell Gallery][psgallery-img]][psgallery-site]
+[![downloads](https://img.shields.io/powershellgallery/dt/Diag-V.svg?label=downloads)](https://www.powershellgallery.com/packages/Diag-V)
 
-[psgallery-img]:   https://img.shields.io/powershellgallery/dt/Diag-V.svg
-[psgallery-site]:  https://www.powershellgallery.com/packages/Diag-V
-[psgallery-v1]:    https://www.powershellgallery.com/packages/Diag-V/2.0
-
+![](https://img.shields.io/powershellgallery/dt/Diag-V.svg)
 ## Synopsis
 Diag-V is a PowerShell module containing several Hyper-V related diagnostics to assist with managing standalone Hyper-V Servers and Hyper-V clusters
 
