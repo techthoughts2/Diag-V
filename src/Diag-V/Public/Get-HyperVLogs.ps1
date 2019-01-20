@@ -1,161 +1,147 @@
 <#
 .Synopsis
-    Parses Hyper-V event logs and retrieves log entries based on user provided options
+    Parses server event logs and retrieves log entries based on user provided options
 .DESCRIPTION
-    Scans Hyper-V server for all Hyper-V Event Logs and then filters by user provided options. This functions serves merely to craft the appropriate syntax for
-    Get-WinEvent to retrieve the desired Hyper-V log results.
-.PARAMETER LastMinutes
-    The # of minutes back in time you wish to retrieve Hyper-V logs. Ex: 90 - this would retrieve the last 90 minutes of Hyper-V logs. If this parameter is specified StartDate and EndDate cannot be used.
+    Retrieves event log information using filters created by user provided options. Capable of running locally on a device to retrieve local logs or can establish a remote connection to a specfified device. Log queries can be based on user specified criteria (Log name, Log Level, Start and End Times). If not options are specified by default only Hyper-V logs Critical, Errors, and Warnings for the last 24 hours are returned. If no logs are found that match the criteria a result is returned to the user to easily place in a ticket or other correspondence.
+.EXAMPLE
+    Get-ServerLogInfo
+
+    On the local running device, retrieves server logs with all defaults: All Hyper-V logs will be queried for Warning, Error, Critical, for the last 24 hours.
+.EXAMPLE
+    Get-ServerLogInfo -HostName Server1 -Level 1
+
+    Retrieves Hyper-V Critical only, for the last 24 hours. The current context of the user will be used in the remote connection to Server1.
+.EXAMPLE
+    Get-ServerLogInfo -HostName Server1 -Credential $credential -Level 1,2
+
+    Retrieves Hyper-V Critical and Warning only, for the last 24 hours. The provided credentials will be used in the remote connection to Server1.
+.EXAMPLE
+    Get-ServerLogInfo -HostName Server01 -Credential $creds -LogName System -Level 1,2 -StartDate '2018-11-04 17:30:31.0' -EndDate '2018-11-04 18:30:31.0'
+
+    Queries System log for Critical and Errors for the specified time period of 1 hour. Note, various date formatting inputs are accepted.
+.EXAMPLE
+    Get-ServerLogInfo -HostName Server01 -Credential $creds -LogName System,Application,*Hyper-V* -Level 1,2
+
+    Queries System, Application, and all Hyper-V logs for Criticals and Errors within the last 24 hours
+.EXAMPLE
+    Get-ServerLogInfo -HostName Server01 -Credential $creds -LogName System,Application,*Hyper-V* -Level 1,2 -Verbose
+
+    Queries System, Application, and all Hyper-V logs for Criticals and Errors within the last 24 hours with verbose output
+.PARAMETER HostName
+    Hostname of destination machine
+.PARAMETER Credential
+    Admin credentials for destination machine
+.PARAMETER LogName
+    Name of logs you wish to pull results from
+    Examples: System,Application | cluster: *Fail* | DHCP: "*DHCP*" | Hyper-V: *Hyper-V*
+    If nothing is specified *Hyper-V* is chosen by default
+.PARAMETER Level
+    Log level you wish to query
+    Verbose 5
+    Informational 4
+    Warning 3
+    Error 2
+    Critical 1
+    LogAlways  0
 .PARAMETER StartDate
-    The initial date that logs should be retrieved from. Ex: MM/DD/YY (12/07/17 - December 07, 2017).  If this parameter is specified LastMinutes cannot be used.
+    Starting DateTime
+    If nothing is chosen the start time is set to 24 hours in the past
 .PARAMETER EndDate
-    The end date that logs should be retrieved from. Ex: MM/DD/YY (12/07/17 - December 07, 2017).  If this parameter is specified LastMinutes cannot be used.
-.PARAMETER Newest
-    Specifies the number of latest log entries to retrieve.  Ex: 5 - this would retrieve the latest 5 entries
-.PARAMETER FilterText
-    Wild card string to search logs for.  Log data will only be returned that contains this wild card string. Ex: Switch - this would retrieve entries that contain the word switch
-.PARAMETER WarningErrorCritical
-    If this switch is used only Warning, Error, Critical log data will be returned.
-.EXAMPLE
-    Get-HyperVLogs
-
-    Retrieves all available Hyper-V logs from the server.
-.EXAMPLE
-    Get-HyperVLogs -Newest 15 -Verbose
-
-    Retrieves the most recent 15 log entries from all available Hyper-V logs on the server with verbose output.
-.EXAMPLE
-    Get-HyperVLogs -FilterText Switch -Newest 2 -ErrorsOnly -Verbose
-
-    Retrieves the most recent 2 Hyper-V log entries that are Warning/Error/Critical that contain the word switch
-.EXAMPLE
-    Get-HyperVLogs -StartDate 11/01/17 -ErrorsOnly
-
-    Retrieves all Warning/Error/Critical Hyper-V log entries from November 1, 2017 to current date
-.EXAMPLE
-    Get-HyperVLogs -StartDate 11/01/17 -EndDate 12/01/17
-
-    Retrieves all Hyper-V log entries from November 1, 2017 to December 1, 2017
-.EXAMPLE
-    Get-HyperVLogs -LastMinutes 90 -Newest 20 -FilterText Switch
-
-    Retrieves all Hyper-V logs from the last 90 minutes, returns the newest 20 that contains the word switch
+    Ending DateTime
+    If nothing is chosen the end time is set to the current time.
 .OUTPUTS
-    ProviderName: Microsoft-Windows-Hyper-V-VMMS
-
-    TimeCreated          Id ProviderName                   LevelDisplayName Message
-    -----------          -- ------------                   ---------------- -------
-    12/07/17 12:06:16 26002 Microsoft-Windows-Hyper-V-VMMS Information      Switch deleted, name='C14EF845-E76A-4318-BE31-F0FB0739B9A4', friendly name='External'.
-    12/07/17 12:06:16 26018 Microsoft-Windows-Hyper-V-VMMS Information      External ethernet port '{4BB35159-FECD-4845-BD69-39C9770913AB}' unbound.
-    12/07/17 12:06:16 26078 Microsoft-Windows-Hyper-V-VMMS Information      Ethernet switch port disconnected (switch name = 'C14EF845-E76A-4318-BE31-F0FB0739B9A4', port name = '6B818751-EC33-407C-BCD2-A4FA7F7C31FA').
-    12/07/17 12:06:16 26026 Microsoft-Windows-Hyper-V-VMMS Information      Internal miniport deleted, name = '6BC4B864-27B7-4D1A-AD05-CF552FA8E9D0', friendly name = 'External'.
-    12/07/17 12:06:15 26078 Microsoft-Windows-Hyper-V-VMMS Information      Ethernet switch port disconnected (switch name = 'C14EF845-E76A-4318-BE31-F0FB0739B9A4', port name = '7BF33E31-7676-4344-B168-D9EDB49BBBB6').
-    12/07/17 12:06:02 26142 Microsoft-Windows-Hyper-V-VMMS Error            Failed while removing virtual Ethernet switch.
-    12/07/17 12:06:02 26094 Microsoft-Windows-Hyper-V-VMMS Error            The automatic Internet Connection Sharing switch cannot be modified.
-    12/07/17 12:05:11 26002 Microsoft-Windows-Hyper-V-VMMS Information      Switch deleted, name='CA2A6472-F6C5-4C6C-84BD-06489F08E4F8', friendly name='Internal'.
-.COMPONENT
-    Diag-V
+    Selected.System.Diagnostics.Eventing.Reader.EventLogRecord
+    -or
+    System.Management.Automation.PSCustomObject
 .NOTES
-    Author: Jake Morrison - TechThoughts - http://techthoughts.info
-    Contributor: Dillon Childers
-    Name                           Value
-    ----                           -----
-    Verbose                        5
-    Informational                  4
-    Warning                        3
-    Error                          2
-    Critical                       1
-    LogAlways                      0
-    Contribute or report issues on this function: https://github.com/techthoughts2/Diag-V
-    How to use Diag-V: http://techthoughts.info/diag-v/
+    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+.COMPONENT
+    Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
-     Retrieves Hyper-V Event Logs information
+    Retrieves server Event Logs information
+.LINK
+    http://techthoughts.info/diag-v/
 #>
 function Get-HyperVLogs {
-    [cmdletbinding(DefaultParameterSetName = 'All')]
-    param
-    (
-        [Parameter(Mandatory = $false, ParameterSetName = 'Time')]
-        [int]$LastMinutes,
-        [Parameter(Mandatory = $false, ParameterSetName = 'Time2')]
-        [datetime]$StartDate,
-        [Parameter(Mandatory = $false, ParameterSetName = 'Time2')]
-        [datetime]$EndDate,
-        [Parameter(Mandatory = $false, ParameterSetName = 'All')]
-        [Parameter(ParameterSetName = 'Time')]
-        [Parameter(ParameterSetName = 'Time2')]
-        [int]$Newest = 0,
-        [Parameter(Mandatory = $false, ParameterSetName = 'All')]
-        [Parameter(ParameterSetName = 'Time')]
-        [Parameter(ParameterSetName = 'Time2')]
-        [string]$FilterText = "",
-        [Parameter(Mandatory = $false, ParameterSetName = 'All')]
-        [Parameter(ParameterSetName = 'Time')]
-        [Parameter(ParameterSetName = 'Time2')]
-        [switch]$WarningErrorCritical
+    [cmdletbinding()]
+    param (
+        [Parameter(Mandatory = $true,
+            HelpMessage = 'Hostname of destination machine')]
+        [string]$HostName = '.',
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'Admin credentials for destination machine')]
+        [pscredential]$Credential,
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'Name of logs you wish to pull results from')]
+        [string[]]$LogName = "*Hyper-v*",
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'Log level you wish to query')]
+        [ValidateRange(1, 5)]
+        [int[]]$Level = (1, 2, 3),
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'Starting DateTime')]
+        [datetime]$StartDate = (Get-Date).AddDays(-1),
+        [Parameter(Mandatory = $false,
+            HelpMessage = 'Ending DateTime')]
+        [datetime]$EndDate = (Get-Date)
     )
-    #default to include all log levels
-    $level = 0, 1, 2, 3, 4, 5
-    #------------------------------------------------------------------
-    #we need to get the date, things don't work very well if we cannot do this.
-    try {
-        [datetime]$theNow = Get-Date -ErrorAction Stop
-        if ($LastMinutes -eq $null -or $LastMinutes -eq 0) {
-            if ($StartDate -eq $null) {
-                #if user doesn't provide a startdate we will default to 30 days back
-                $StartDate = $theNow.AddDays(-30)
-            }
-            if ($EndDate -eq $null) {
-                #if user doesn't provide an endate we will use the endate of today
-                $EndDate = $theNow
-            }
-        }#lastminutesEval
-        else {
-            #the user has chosen to go back in time by a set number of minutes
-            $StartDate = $theNow.AddMinutes( - $LastMinutes)
-            $EndDate = $theNow
-        }#lastminutesEval
-        if ($WarningErrorCritical) {
-            $level = 1, 2, 3
-        }#WarningErrorCritical
-    }
-    catch {
-        Write-Warning "Unable to get the current date on this device:"
-        Write-Error $_
-    }
-    #------------------------------------------------------------------
-    Write-Verbose -Message "NOW: $theNow"
-    Write-Verbose -Message "Start: $StartDate"
-    Write-Verbose -Message "End: $EndDate"
-    #------------------------------------------------------------------
+    Write-Verbose -Message "Building filter..."
+    $finalLogString = @()
+    foreach ($log in $LogName) {
+        $finalLogString += $log
+    }#foreach_LogName
+    $finalLevel = @()
+    foreach ($number in $Level) {
+        $finalLevel += $number
+    }#foreach_Level
+    Write-Verbose -Message "Log Name: $finalLogString"
+    Write-Verbose -Message "Level: $finalLevel"
+    Write-Verbose -Message "StartTime: $StartDate"
+    Write-Verbose -Message "EndTime: $EndDate"
     #create filter hashtable
     $filter = @{
-        LogName = "*Hyper-v*"
-        Level = $level
+        LogName   = $finalLogString
+        Level     = $finalLevel
         StartTime = $StartDate
-        EndTime = $EndDate
+        EndTime   = $EndDate
     }
-    #------------------------------------------------------------------
-    #different calls are made depending on use choice
-    if ($FilterText -ne "" -and $Newest -ne 0) {
-        Write-Verbose -Message "Get-WinEvent -FilterHashTable $filter | Where-Object -Property Message -like ""*$FilterText*"" | Select-Object -First $Newest"
-        $logs = Get-WinEvent -FilterHashTable $filter -ErrorAction SilentlyContinue | Where-Object -Property Message -like "*$FilterText*" | Select-Object -First $Newest | Select-Object TimeCreated, Id, ProviderName, LevelDisplayName, Message | Format-Table -GroupBy ProviderName
-    }
-    elseif ($FilterText -eq "" -and $Newest -ne 0) {
-        Write-Verbose -Message "Get-WinEvent -FilterHashTable $filter | Select-Object -First $Newest    "
-        $logs = Get-WinEvent -FilterHashTable $filter -ErrorAction SilentlyContinue | Select-Object -First $Newest | Select-Object TimeCreated, Id, ProviderName, LevelDisplayName, Message | Format-Table -GroupBy ProviderName
-    }
-    elseif ($Newest -eq 0 -and $FilterText -ne "") {
-        Write-Verbose -Message "Get-WinEvent -FilterHashTable $filter | Where-Object -Property Message -like ""*$FilterText*"""
-        $logs = Get-WinEvent -FilterHashTable $filter -ErrorAction SilentlyContinue | Where-Object -Property Message -like "*$FilterText*" | Select-Object TimeCreated, Id, ProviderName, LevelDisplayName, Message | Format-Table -GroupBy ProviderName
-    }
+    Write-Verbose -Message "Attempting to gather logs from $HostName ..."
+    try {
+        if ($Credential) {
+            $creds = $Credential
+            Write-Verbose -Message "Credentials set."
+            $a = Get-WinEvent -FilterHashTable $filter -ComputerName $HostName -Credential $creds -ErrorAction Stop
+        }
+        else{
+            $a = Get-WinEvent -FilterHashTable $filter -ComputerName $HostName -ErrorAction Stop
+        }
+        Write-Verbose -Message "Log capture complete."
+    }#try_Get-WinEvent
+    catch {
+        Write-Verbose $_
+        if ($_.Exception -like "*that match*") {
+            $a = $null
+        }#if_error_no_match
+        else {
+            Write-Warning "An error was encountered capturing logs from $HostName"
+            Write-Error $_
+            return
+        }#else_error_no_match
+    }#catch_Get-WinEvent
+    if ($a) {
+        Write-Verbose -Message "Processing logs results..."
+        $results = $a | Select-Object TimeCreated, LogName, ProviderName, LevelDisplayName, Message
+    }#if_logsNull
     else {
-        Write-Verbose -Message "Get-WinEvent -FilterHashTable $filter"
-        $logs = Get-WinEvent -FilterHashTable $filter -ErrorAction SilentlyContinue | Select-Object TimeCreated, Id, ProviderName, LevelDisplayName, Message | Format-Table -GroupBy ProviderName
-    }
-    if ($logs -eq $null) {
-        Write-Warning "No logs entries were found that matched the provided criteria."
-    }
-    #------------------------------------------------------------------
-    return $logs
-}
+        Write-Verbose -Message "No logs were found that matched this search criteria."
+        $results = [PSCustomObject]@{
+            HostName  = $HostName
+            LogName   = $finalLogString
+            Level     = $finalLevel
+            StartTime = $StartDate
+            EndTime   = $EndDate
+            Status    = "No logs were found that matched this search criteria."
+        }
+    }#else_logsNull
+    return $results
+}#Get-HyperVLogs

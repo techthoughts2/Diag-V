@@ -33,8 +33,6 @@
     Selected.Microsoft.HyperV.PowerShell.DataExchangeComponent
     Selected.Microsoft.HyperV.PowerShell.ShutdownComponent
     Selected.Microsoft.HyperV.PowerShell.VirtualMachine
-.COMPONENT
-    Diag-V
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
     This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
