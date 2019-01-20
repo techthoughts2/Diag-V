@@ -43,7 +43,7 @@
         'Get-VMAllVHDs',
         'Get-SharedVHDs',
         'Test-HyperVAllocation',
-        'Get-CSVtoPhysicalDiskMapping',
+        'Get-CSVInfo',
         'Get-FileSizes',
         'Get-HyperVLogs'
     )
