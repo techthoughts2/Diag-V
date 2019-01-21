@@ -1,0 +1,21 @@
+# This is a simple CodeBuild build file for PowerShell.
+# - pre_build step will ensure the Module Name / Version has not previously been built for production (plans to add this at a later time)
+# - build step will perform Clean, ValidateRequirements, Analyze, Test, CreateHelp, Build, Archive
+
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - powershell -command '.\configure_aws_credential.ps1'
+      - '& "C:\Program Files\PowerShell\6\pwsh.exe" -command ''.\install_modules.ps1'''
+  pre_build:
+    commands:
+      #- '& "C:\Program Files\PowerShell\6\pwsh.exe" -command ''Invoke-Build -File .\src\PoshGram.build.Settings.ps1 -Task ValidateUniqueModuleVersion'''
+  build:
+    commands:
+      - powershell -command 'Invoke-Build -File .\src\Diag-V.build.ps1'
+artifacts:
+  files:
+    - '**/*'
+  base-directory: 'src\Archive'
