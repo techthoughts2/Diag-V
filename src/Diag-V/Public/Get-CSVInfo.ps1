@@ -1,6 +1,6 @@
 <#
 .Synopsis
-    Queries all CSVs that are part of the Hyper-V cluster and returns detailed informationa about each CSV
+    Queries all CSVs that are part of the Hyper-V cluster and returns detailed information about each CSV
 .DESCRIPTION
     Discovers all cluster shared volumes (CSV) associated with the Hyper-V cluster. Resolves all cluster shared volumes to physical drives and pulls usefull information about the characteristcs of the associated physical drive.
 .EXAMPLE
@@ -47,7 +47,6 @@ function Get-CSVInfo {
     Write-Verbose -Message 'Processing pre-checks. This may take a few seconds...'
     $adminEval = Test-RunningAsAdmin
     if ($adminEval -eq $true) {
-        $vmCollection = @()
         $clusterEval = Test-IsACluster
         if ($clusterEval -eq $true) {
             Write-Verbose -Message "Cluster detected. Performing CSV discovery..."

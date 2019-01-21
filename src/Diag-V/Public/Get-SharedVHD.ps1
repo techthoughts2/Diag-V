@@ -1,62 +1,38 @@
 <#
 .Synopsis
-    For each VM detected every associated VHD/VHDX is identified and several pieces of VHD/VHDX information is returned
+    For each VM detected every associated VHD/VHDX is checked to determine if the VHD/VHDX is shared or not
 .DESCRIPTION
-    Identifies all VHDs/VHDXs associated with each VM detected. For each VHD/VHDX it pulls several pieces of information and displays to user. It then sums the current VHD/VHDX disk usage and the POTENTIAL VHD/VHDX disk usage dependent on whether the VHDs/VHDXs are fixed are dynamic.
+    Identifies all VHDs/VHDXs associated with each VM detected. For each VHD/VHDX it pulls several pieces of information to display to user. If SupportPersistentReservations is true, the VHD/VHDX is shared.
 .EXAMPLE
-    Get-VMAllVHDs
+    Get-SharedVHD
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered.
+    This command will automatically detect a standalone hyp or hyp cluster and displays SupportPersistentReservations information for each VHD for every VM discovered. If SupportPersistentReservations is true, the VHD is shared.
 .EXAMPLE
-    Get-VMAllVHDs -NoFormat
+    Get-SharedVHD -Credential $credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered. Raw data object is returned with no processing done.
-.EXAMPLE
-    Get-VMAllVHDs -NoFormat | ? {$_.Name -eq 'VM1'}
-
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered. Only data related to VM1 is returned.
-.EXAMPLE
-    Get-VMAllVHDs -Credential $credential
-
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered. The provided credentials are used.
-.PARAMETER NoFormat
-    No formatting of return object. By default this function returns a formatted table object. This makes it look good, but you lose certain functionality, like using Where-Object. By specifying this parameter you get a more raw output, but the ability to query.
+    This command will automatically detect a standalone hyp or hyp cluster and displays SupportPersistentReservations information for each VHD for every VM discovered. If SupportPersistentReservations is true, the VHD is shared. Provided credentials are used.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
-    Microsoft.PowerShell.Commands.Internal.Format.FormatStartData
-    Microsoft.PowerShell.Commands.Internal.Format.GroupStartData
-    Microsoft.PowerShell.Commands.Internal.Format.FormatEntryData
-    Microsoft.PowerShell.Commands.Internal.Format.GroupEndData
-    Microsoft.PowerShell.Commands.Internal.Format.FormatEndData
-    -or-
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
     This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
     I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
     See the README for more details.
-    The VHDX disk usage summary is only available when using the NoFormat switch.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
     Get the following VM VHD information for all detected Hyp nodes:
     VMName
-    VhdType
-    Size(GB)
-    MaxSize(GB)
+    SupportPersistentReservations
     Path
-    Total current disk usage (NoFormat)
-    Total POTENTIAL disk usage (NoFormat)
 .LINK
     http://techthoughts.info/diag-v/
 #>
-function Get-VMAllVHDs {
+function Get-SharedVHD {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $false,
-            HelpMessage = 'No formatting of return object')]
-        [switch]$NoFormat,
         [Parameter(Mandatory = $false,
             HelpMessage = 'PSCredential object for storing provided creds')]
         [pscredential]$Credential
@@ -111,35 +87,30 @@ function Get-VMAllVHDs {
                                 Write-Verbose -Message "Retrieving VHD information for VM: $vmname"
                                 try {
                                     if ($Credential -and $env:COMPUTERNAME -ne $node) {
-                                        $rawVHD = Get-VHD -ComputerName $node -VMId $VM.VMId -Credential $Credential -ErrorAction Stop
+                                        $rawVMDisk = Get-VMHardDiskDrive -ComputerName $node -VMName $vmname -Credential $Credential -ErrorAction Stop
                                     }#if_Credential
                                     else {
-                                        $rawVHD = Get-VHD -ComputerName $node -VMId $VM.VMId -ErrorAction Stop
+                                        $rawVMDisk = Get-VMHardDiskDrive -ComputerName $node -VMName $vmname -ErrorAction Stop
                                     }#else_Credential
-                                }#try_Get-VHD
+                                }#try_Get-VMHardDiskDrive
                                 catch {
-                                    Write-Warning -Message "An error was encountered getting VHD information for: $vmname"
-                                }#catch_Get-VHD
+                                    Write-Warning -Message "An error was encountered getting VHD disk information for: $vmname"
+                                }#catch_Get-VMHardDiskDrive
                                 $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
-                                foreach ($vhd in $rawVHD) {
+                                foreach ($vhd in $rawVMDisk) {
                                     Write-Verbose -Message 'Processing VHD.'
                                     #________________
-                                    $vhdType = ''
-                                    $size = 0
-                                    $maxSize = 0
+                                    $pReservation = $null
                                     $path = ''
                                     $object = New-Object -TypeName PSObject
                                     #________________
                                     #####################################################
-                                    $vhdType = $vhd.VhdType
-                                    [int]$size = $vhd.filesize / 1gb
-                                    [int]$maxSize = $vhd.size / 1gb
+                                    #$vhdType = $vhd.VhdType
+                                    $pReservation = $vhd.SupportPersistentReservations
                                     $path = $vhd.Path
                                     $object | Add-Member -MemberType NoteProperty -name Host -Value $node -Force
                                     $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
-                                    $object | Add-Member -MemberType NoteProperty -name VhdType -Value $vhdType -Force
-                                    $object | Add-Member -MemberType NoteProperty -name 'Size(GB)' -Value $size -Force
-                                    $object | Add-Member -MemberType NoteProperty -name 'MaxSize(GB)' -Value $maxSize -Force
+                                    $object | Add-Member -MemberType NoteProperty -name SupportPersistentReservations -Value $pReservation -Force
                                     $object | Add-Member -MemberType NoteProperty -name Path -Value $path -Force
                                     $vmCollection += $object
                                     #####################################################
@@ -162,14 +133,6 @@ function Get-VMAllVHDs {
                         Write-Warning -Message "Connection test to $node unsuccesful."
                     }#else_connection
                 }#foreach_Node
-                if ($vmCollection -ne '') {
-                    #####################################
-                    $object = New-Object -TypeName PSObject
-                    $object | Add-Member -MemberType NoteProperty -name 'TotalVHD(GB)' -Value $currentS -Force
-                    $object | Add-Member -MemberType NoteProperty -name 'TotalPotentialVHD(GB)' -Value $potentialS -Force
-                    $vmCollection += $object
-                    #####################################
-                }#if_nullCheck
             }#if_nodeNULLCheck
             else {
                 Write-Warning -Message 'Device appears to be configured as a cluster but no cluster nodes were returned by Get-ClusterNode'
@@ -198,32 +161,27 @@ function Get-VMAllVHDs {
                     $vmname = $vm.VMName
                     #resets
                     $object = New-Object -TypeName PSObject
-                    Write-Verbose -Message "Retrieving VHD information for VM: $vmname"
+                    Write-Verbose -Message "Retrieving VHD disk information for VM: $vmname"
                     try {
-                        $rawVHD = Get-VHD -VMId $VM.VMId -ErrorAction Stop
-                    }#try_Get-VHD
+                        $rawVMDisk = Get-VMHardDiskDrive -VMName $vmname -ErrorAction Stop
+                    }#try_Get-VMHardDiskDrive
                     catch {
                         Write-Warning -Message "An error was encountered getting VHD information for: $vmname"
-                    }#catch_Get-VHD
+                    }#catch_Get-VMHardDiskDrive
                     $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
-                    foreach ($vhd in $rawVHD) {
+                    foreach ($vhd in $rawVMDisk) {
                         Write-Verbose -Message 'Processing VHD.'
                         #________________
-                        $vhdType = ''
-                        $size = 0
-                        $maxSize = 0
+                        $pReservation = $null
                         $path = ''
                         $object = New-Object -TypeName PSObject
                         #________________
                         #####################################################
-                        $vhdType = $vhd.VhdType
-                        [int]$size = $vhd.filesize / 1gb
-                        [int]$maxSize = $vhd.size / 1gb
+                        #$vhdType = $vhd.VhdType
+                        $pReservation = $vhd.SupportPersistentReservations
                         $path = $vhd.Path
                         $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
-                        $object | Add-Member -MemberType NoteProperty -name VhdType -Value $vhdType -Force
-                        $object | Add-Member -MemberType NoteProperty -name 'Size(GB)' -Value $size -Force
-                        $object | Add-Member -MemberType NoteProperty -name 'MaxSize(GB)' -Value $maxSize -Force
+                        $object | Add-Member -MemberType NoteProperty -name SupportPersistentReservations -Value $pReservation -Force
                         $object | Add-Member -MemberType NoteProperty -name Path -Value $path -Force
                         $vmCollection += $object
                         #####################################################
@@ -237,12 +195,6 @@ function Get-VMAllVHDs {
                     $vmCollection += $object
                     #_____________________________________________________________
                 }#foreachVM
-                #####################################
-                $object = New-Object -TypeName PSObject
-                $object | Add-Member -MemberType NoteProperty -name 'TotalVHD(GB)' -Value $currentS -Force
-                $object | Add-Member -MemberType NoteProperty -name 'TotalPotentialVHD(GB)' -Value $potentialS -Force
-                $vmCollection += $object
-                #####################################
             }#if_rawVM
             else {
                 Write-Verbose -Message 'No VMs were found on this device.'
@@ -253,11 +205,14 @@ function Get-VMAllVHDs {
         Write-Warning -Message 'Not running as administrator. No further action can be taken.'
         return
     }#administrator check
+    <#
     if ($NoFormat) {
         $final = $vmCollection
     }#if_NoFormat
     else {
         $final = $vmCollection | Format-Table
     }#else_NoFormat
+    #>
+    $final = $vmCollection
     return $final
-}#Get-VMAllVHDs
+}#Get-SharedVHD

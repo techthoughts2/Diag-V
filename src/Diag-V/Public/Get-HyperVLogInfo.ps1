@@ -62,10 +62,10 @@
 .LINK
     http://techthoughts.info/diag-v/
 #>
-function Get-HyperVLogs {
+function Get-HyperVLogInfo {
     [cmdletbinding()]
     param (
-        [Parameter(Mandatory = $true,
+        [Parameter(Mandatory = $false,
             HelpMessage = 'Hostname of destination machine')]
         [string]$HostName = '.',
         [Parameter(Mandatory = $false,
@@ -144,4 +144,4 @@ function Get-HyperVLogs {
         }
     }#else_logsNull
     return $results
-}#Get-HyperVLogs
+}#Get-HyperVLogInfo

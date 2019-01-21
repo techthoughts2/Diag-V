@@ -1209,7 +1209,7 @@ InModuleScope Diag-V {
                 $eval | Select-Object -ExpandProperty Enabled | Should -BeExactly $false
             }#it
         }#context
-        Context 'Get-VMAllVHDs' {
+        Context 'Get-AllVHD' {
             function Get-VHD {}
             BeforeEach {
                 Mock Test-RunningAsAdmin -MockWith {
@@ -1282,28 +1282,28 @@ InModuleScope Diag-V {
                 Mock Test-RunningAsAdmin -MockWith {
                     $false
                 }#endMock
-                Get-VMAllVHDs | Should -BeNullOrEmpty
+                Get-AllVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a cluster is detected but no nodes are returned' {
                 Mock Get-ClusterNode -MockWith {}
-                Get-VMAllVHDs | Should -BeNullOrEmpty
+                Get-AllVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a cluster is detected but an error is encountered getting VMs' {
                 Mock Get-VM -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                Get-VMAllVHDs | Should -BeNullOrEmpty
+                Get-AllVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a cluster is detected but no VMs are found on any node' {
                 Mock Get-VM -MockWith {}
-                Get-VMAllVHDs | Should -BeNullOrEmpty
+                Get-AllVHD | Should -BeNullOrEmpty
             }#it
             It 'should not return any drive information if a cluster is detected but an error is encountered getting VHD information' {
                 $Credential = New-Object -TypeName System.Management.Automation.PSCredential('username', (ConvertTo-SecureString 'password' -AsPlainText -Force))
                 Mock Get-VHD -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                $eval = Get-VMAllVHDs -Credential $Credential
+                $eval = Get-AllVHD -Credential $Credential
                 $eval[0].Path | Should -BeNullOrEmpty
             }#it
             It 'should at least return information from local node if a cluster but no other node can be reached' {
@@ -1319,7 +1319,7 @@ InModuleScope Diag-V {
                 Mock Test-NetConnection -MockWith {
                     $false
                 }#endMock
-                $eval = Get-VMAllVHDs -NoFormat
+                $eval = Get-AllVHD -NoFormat
                 $eval[0].Name | Should -BeExactly 'DemoVM'
                 $eval[0].VhdType | Should -BeExactly 'Dynamic'
                 $eval[0].'Size(GB)' | Should -BeExactly 60
@@ -1327,7 +1327,7 @@ InModuleScope Diag-V {
                 $eval[0].Path | Should -BeExactly 'E:\vms\Virtual Hard Disks\20163.vhdx'
             }#it
             It 'should return valid results if a cluster is detected and no errors are encountered' {
-                $eval = Get-VMAllVHDs -NoFormat
+                $eval = Get-AllVHD -NoFormat
                 $eval[0].Name | Should -BeExactly 'DemoVM'
                 $eval[0].VhdType | Should -BeExactly 'Dynamic'
                 $eval[0].'Size(GB)' | Should -BeExactly 60
@@ -1341,14 +1341,14 @@ InModuleScope Diag-V {
                 Mock Get-VM -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                Get-VMAllVHDs | Should -BeNullOrEmpty
+                Get-AllVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a standalone is detected but no VMs are found' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-VM -MockWith {}
-                Get-VMAllVHDs | Should -BeNullOrEmpty
+                Get-AllVHD | Should -BeNullOrEmpty
             }#it
             It 'should not return any drive information if a standalone is detected but an error is encountered getting VHD information' {
                 Mock Test-IsACluster -MockWith {
@@ -1357,14 +1357,14 @@ InModuleScope Diag-V {
                 Mock Get-VHD -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                $eval = Get-VMAllVHDs
+                $eval = Get-AllVHD
                 $eval[0].Path | Should -BeNullOrEmpty
             }#it
             It 'should return valid results if a standalone is detected and no errors are encountered' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
-                $eval = Get-VMAllVHDs -NoFormat
+                $eval = Get-AllVHD -NoFormat
                 $eval[0].Name | Should -BeExactly 'DemoVM'
                 $eval[0].VhdType | Should -BeExactly 'Dynamic'
                 $eval[0].'Size(GB)' | Should -BeExactly 60
@@ -1372,7 +1372,7 @@ InModuleScope Diag-V {
                 $eval[0].Path | Should -BeExactly 'E:\vms\Virtual Hard Disks\20163.vhdx'
             }#it
         }#context
-        Context 'Get-SharedVHDs' {
+        Context 'Get-SharedVHD' {
             function Get-VMHardDiskDrive {}
             BeforeEach {
                 Mock Test-RunningAsAdmin -MockWith {
@@ -1439,28 +1439,28 @@ InModuleScope Diag-V {
                 Mock Test-RunningAsAdmin -MockWith {
                     $false
                 }#endMock
-                Get-SharedVHDs | Should -BeNullOrEmpty
+                Get-SharedVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a cluster is detected but no nodes are returned' {
                 Mock Get-ClusterNode -MockWith {}
-                Get-SharedVHDs | Should -BeNullOrEmpty
+                Get-SharedVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a cluster is detected but an error is encountered getting VMs' {
                 Mock Get-VM -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                Get-SharedVHDs | Should -BeNullOrEmpty
+                Get-SharedVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a cluster is detected but no VMs are found on any node' {
                 Mock Get-VM -MockWith {}
-                Get-SharedVHDs | Should -BeNullOrEmpty
+                Get-SharedVHD | Should -BeNullOrEmpty
             }#it
             It 'should not return any drive information if a cluster is detected but an error is encountered getting VHD information' {
                 $Credential = New-Object -TypeName System.Management.Automation.PSCredential('username', (ConvertTo-SecureString 'password' -AsPlainText -Force))
                 Mock Get-VMHardDiskDrive -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                $eval = Get-SharedVHDs -Credential $Credential
+                $eval = Get-SharedVHD -Credential $Credential
                 $eval[0].Path | Should -BeNullOrEmpty
             }#it
             It 'should at least return information from local node if a cluster but no other node can be reached' {
@@ -1476,13 +1476,13 @@ InModuleScope Diag-V {
                 Mock Test-NetConnection -MockWith {
                     $false
                 }#endMock
-                $eval = Get-SharedVHDs
+                $eval = Get-SharedVHD
                 $eval[0].Name | Should -BeExactly 'DemoVM'
                 $eval[0].SupportPersistentReservations | Should -BeExactly $false
                 $eval[0].Path | Should -BeExactly 'E:\vms\Virtual Hard Disks\20163.vhdx'
             }#it
             It 'should return valid results if a cluster is detected and no errors are encountered' {
-                $eval = Get-SharedVHDs | Select-Object -First 1
+                $eval = Get-SharedVHD | Select-Object -First 1
                 $eval[0].Name | Should -BeExactly 'DemoVM'
                 $eval[0].SupportPersistentReservations | Should -BeExactly $false
                 $eval[0].Path | Should -BeExactly 'E:\vms\Virtual Hard Disks\20163.vhdx'
@@ -1494,14 +1494,14 @@ InModuleScope Diag-V {
                 Mock Get-VM -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                Get-SharedVHDs | Should -BeNullOrEmpty
+                Get-SharedVHD | Should -BeNullOrEmpty
             }#it
             It 'should return null if a standalone is detected but no VMs are found' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-VM -MockWith {}
-                Get-SharedVHDs | Should -BeNullOrEmpty
+                Get-SharedVHD | Should -BeNullOrEmpty
             }#it
             It 'should not return any drive information if a standalone is detected but an error is encountered getting VHD information' {
                 Mock Test-IsACluster -MockWith {
@@ -1510,14 +1510,14 @@ InModuleScope Diag-V {
                 Mock Get-VMHardDiskDrive -MockWith {
                     Throw 'Bullshit Error'
                 }#endMock
-                $eval = Get-SharedVHDs
+                $eval = Get-SharedVHD
                 $eval.Path | Should -BeNullOrEmpty
             }#it
             It 'should return valid results if a standalone is detected and no errors are encountered' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
-                $eval = Get-SharedVHDs
+                $eval = Get-SharedVHD
                 $eval[0].Name | Should -BeExactly 'DemoVM'
                 $eval[0].SupportPersistentReservations | Should -BeExactly $false
                 $eval[0].Path | Should -BeExactly 'E:\vms\Virtual Hard Disks\20163.vhdx'
@@ -2563,7 +2563,7 @@ InModuleScope Diag-V {
                 $eval.DriveHealth[1] | Should -BeExactly 'HEALTHY'
             }#it
         }#context_Test-HyperVAllocation
-        Context 'Get-HyperVLogs' {
+        Context 'Get-HyperVLogInfo' {
             $Global:adminCred = $null
             $secpasswd = ConvertTo-SecureString "PlainTextPassword" -AsPlainText -Force
             $creds = New-Object System.Management.Automation.PSCredential ("username", $secpasswd)
@@ -2572,7 +2572,7 @@ InModuleScope Diag-V {
                     Mock Get-WinEvent -MockWith {
                         throw 'Fake Error'
                     }#endMock
-                    Get-HyperVLogs -HostName "Server01" -Credential $creds | Should -BeNullOrEmpty
+                    Get-HyperVLogInfo -HostName "Server01" -Credential $creds | Should -BeNullOrEmpty
                 }
             }#context_Error
             Context 'Success' {
@@ -2586,19 +2586,19 @@ InModuleScope Diag-V {
                             Message          = "A fatal alert was generated and sent to the remote endpoint."
                         }
                     }#endMock
-                    Get-HyperVLogs -HostName "Server01" `
+                    Get-HyperVLogInfo -HostName "Server01" `
                         | Select-Object -ExpandProperty LogName `
                         | Should -Be "System"
                 }
                 It 'should return a properly formatted message for the user indicating that no longs matches the query if none found' {
                     Mock Get-WinEvent {}
-                    Get-HyperVLogs -HostName "Server01" `
+                    Get-HyperVLogInfo -HostName "Server01" `
                         | Select-Object -ExpandProperty Status `
                         | Should -BeExactly 'No logs were found that matched this search criteria.'
                 }#it
             }#context_Success
-        }#context_Get-HyperVLogs
-        Context 'Get-FileSizes' {
+        }#context_Get-HyperVLogInfo
+        Context 'Get-FileSizeInfo' {
             BeforeEach {
                 Mock Test-Path -MockWith {
                     $true
@@ -2635,14 +2635,14 @@ InModuleScope Diag-V {
                 Mock Test-Path -MockWith {
                     $false
                 }#endMock
-                Get-FileSizes -Path C:\files | Should -BeNullOrEmpty
+                Get-FileSizeInfo -Path C:\files | Should -BeNullOrEmpty
             }#it
             It 'should return null if no files are found at the specified path' {
                 Mock Get-ChildItem -MockWith {}
-                Get-FileSizes -Path C:\files | Should -BeNullOrEmpty
+                Get-FileSizeInfo -Path C:\files | Should -BeNullOrEmpty
             }#it
             It 'should return file results if no issues are encountered' {
-                Get-FileSizes -Path C:\files | Should -Not -BeNullOrEmpty
+                Get-FileSizeInfo -Path C:\files | Should -Not -BeNullOrEmpty
             }
         }#context
     }#describe_Functions

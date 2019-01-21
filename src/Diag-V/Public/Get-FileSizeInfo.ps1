@@ -4,7 +4,7 @@
 .DESCRIPTION
     Recursively scans all files in the specified path. It then gives a total size in GB for all files found under the specified location as well as the top 10 largest files discovered.
 .EXAMPLE
-    Get-FileSizes -Path C:\ClusterStorage\Volume1\
+    Get-FileSizeInfo -Path C:\ClusterStorage\Volume1\
 
     This command recursively scans the specified path and will tally the total size of all discovered files as well as return the top 10 largest files.
 .PARAMETER Path
@@ -25,7 +25,7 @@
 .LINK
     http://techthoughts.info/diag-v/
 #>
-function Get-FileSizes {
+function Get-FileSizeInfo {
     [cmdletbinding()]
     Param (
         #directory path that you wish to scan
@@ -70,4 +70,4 @@ function Get-FileSizes {
         return
     }#else_Test-Path
     return $results
-}#Get-FileSizes
+}#Get-FileSizeInfo

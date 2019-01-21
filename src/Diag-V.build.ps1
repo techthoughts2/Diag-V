@@ -66,7 +66,7 @@ Enter-Build {
 #Synopsis: Validate system requirements are met
 task ValidateRequirements {
     #running at least powershell 5?
-    assert ($PSVersionTable.PSVersion.Major.ToString() -ge '6') 'At least Powershell 6 is required for this build to function properly'
+    assert ($PSVersionTable.PSVersion.Major.ToString() -ge '5') 'At least Powershell 5 is required for this build to function properly'
 }#ValidateRequirements
 
 #Synopsis: Clean Artifacts Directory

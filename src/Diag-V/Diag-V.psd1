@@ -40,12 +40,12 @@
         'Get-VMLocationPathInfo',
         'Get-IntegrationServicesCheck',
         'Get-BINSpaceInfo',
-        'Get-VMAllVHDs',
-        'Get-SharedVHDs',
+        'Get-AllVHD',
+        'Get-SharedVHD',
         'Test-HyperVAllocation',
         'Get-CSVInfo',
-        'Get-FileSizes',
-        'Get-HyperVLogs'
+        'Get-FileSizeInfo',
+        'Get-HyperVLogInfo'
     )
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
