@@ -68,7 +68,7 @@ function Get-HyperVLogInfo {
     param (
         [Parameter(Mandatory = $false,
             HelpMessage = 'Hostname of destination machine')]
-        [string]$HostName = '.',
+        [string]$HostName = $env:COMPUTERNAME,
         [Parameter(Mandatory = $false,
             HelpMessage = 'Admin credentials for destination machine')]
         [pscredential]$Credential,
