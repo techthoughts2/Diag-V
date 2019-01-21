@@ -1,24 +1,24 @@
 <#
 .Synopsis
-    Displays status for all VMs on a standalone Hyper-V server or Hyper-V cluster
+    Returns status of all discovered VMs.
 .DESCRIPTION
-    Gets the status of all discovered VMs. Cluster and standalone hyp detection is done automatically. If a cluster is detected, all VMs in the cluster will be processed.
+    Automatically detects Standalone / Clustered Hyper-V and returns the status of all discovered VMs.
 .EXAMPLE
     Get-VMStatus
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information from all detected nodes.
+    Returns VM status information for all discovered VMs.
 .EXAMPLE
     Get-VMStatus -Credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information from all detected nodes using the provided credentials.
+    Returns VM status information for all discovered VMs using the provided credentials.
 .EXAMPLE
     Get-VMStatus -NoFormat | Where-Object {$_.name -eq 'Server1'}
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information from all detected nodes. Only date for Server1 will be returned.
+    Returns VM status information for all discovered VMs. Only date for Server1 will be displayed.
 .EXAMPLE
     Get-VMStatus -NoFormat
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM status information from all detected nodes. Raw data object is returned with no processing done.
+    Returns VM status information for all discovered VMs. Raw data object is returned with no processing done.
 .PARAMETER NoFormat
     No formatting of return object. By default this function returns a formatted table object. This makes it look good, but you lose certain functionality, like using Where-Object. By specifying this parameter you get a more raw output, but the ability to query.
 .PARAMETER Credential
@@ -29,13 +29,12 @@
     Microsoft.PowerShell.Commands.Internal.Format.FormatEntryData
     Microsoft.PowerShell.Commands.Internal.Format.GroupEndData
     Microsoft.PowerShell.Commands.Internal.Format.FormatEndData
-    -or
+    -or-
     Microsoft.HyperV.PowerShell.VirtualMachine
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY

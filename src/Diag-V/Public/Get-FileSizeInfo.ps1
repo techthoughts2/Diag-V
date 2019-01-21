@@ -1,6 +1,6 @@
 <#
 .Synopsis
-    Scans specified path and gets total size as well as top 10 largest files
+    Evaluates the user provided path and tallies the total size of all files found. The top 10 largest files are also returned.
 .DESCRIPTION
     Recursively scans all files in the specified path. It then gives a total size in GB for all files found under the specified location as well as the top 10 largest files discovered.
 .EXAMPLE

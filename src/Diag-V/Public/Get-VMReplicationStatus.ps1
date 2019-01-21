@@ -1,29 +1,28 @@
 <#
 .Synopsis
-    Gets VM replication configuration and replication status for all detected VMs
+    Returns VM replication configuration and replication status for all detected VMs.
 .DESCRIPTION
-    Gets the VMs replication status info for all VMs. Automatically detects if running on a standalone hyp or hyp cluster. If standalone is detected it will display VM replication status info for all VMs on the hyp. If a cluster is detected it will display VM replication status information for each node in the cluster.
+    Automatically detects Standalone / Clustered Hyper-V and returns VM replication status information for all VMs.
 .EXAMPLE
     Get-VMReplicationStatus
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM replication status information for all detected nodes.
+    Returns VM replication status information for all detected VMs.
 .EXAMPLE
     Get-VMReplicationStatus | Where-Object {$_.VMName -eq 'Server1'}
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM replication status information for Server1 only.
+    Returns VM replication status information for all VMs. Only Server1 will be displayed.
 .EXAMPLE
     Get-VMReplicationStatus -Credential $credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM replication status information for all detected nodes using the provided credentials.
+    Returns VM replication status information for all detected VMs using the provided credentials.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
     Selected.Microsoft.HyperV.PowerShell.VirtualMachine
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY

@@ -1,25 +1,26 @@
 <#
 .Synopsis
-    For each VM detected every associated VHD/VHDX is checked to determine if the VHD/VHDX is shared or not
+    For each VM detected all associated VHD / VHDX are evaluated for there SupportPersistentReservations status.
 .DESCRIPTION
-    Identifies all VHDs/VHDXs associated with each VM detected. For each VHD/VHDX it pulls several pieces of information to display to user. If SupportPersistentReservations is true, the VHD/VHDX is shared.
+    Automatically detects Standalone / Clustered Hyper-V and identifies all VHD / VHDX associated with each VM found. Results are returned about the SupportPersistentReservations status if each virtual drive.
 .EXAMPLE
     Get-SharedVHD
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays SupportPersistentReservations information for each VHD for every VM discovered. If SupportPersistentReservations is true, the VHD is shared.
+    Returns SupportPersistentReservations information for each VHD for every VM discovered. If SupportPersistentReservations is true, the VHD is shared.
 .EXAMPLE
     Get-SharedVHD -Credential $credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays SupportPersistentReservations information for each VHD for every VM discovered. If SupportPersistentReservations is true, the VHD is shared. Provided credentials are used.
+    Returns SupportPersistentReservations information for each VHD for every VM discovered. If SupportPersistentReservations is true, the VHD is shared. Provided credentials are used.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
+
+    If SupportPersistentReservations is true, the VHD / VHDX is shared.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY

@@ -1,30 +1,30 @@
 <#
 .Synopsis
-    Performs a Hyper-V system evaluation for each Hyper-V node found and returns a resource allocation health report.
+    Performs a Hyper-V system evaluation for each Hyper-V node found, and returns a resource allocation health report.
 .DESCRIPTION
-    For single Hyper-V instances or Hyper-V clusters all Hyp nodes will be identified and evaluated. Available chassis resources will be gathered and will be compared to all VM CPU and memory allocations. Calculations will then be performed to determine the overall health of the node from a CPU/RAM perspective. Available storage space will also be calculated. For clusters CSV locations will be checked. For standalone Hyps any drive larger than 10GB and not C: will be checked. Drives under 1TB with less than 15% will be flagged as unhealthy. Drives over 1TB with less than 10% will be flagged as unhealty. If a cluster is deteceted and additional caluclation will be performed that simulates the loss of one node to determine if VMs could survive and start with one node down.
+    Automatically detects Standalone / Clustered Hyper-V. All Hyer-V nodes will be identified and evaluated. Available chassis resources will be gathered and will be compared to all VM CPU and memory allocations. Calculations will then be performed to determine the overall health of the node from a CPU/RAM perspective. Available storage space will also be calculated. For clusters CSV locations will be checked. For standalone Hyper-V servers any drive larger than 10GB and not C: will be checked. Drives under 1TB with less than 15% will be flagged as unhealthy. Drives over 1TB with less than 10% will be flagged as unhealthy. If a cluster is detected an additional calculation will be performed that simulates the loss of one node to determine if VMs could survive the loss of a cluster node.
 .EXAMPLE
     Test-HyperVAllocation
 
-    Detects if running on a standalone Hyper-V instance or Hyper-V cluster. Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations.
+    Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations.
 .EXAMPLE
     Test-HyperVAllocation -Credential $credential
 
-    Detects if running on a standalone Hyper-V instance or Hyper-V cluster. Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations. The provided credentials are used.
+    Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations. The provided credentials are used.
 .EXAMPLE
     Test-HyperVAllocation -Verbose
 
-    Detects if running on a standalone Hyper-V instance or Hyper-V cluster. Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations with Verbose output.
+    Gathers chassis and VM configuration information from all nodes and returns a diagnostic report based on a series of calculations with Verbose output.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
-    This was really hard to make.
+
+    See the README for more details if you want to run this function remotely.
+
+    This was really, really hard to make.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY

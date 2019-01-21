@@ -1,24 +1,24 @@
 <#
 .Synopsis
-    For each VM detected every associated VHD/VHDX is identified and several pieces of VHD/VHDX information is returned
+    For each VM detected all associated VHD / VHDX are identified and information about those virtual disks are returned.
 .DESCRIPTION
-    Identifies all VHDs/VHDXs associated with each VM detected. For each VHD/VHDX it pulls several pieces of information and displays to user. It then sums the current VHD/VHDX disk usage and the POTENTIAL VHD/VHDX disk usage dependent on whether the VHDs/VHDXs are fixed are dynamic.
+    Automatically detects Standalone / Clustered Hyper-V and identifies all VHDs / VHDXs associated with each VM detected. For each VHD / VHDX data is retrieved and returned. Calculations are performed to determine the total sum of current VHD / VHDX usage and the POTENTIAL VHD / VHDX usage (dependent on whether virtual disks are fixed or dynamic)
 .EXAMPLE
     Get-AllVHD
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered.
+    Returns virtual hard disk information for each VM discovered.
 .EXAMPLE
     Get-AllVHD -NoFormat
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered. Raw data object is returned with no processing done.
+    Returns virtual hard disk information for each VM discovered. A Raw data object is returned with no processing done.
 .EXAMPLE
     Get-AllVHD -NoFormat | ? {$_.Name -eq 'VM1'}
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered. Only data related to VM1 is returned.
+    Returns virtual hard disk information for each VM discovered but only data related to VM1 will be displayed.
 .EXAMPLE
     Get-AllVHD -Credential $credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and displays for each VHD for every VM discovered. The provided credentials are used.
+    Returns virtual hard disk information for each VM discovered. The provided credentials are used.
 .PARAMETER NoFormat
     No formatting of return object. By default this function returns a formatted table object. This makes it look good, but you lose certain functionality, like using Where-Object. By specifying this parameter you get a more raw output, but the ability to query.
 .PARAMETER Credential
@@ -33,9 +33,9 @@
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
+
     The VHDX disk usage summary is only available when using the NoFormat switch.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V

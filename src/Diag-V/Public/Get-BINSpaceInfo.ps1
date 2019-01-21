@@ -1,12 +1,12 @@
 <#
 .Synopsis
-    Evaluates each VM to determine if Hard Drive space is being taken up by the AutomaticStopAction setting.
+    Evaluates each VM to determine if hard drive space is being taken up by the AutomaticStopAction setting.
 .DESCRIPTION
-    Checks each VMs RAM and AutomaticStopAction setting - then tallies the amount of total hard drive space being taken up by the associated BIN files. Useful for identifying potential storage savings by adjusting the AutomaticStopAction. Cluster and standalone hyp detection is done automatically. If a cluster is detected, all VMs in the cluster will be processed.
+    Automatically detects Standalone / Clustered Hyper-V and checks each VMs RAM and AutomaticStopAction setting - then tallies the amount of total hard drive space being taken up by the associated BIN files. Useful for identifying potential storage savings by adjusting the AutomaticStopAction.
 .EXAMPLE
     Get-BINSpaceInfo -InfoType StorageSavings
 
-    Gets all VMs, their RAM, and their AutomaticStopAction setting. Based on findings, an estimated total potential Storage Savings is calculated and returned for each Hyp.
+    Gets all VMs, their RAM, and their AutomaticStopAction setting. Based on findings, an estimated total potential storage savings is calculated and returned for each Hyper-V server.
 .EXAMPLE
     Get-BINSpaceInfo -InfoType VMInfo
 
@@ -23,9 +23,8 @@
 
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY

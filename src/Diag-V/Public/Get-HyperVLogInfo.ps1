@@ -1,8 +1,8 @@
 <#
 .Synopsis
-    Parses server event logs and retrieves log entries based on user provided options
+    Parses server event logs and retrieves log entries based on user provided options.
 .DESCRIPTION
-    Retrieves event log information using filters created by user provided options. Capable of running locally on a device to retrieve local logs or can establish a remote connection to a specfified device. Log queries can be based on user specified criteria (Log name, Log Level, Start and End Times). If not options are specified by default only Hyper-V logs Critical, Errors, and Warnings for the last 24 hours are returned. If no logs are found that match the criteria a result is returned to the user to easily place in a ticket or other correspondence.
+    Retrieves event log information using filters created by user provided options. Capable of running locally on a device to retrieve local logs or can establish a remote connection to a specified device. Log queries can be based on user provided criteria (Log name, Log Level, Start and End Times). If not, options are specified by default: (Hyper-V logs Critical, Errors, and Warnings for the last 24 hours). If no logs are found that match the criteria a result is returned to the user to easily place in a ticket or other correspondence.
 .EXAMPLE
     Get-ServerLogInfo
 
@@ -22,11 +22,11 @@
 .EXAMPLE
     Get-ServerLogInfo -HostName Server01 -Credential $creds -LogName System,Application,*Hyper-V* -Level 1,2
 
-    Queries System, Application, and all Hyper-V logs for Criticals and Errors within the last 24 hours
+    Queries System, Application, and all Hyper-V logs for Critical and Error within the last 24 hours
 .EXAMPLE
     Get-ServerLogInfo -HostName Server01 -Credential $creds -LogName System,Application,*Hyper-V* -Level 1,2 -Verbose
 
-    Queries System, Application, and all Hyper-V logs for Criticals and Errors within the last 24 hours with verbose output
+    Queries System, Application, and all Hyper-V logs for Critical and Error within the last 24 hours with verbose output
 .PARAMETER HostName
     Hostname of destination machine
 .PARAMETER Credential
@@ -51,10 +51,12 @@
     If nothing is chosen the end time is set to the current time.
 .OUTPUTS
     Selected.System.Diagnostics.Eventing.Reader.EventLogRecord
-    -or
+    -or-
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+
+    This function can query any server log - but is set by default to only query Hyper-V logs. This can be changed by the user through parameter adjustments.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY

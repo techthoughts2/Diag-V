@@ -1,25 +1,25 @@
 <#
 .Synopsis
-    Queries all CSVs that are part of the Hyper-V cluster and returns detailed information about each CSV
+    Queries all CSVs that are part of the Hyper-V cluster and returns detailed information about each CSV.
 .DESCRIPTION
-    Discovers all cluster shared volumes (CSV) associated with the Hyper-V cluster. Resolves all cluster shared volumes to physical drives and pulls usefull information about the characteristcs of the associated physical drive.
+    Discovers all cluster shared volumes (CSV) associated with the Hyper-V cluster. Resolves all cluster shared volumes to a physical disk and returns information regarding the CSV and associated physical drive.
 .EXAMPLE
     Get-CSVInfo
 
-    This command retrieves all cluster shared volumes and pulls information related to the physical disk associated with each CSV.
+    Returns cluster shared volumes and information related to the physical disk association of each CSV.
 .EXAMPLE
     Get-CSVInfo -Credential
 
-    This command retrieves all cluster shared volumes and pulls information related to the physical disk associated with each CSV. The provided credentials are used.
+    Returns cluster shared volumes and information related to the physical disk association of each CSV. The provided credentials are used.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
+
     This function will only work on Hyper-V clusters.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V

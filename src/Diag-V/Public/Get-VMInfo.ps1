@@ -1,29 +1,28 @@
 <#
 .Synopsis
-    Retrieves basic and advanced VM information for all VMs found on a standalone or cluster
+    Returns VM information for all detected VMs.
 .DESCRIPTION
-    Gets VS configuration information for all discovered VMs. This function goes a lot further than a simple Get-VM and provides in depth information of the VM configuration. Cluster and standalone hyp detection is done automatically. If a cluster is detected, all VMs in the cluster will be processed.
+    Automatically detects Standalone / Clustered Hyper-V and returns VM configuration information for all discovered VMs. This function goes a lot further than a simple Get-VM and provides in depth information of the VM configuration.
 .EXAMPLE
     Get-VMInfo
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM configuration information for all discovered VMs.
+    Returns VM configuration information for all discovered VMs.
 .EXAMPLE
     Get-VMInfo -Credential $credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM configuration information for all discovered VMs. The provided credentials will be used to query each hyp.
+    Returns VM configuration information for all discovered VMs. The provided credentials will be used.
 .EXAMPLE
     Get-VMInfo | Where-Object {$_.Name -eq 'Server1'}
 
-    This command will automatically detect a standalone hyp or hyp cluster and will retrieve VM configuration information for all discovered VMs. Only Server1 VM information will be returned.
+    Returns VM configuration information for all discovered VMs. Only Server1 VM information will be displayed.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
@@ -52,11 +51,6 @@ function Get-VMInfo {
             HelpMessage = 'PSCredential object for storing provided creds')]
         [pscredential]$Credential
     )
-
-    <#
-    .Synopsis
-        Import-CimXml iterates through INSTANCE/PROPERTY data to find the desired information
-    #>
     filter Import-CimXml {
         # Filter for parsing XML data
 

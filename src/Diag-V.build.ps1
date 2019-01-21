@@ -243,7 +243,7 @@ task CreateHelp CreateMarkdownHelp, CreateExternalHelp, {
 # Synopsis: Build help files for module and fail if help information is missing
 task CreateMarkdownHelp {
     $ModulePage = "$($script:ArtifactsPath)\docs\$($ModuleName).md"
-
+    $ModuleDocLoc = "$($script:ArtifactsPath)\docs\"
     $markdownParams = @{
         Module         = $ModuleName
         OutputFolder   = "$($script:ArtifactsPath)\docs\"
@@ -266,6 +266,16 @@ task CreateMarkdownHelp {
     }
 
     $ModulePageFileContent | Out-File $ModulePage -Force -Encoding:utf8
+
+    #account for dash bug
+    $helpDocFiles = Get-ChildItem -Path $ModuleDocLoc
+    foreach ($file in $helpDocFiles) {
+        $FileContent = Get-Content -raw $file.FullName
+        $FileContent = $FileContent -replace 'Diag-V', 'DiagV'
+        $FileContent | Out-File $file.FullName -Force -Encoding:utf8
+    }
+
+    Rename-Item -Path $ModulePage -NewName 'DiagV.md'
 
     $MissingDocumentation = Select-String -Path "$($script:ArtifactsPath)\docs\*.md" -Pattern "({{.*}})"
     if ($MissingDocumentation.Count -gt 0) {
@@ -290,6 +300,25 @@ task CreateMarkdownHelp {
 task CreateExternalHelp {
     Write-Host -NoNewLine '      Creating external xml help file'
     $null = New-ExternalHelp "$($script:ArtifactsPath)\docs" -OutputPath "$($script:ArtifactsPath)\en-US\" -Force
+
+    #steps to account for - bug
+    $ModuleDocLoc = "$($script:ArtifactsPath)\docs\"
+    $helpDocFiles = Get-ChildItem -Path $ModuleDocLoc
+    foreach ($file in $helpDocFiles) {
+        $FileContent = Get-Content -raw $file.FullName
+        $FileContent = $FileContent -replace 'DiagV', 'Diag-V'
+        $FileContent | Out-File $file.FullName -Force -Encoding:utf8
+    }
+
+    $wXMLContent = Get-Content -Raw "$($script:ArtifactsPath)\en-US\DiagV-help.xml"
+    $wXMLContent = $wXMLContent -replace 'DiagV', 'Diag-V'
+    $wXMLContent | Out-File "$($script:ArtifactsPath)\en-US\DiagV-help.xml" -Force -Encoding:utf8
+
+    $ModulePage = "$($script:ArtifactsPath)\docs\DiagV.md"
+    Rename-Item -Path $ModulePage -NewName 'Diag-V.md'
+
+    Rename-Item -Path "$($script:ArtifactsPath)\en-US\DiagV-help.xml" -NewName "Diag-V-help.xml"
+
     Write-Host -ForeGroundColor green '...Complete!'
 }#CreateExternalHelp
 

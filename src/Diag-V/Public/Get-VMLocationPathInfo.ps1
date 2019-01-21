@@ -1,29 +1,28 @@
 <#
 .Synopsis
-    A VM has several components which can reside in a different location. This script will identify the location of all of VM components.
+    A VM has several components which can reside in varying locations. This identifies and returns the location of all VM components.
 .DESCRIPTION
-    A VM is comprised of a few components besides just .vhd/.vhdx. This will retrieve the location paths for the VM's configuration files, Snapshot Files, and Smart Paging files. Cluster and standalone hyp detection is done automatically. If a cluster is detected, all VMs in the cluster will be processed.
+    Automatically detects Standalone / Clustered Hyper-V. A VM is comprised of a few components beyond just VHD/ VHDX. This returns the location paths for the VM's configuration files, Snapshot Files, and Smart Paging files.
 .EXAMPLE
     Get-VMLocationPathInfo
 
-    This command will automatically detect a standalone hyp or hyp cluster and will return the file paths for all discovered VMs.
+    Returns the configuration paths for all discovered VMs.
 .EXAMPLE
     Get-VMLocationPathInfo | Where-Object {$_.VMName -eq 'Server1'}
 
-    This command will automatically detect a standalone hyp or hyp cluster and will return the file paths for Server1 only.
+    Returns the configuration paths for Server1 only.
 .EXAMPLE
     Get-VMLocationPathInfo -Credential $credential
 
-    This command will automatically detect a standalone hyp or hyp cluster and will return the file paths for all discovered VMs using the provided credentials.
+    Returns the configuration paths for all discovered VMs using the provided credentials.
 .PARAMETER Credential
     PSCredential object for storing provided creds
 .OUTPUTS
     Selected.Microsoft.HyperV.PowerShell.VirtualMachine
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-    This function will operate normally if executed on the local device. That said, because of limiations with the WinRM double-hop issue, you may experience issues if running this command in a remote session.
-    I have attempted to provide the credential object to circumvent this issue, however, the configuration of your WinRM setup may still prevent access when running this commmand from a remote session.
-    See the README for more details.
+
+    See the README for more details if you want to run this function remotely.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
 .FUNCTIONALITY
