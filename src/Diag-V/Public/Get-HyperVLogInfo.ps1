@@ -55,7 +55,6 @@
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-
     This function can query any server log - but is set by default to only query Hyper-V logs. This can be changed by the user through parameter adjustments.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V

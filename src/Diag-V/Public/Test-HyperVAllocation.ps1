@@ -2,7 +2,7 @@
 .Synopsis
     Performs a Hyper-V system evaluation for each Hyper-V node found, and returns a resource allocation health report.
 .DESCRIPTION
-    Automatically detects Standalone / Clustered Hyper-V. All Hyer-V nodes will be identified and evaluated. Available chassis resources will be gathered and will be compared to all VM CPU and memory allocations. Calculations will then be performed to determine the overall health of the node from a CPU/RAM perspective. Available storage space will also be calculated. For clusters CSV locations will be checked. For standalone Hyper-V servers any drive larger than 10GB and not C: will be checked. Drives under 1TB with less than 15% will be flagged as unhealthy. Drives over 1TB with less than 10% will be flagged as unhealthy. If a cluster is detected an additional calculation will be performed that simulates the loss of one node to determine if VMs could survive the loss of a cluster node.
+    Automatically detects Standalone / Clustered Hyper-V. All Hyper-V nodes will be identified and evaluated. Available chassis resources will be gathered and will be compared to all VM CPU and memory allocations. Calculations will then be performed to determine the overall health of the node from a CPU/RAM perspective. Available storage space will also be calculated. For clusters, CSV locations will be checked. For standalone Hyper-V servers any drive larger than 10GB and not C: will be checked. Drives under 1TB with less than 15% will be flagged as unhealthy. Drives over 1TB with less than 10% will be flagged as unhealthy. If a cluster is detected an additional calculation will be performed that simulates the loss of one node to determine if VMs could survive the loss of a cluster node.
 .EXAMPLE
     Test-HyperVAllocation
 
@@ -21,9 +21,7 @@
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-
     See the README for more details if you want to run this function remotely.
-
     This was really, really hard to make.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V

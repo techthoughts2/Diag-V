@@ -33,9 +33,7 @@
     System.Management.Automation.PSCustomObject
 .NOTES
     Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
-
     See the README for more details if you want to run this function remotely.
-
     The VHDX disk usage summary is only available when using the NoFormat switch.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
