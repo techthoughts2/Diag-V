@@ -102,14 +102,18 @@
             ReleaseNotes = '
 3.0.0
     Added Pester tests for all functions.
-    Re-wrote all functions from previous module versions to account for bugs and layout of new tests. Banished write-host - all functions now return PowerShell objects.
+    Re-wrote all functions from previous module versions to account for bugs and layout of new tests. Removed Write-Host - all functions now return PowerShell objects.
     Fixed numerous bugs.
     Added additional functionality to several functions. Some functions were renamed to more clearly indicate what they are now capable of.
-    Adjusted layout of Diag-V module to CI/CD standards
+    Adjusted layout of Diag-V module to CI/CD standards.
     Added code to support AWS Codebuild.
     Added new icon.
+    Rewrote all documentation to capture new changes and capabilities.
 2.0
-    Complete re-write from original script version. Converted Diag-V from a ps1 PowerShell script to a fully supported PowerShell module. Redesigned all diagnostic functions: Improved error control, General bug fixes, Better readability, Added new Hyper-V log parser function
+    Complete re-write from original script version.
+    Converted Diag-V from a ps1 PowerShell script to a fully supported PowerShell module.
+    Redesigned all diagnostic functions:
+    Improved error control, General bug fixes, Better readability, Added new Hyper-V log parser function.
 1.0
     Initial .ps1 script version of Diag-V.
 '
