@@ -11,6 +11,8 @@ master | Enhancements
 
 Diag-V is a read-only PowerShell module containing several Hyper-V related diagnostics to assist with managing standalone Hyper-V Servers and Hyper-V clusters.
 
+![Diag-V PS Word Cloud](media/Diag-V.png "Diag-V PSWord Cloud")
+
 ## Description
 
 Diag-V is a PowerShell Module collection of primarily Hyper-V diagnostic functions, as well as several windows diagnostic functions useful when interacting with Hyper-V servers. Hyper-V functions are cable of automatically detecting if being run against a standalone or Clustered Hyper-V instance. If a cluster is detected, data will be gathered from all nodes in the cluster. Diag-V is a read only, data gathering module that can provide rapid insight into your Hyper-V environment.
