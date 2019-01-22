@@ -131,7 +131,7 @@ function Get-VMStatus {
     if ($NoFormat) {
         $final = $vmCollection
     }#if_NoFormat
-    else{
+    else {
         $final = $vmCollection | Sort-Object ComputerName, State | Select-Object ComputerName, Name, State, CPUUsage, @{N = "MemoryMB"; E = {$_.MemoryAssigned / 1MB}}, Uptime, Status | Format-Table -AutoSize
     }#else_NoFormat
     return $final

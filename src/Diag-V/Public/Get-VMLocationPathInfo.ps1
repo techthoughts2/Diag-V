@@ -81,7 +81,7 @@ function Get-VMLocationPathInfo {
                             return
                         }#catch_Get-VM
                         if ($rawVM) {
-                                $vmCollection += $rawVM
+                            $vmCollection += $rawVM
                         }#if_rawVM
                         else {
                             Write-Verbose "No VMs were returned from $node"
@@ -120,6 +120,6 @@ function Get-VMLocationPathInfo {
         Write-Warning -Message 'Not running as administrator. No further action can be taken.'
         return
     }#administrator check
-    $final = $vmCollection | Select-Object ComputerName,VMName,State,Path,ConfigurationLocation,SnapshotFileLocation,SmartPagingFilePath
+    $final = $vmCollection | Select-Object ComputerName, VMName, State, Path, ConfigurationLocation, SnapshotFileLocation, SmartPagingFilePath
     return $final
 }#Get-VMLocationPathInfo

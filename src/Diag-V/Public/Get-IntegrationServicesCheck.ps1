@@ -117,7 +117,7 @@ function Get-IntegrationServicesCheck {
                                     return
                                 }#catch_Get-VMIntegrationService
                                 $rawCombine = $rawIntegration + $vm
-                                $cObj = $rawCombine | Select-Object ComputerName,VMName,Name,Enabled,PrimaryStatusDescription,IntegrationServicesVersion
+                                $cObj = $rawCombine | Select-Object ComputerName, VMName, Name, Enabled, PrimaryStatusDescription, IntegrationServicesVersion
                                 #_____________________________________________________________
                                 Write-Verbose -Message 'VM Information processed.'
                                 #_____________________________________________________________
@@ -170,7 +170,7 @@ function Get-IntegrationServicesCheck {
                         return
                     }#catch_Get-VMIntegrationService
                     $rawCombine = $rawIntegration + $vm
-                    $cObj = $rawCombine | Select-Object ComputerName,VMName,Name,Enabled,PrimaryStatusDescription,IntegrationServicesVersion
+                    $cObj = $rawCombine | Select-Object ComputerName, VMName, Name, Enabled, PrimaryStatusDescription, IntegrationServicesVersion
                     #_____________________________________________________________
                     Write-Verbose -Message 'VM Information processed.'
                     #_____________________________________________________________
@@ -192,7 +192,7 @@ function Get-IntegrationServicesCheck {
     if ($NoFormat) {
         $final = $vmCollection
     }#if_NoFormat
-    else{
+    else {
         $final = $vmCollection | Format-Table
     }#else_NoFormat
     return $final

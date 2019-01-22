@@ -55,17 +55,17 @@ function Get-FileSizeInfo {
             $intSize = [math]::round($intSize / 1GB, 0)
             #___________________
             $results += $files `
-                        | Select-Object Directory, Name, @{Label = 'Size(MB)'; Expression = {[math]::round($_.Length / 1MB, 2)}} `
-                        | Sort-Object 'Size(MB)' -Descending | Select-Object -First 10
+                | Select-Object Directory, Name, @{Label = 'Size(MB)'; Expression = {[math]::round($_.Length / 1MB, 2)}} `
+                | Sort-Object 'Size(MB)' -Descending | Select-Object -First 10
             $results += "Total size of all files: $intSize GB"
             #___________________
         }#if_Null
-        else{
+        else {
             Write-Warning "No files were found at the specified location."
             return
         }#else_Null
     }#if_Test-Path
-    else{
+    else {
         Write-Warning "The path specified is not valid."
         return
     }#else_Test-Path

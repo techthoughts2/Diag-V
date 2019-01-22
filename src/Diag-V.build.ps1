@@ -151,13 +151,13 @@ task Test {
     if (Test-Path -Path $script:UnitTestsPath) {
         Write-Host -NoNewLine "      Performing Pester Unit Tests"
         $invokePesterParams = @{
-            Path         = 'Tests\Unit'
-            Strict       = $true
-            PassThru     = $true
-            Verbose      = $false
-            EnableExit   = $false
-            CodeCoverage = "$ModuleName\*\*.ps1"
-            CodeCoverageOutputFile = "$codeCovPath\codecoverage.xml"
+            Path                         = 'Tests\Unit'
+            Strict                       = $true
+            PassThru                     = $true
+            Verbose                      = $false
+            EnableExit                   = $false
+            CodeCoverage                 = "$ModuleName\*\*.ps1"
+            CodeCoverageOutputFile       = "$codeCovPath\codecoverage.xml"
             CodeCoverageOutputFileFormat = 'JaCoCo'
         }
 
@@ -197,11 +197,11 @@ task Test {
     if (Test-Path -Path $script:InfraTestsPath) {
         Write-Host -NoNewLine "      Performing Pester Infrastructure Tests"
         $invokePesterParams = @{
-            Path         = '..\..\Tests\Infrastructure'
-            Strict       = $true
-            PassThru     = $true
-            Verbose      = $false
-            EnableExit   = $false
+            Path       = '..\..\Tests\Infrastructure'
+            Strict     = $true
+            PassThru   = $true
+            Verbose    = $false
+            EnableExit = $false
         }
         Write-Host $invokePesterParams.path
         # Publish Test Results as NUnitXml

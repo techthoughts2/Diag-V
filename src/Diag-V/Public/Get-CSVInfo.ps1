@@ -75,25 +75,25 @@ function Get-CSVInfo {
                         if ($Credential) {
                             $cimSession = New-CimSession -Credential $Credential -ComputerName $volumeowner -ErrorAction Stop
                         }#if_Credential
-                        else{
+                        else {
                             $cimSession = New-CimSession -ComputerName $volumeowner -ErrorAction Stop
                         }#else_Credential
                         $volumeInfo = Get-Disk -CimSession $cimSession -ErrorAction Stop `
-                                        | Get-Partition -ErrorAction Stop `
-                                        | Select-Object DiskNumber, @{Name = "Volume";Expression = {Get-Volume -Partition $_ -ErrorAction Stop}}
+                            | Get-Partition -ErrorAction Stop `
+                            | Select-Object DiskNumber, @{Name = "Volume"; Expression = {Get-Volume -Partition $_ -ErrorAction Stop}}
                         $csvdisknumber = ($volumeinfo | Where-Object { $_.volume.path -eq $csvVolume -or $_.volume.ObjectID -eq $csvVolume }).Disknumber
                         $fileSystemType = ($volumeinfo | Where-Object { $_.volume.path -eq $csvVolume -or $_.volume.ObjectID -eq $csvVolume }).Volume.FileSystemType
                         #___________________________________________________
                         $csvtophysicaldisk = New-Object -TypeName PSObject -Property @{
-                            "CSVName" = $csv.Name
-                            "CSVOwnerNode" = $volumeowner
-                            "CSVVolumePath" = $csv.SharedVolumeInfo.FriendlyVolumeName
-                            "FileSystemType" = $fileSystemType
+                            "CSVName"               = $csv.Name
+                            "CSVOwnerNode"          = $volumeowner
+                            "CSVVolumePath"         = $csv.SharedVolumeInfo.FriendlyVolumeName
+                            "FileSystemType"        = $fileSystemType
                             "CSVPhysicalDiskNumber" = $csvdisknumber
-                            "CSVPartitionNumber" = $csv.SharedVolumeInfo.PartitionNumber
-                            "Size (GB)" = [int]($csv.SharedVolumeInfo.Partition.Size / 1GB)
-                            "FreeSpace (GB)" = [int]($csv.SharedVolumeInfo.Partition.Freespace / 1GB)
-                            "Percent Free" = $csv.SharedVolumeInfo.Partition.PercentFree
+                            "CSVPartitionNumber"    = $csv.SharedVolumeInfo.PartitionNumber
+                            "Size (GB)"             = [int]($csv.SharedVolumeInfo.Partition.Size / 1GB)
+                            "FreeSpace (GB)"        = [int]($csv.SharedVolumeInfo.Partition.Freespace / 1GB)
+                            "Percent Free"          = $csv.SharedVolumeInfo.Partition.PercentFree
                         }
                         #___________________________________________________
                     }#try_All
@@ -105,7 +105,7 @@ function Get-CSVInfo {
                     $results += $csvtophysicaldisk
                 }#foreach_CSV
             }#if_nullCheck
-            else{
+            else {
                 Write-Warning -Message 'No CSVs discovered.'
                 return
             }#else_nullCheck

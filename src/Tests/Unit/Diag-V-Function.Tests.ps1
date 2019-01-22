@@ -21,7 +21,8 @@ InModuleScope Diag-V {
     #-------------------------------------------------------------------------
     Describe 'Diag-V Supporting Function Tests' -Tag Unit {
         Context 'Test-IsACluster' {
-            function Get-ClusterNode {}
+            function Get-ClusterNode {
+            }
             It 'should return $false if the cluster service check is null' {
                 mock Get-Service -MockWith {}
                 Test-IsACluster | Should -Be $false
@@ -97,7 +98,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Test-IsACluster | Should -Be $false
             }#it
             It 'should return $true if the cluster service is running and a a node is returned that matches the hostname' {
@@ -188,7 +189,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
                 }
@@ -212,7 +213,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
                 }
@@ -257,7 +258,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
                 }
@@ -335,7 +336,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
                 }
@@ -369,10 +370,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
                         Name         = 'DemoVM'
@@ -403,10 +404,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
                         ComputerName         = 'HYP0'
@@ -498,10 +499,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
-                }
+                }#endMock
                 Get-VMInfo | Select-Object -ExpandProperty OSName | Should -BeExactly 'Windows'
             }#it
             It 'should return an OSName value of Unknown if an error is encountered establishing a CIM session' {
@@ -613,10 +614,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
                         ComputerName         = 'HYP0'
@@ -634,7 +635,7 @@ InModuleScope Diag-V {
                         Uptime               = '51.05:14:44.6730000'
                         Status               = 'Operating normally'
                         AutomaticStopAction  = 'Save'
-                        MemoryAssigned	     = 2147483648
+                        MemoryAssigned       = 2147483648
                     }
                 }#endMock
             }#beforeEach
@@ -671,10 +672,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
-                }
+                }#endMock
                 Get-BINSpaceInfo -InfoType StorageSavings | Select-Object -ExpandProperty StorageSavings | Should -BeExactly '2 GB'
             }#it
             It 'should return valid results if a cluster is detected, credentials are provided, VMInfo indicated, and no issues are encountered' {
@@ -687,7 +688,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 $eval = Get-BINSpaceInfo -InfoType VMInfo -Credential $Credential | Select-Object -First 1
                 $eval | Select-Object -ExpandProperty ComputerName | Should -BeExactly 'HYP0'
                 $eval | Select-Object -ExpandProperty VMName | Should -BeExactly 'DemoVM'
@@ -757,32 +758,32 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName            = 'HYP0'
-                        VMName                  = 'DemoVM'
-                        ProcessorCount          = 32
-                        DynamicMemoryEnabled    = $true
-                        MemoryMinimum           = 4294967296
-                        MemoryMaximum           = 16978542592
-                        IsClustered             = $false
-                        Version                 = '8.0'
-                        ReplicationHealth       = 'NotApplicable'
-                        State                   = 'Running'
-                        CPUUsage                = '2'
-                        MemoryMB                = '2048'
-                        Uptime                  = '51.05:14:44.6730000'
-                        Status                  = 'Operating normally'
-                        AutomaticStopAction     = 'Save'
-                        MemoryAssigned	        = 2147483648
-                        Path                    = 'E:\vms\'
-                        ConfigurationLocation   = 'E:\vms\'
-                        SnapshotFileLocation	= 'E:\vms\'
-                        SmartPagingFilePath     = 'E:\vms\'
+                        ComputerName          = 'HYP0'
+                        VMName                = 'DemoVM'
+                        ProcessorCount        = 32
+                        DynamicMemoryEnabled  = $true
+                        MemoryMinimum         = 4294967296
+                        MemoryMaximum         = 16978542592
+                        IsClustered           = $false
+                        Version               = '8.0'
+                        ReplicationHealth     = 'NotApplicable'
+                        State                 = 'Running'
+                        CPUUsage              = '2'
+                        MemoryMB              = '2048'
+                        Uptime                = '51.05:14:44.6730000'
+                        Status                = 'Operating normally'
+                        AutomaticStopAction   = 'Save'
+                        MemoryAssigned        = 2147483648
+                        Path                  = 'E:\vms\'
+                        ConfigurationLocation = 'E:\vms\'
+                        SnapshotFileLocation  = 'E:\vms\'
+                        SmartPagingFilePath   = 'E:\vms\'
                     }
                 }#endMock
             }#beforeEach
@@ -815,10 +816,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
-                }
+                }#endMock
                 Get-VMLocationPathInfo | Select-Object -ExpandProperty SmartPagingFilePath | Should -BeExactly 'E:\vms\'
             }#it
             It 'should return valid results if a cluster is detected, credentials are provided, and no issues are encountered' {
@@ -831,7 +832,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 $eval = Get-VMLocationPathInfo -Credential $Credential | Select-Object -First 1
                 $eval | Select-Object -ExpandProperty ComputerName | Should -BeExactly 'HYP0'
                 $eval | Select-Object -ExpandProperty VMName | Should -BeExactly 'DemoVM'
@@ -885,34 +886,34 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName            = 'HYP0'
-                        VMName                  = 'DemoVM'
-                        ProcessorCount          = 32
-                        DynamicMemoryEnabled    = $true
-                        MemoryMinimum           = 4294967296
-                        MemoryMaximum           = 16978542592
-                        IsClustered             = $false
-                        Version                 = '8.0'
-                        ReplicationHealth       = 'FakeStatus'
-                        State                   = 'Running'
-                        CPUUsage                = '2'
-                        MemoryMB                = '2048'
-                        Uptime                  = '51.05:14:44.6730000'
-                        Status                  = 'Operating normally'
-                        AutomaticStopAction     = 'Save'
-                        MemoryAssigned	        = 2147483648
-                        Path                    = 'E:\vms\'
-                        ConfigurationLocation   = 'E:\vms\'
-                        SnapshotFileLocation	= 'E:\vms\'
-                        SmartPagingFilePath     = 'E:\vms\'
-                        ReplicationState	    = 'FakeStatus'
-                        ReplicationMode	        = 'FakeStatus'
+                        ComputerName          = 'HYP0'
+                        VMName                = 'DemoVM'
+                        ProcessorCount        = 32
+                        DynamicMemoryEnabled  = $true
+                        MemoryMinimum         = 4294967296
+                        MemoryMaximum         = 16978542592
+                        IsClustered           = $false
+                        Version               = '8.0'
+                        ReplicationHealth     = 'FakeStatus'
+                        State                 = 'Running'
+                        CPUUsage              = '2'
+                        MemoryMB              = '2048'
+                        Uptime                = '51.05:14:44.6730000'
+                        Status                = 'Operating normally'
+                        AutomaticStopAction   = 'Save'
+                        MemoryAssigned        = 2147483648
+                        Path                  = 'E:\vms\'
+                        ConfigurationLocation = 'E:\vms\'
+                        SnapshotFileLocation  = 'E:\vms\'
+                        SmartPagingFilePath   = 'E:\vms\'
+                        ReplicationState      = 'FakeStatus'
+                        ReplicationMode       = 'FakeStatus'
                     }
                 }#endMock
             }#beforeEach
@@ -929,7 +930,7 @@ InModuleScope Diag-V {
             It 'should return null if no VMs have replication enabled' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ReplicationState	    = 'Disabled'
+                        ReplicationState = 'Disabled'
                     }
                 }#endMock
                 Get-VMReplicationStatus | Should -BeNullOrEmpty
@@ -953,10 +954,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
-                }
+                }#endMock
                 Get-VMReplicationStatus | Select-Object -ExpandProperty ReplicationMode | Should -BeExactly 'FakeStatus'
             }#it
             It 'should return valid results if a cluster is detected, credentials are provided, and no issues are encountered' {
@@ -1021,35 +1022,35 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'HYP0'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 32
-                        DynamicMemoryEnabled        = $true
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
+                        ComputerName               = 'HYP0'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 32
+                        DynamicMemoryEnabled       = $true
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
                     }
                 }#endMock
                 $results = @()
@@ -1112,7 +1113,7 @@ InModuleScope Diag-V {
             It 'should return null if no VMs have replication enabled' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ReplicationState	    = 'Disabled'
+                        ReplicationState = 'Disabled'
                     }
                 }#endMock
                 Get-IntegrationServicesCheck | Should -BeNullOrEmpty
@@ -1142,10 +1143,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
-                }
+                }#endMock
                 Get-IntegrationServicesCheck -NoFormat | Select-Object -First 1 -ExpandProperty Name | Should -BeExactly 'Guest Service Interface'
             }#it
             It 'should return valid results if a cluster is detected, credentials are provided, and no issues are encountered' {
@@ -1158,10 +1159,10 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 $eval = Get-IntegrationServicesCheck -Credential $Credential -NoFormat | Select-Object -First 1
                 $eval | Select-Object -ExpandProperty VMName | Should -BeExactly 'Server1'
                 $eval | Select-Object -ExpandProperty Name | Should -BeExactly 'Guest Service Interface'
@@ -1210,7 +1211,8 @@ InModuleScope Diag-V {
             }#it
         }#context
         Context 'Get-AllVHD' {
-            function Get-VHD {}
+            function Get-VHD {
+            }
             BeforeEach {
                 Mock Test-RunningAsAdmin -MockWith {
                     $true
@@ -1226,35 +1228,35 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'HYP0'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 32
-                        DynamicMemoryEnabled        = $true
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
+                        ComputerName               = 'HYP0'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 32
+                        DynamicMemoryEnabled       = $true
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
                     }
                 }#endMock
                 Mock Get-VHD -MockWith {
@@ -1276,7 +1278,7 @@ InModuleScope Diag-V {
                         DiskNumber              = ''
                         Number                  = ''
                     }
-                }
+                }#endMock
             }#beforeEach
             It 'should return null if not running as admin' {
                 Mock Test-RunningAsAdmin -MockWith {
@@ -1315,7 +1317,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
                 }#endMock
@@ -1373,7 +1375,8 @@ InModuleScope Diag-V {
             }#it
         }#context
         Context 'Get-SharedVHD' {
-            function Get-VMHardDiskDrive {}
+            function Get-VMHardDiskDrive {
+            }
             BeforeEach {
                 Mock Test-RunningAsAdmin -MockWith {
                     $true
@@ -1389,35 +1392,35 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'HYP0'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 32
-                        DynamicMemoryEnabled        = $true
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
+                        ComputerName               = 'HYP0'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 32
+                        DynamicMemoryEnabled       = $true
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
                     }
                 }#endMock
                 Mock Get-VMHardDiskDrive -MockWith {
@@ -1433,7 +1436,7 @@ InModuleScope Diag-V {
                         ComputerName                  = 'HYP0'
                         IsDeleted                     = $false
                     }
-                }
+                }#endMock
             }#beforeEach
             It 'should return null if not running as admin' {
                 Mock Test-RunningAsAdmin -MockWith {
@@ -1472,7 +1475,7 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $false
                 }#endMock
@@ -1524,7 +1527,8 @@ InModuleScope Diag-V {
             }#it
         }#context
         Context 'Get-CSVInfo' {
-            function Get-ClusterSharedVolume {}
+            function Get-ClusterSharedVolume {
+            }
             BeforeEach {
                 Mock Test-RunningAsAdmin -MockWith {
                     $true
@@ -1564,17 +1568,17 @@ InModuleScope Diag-V {
                             FriendlyVolumeName = 'C:\ClusterStorage\Volume1'
                             MaintenanceMode    = $false
                             Partition          = [PSCustomObject]@{
-                                DriveLetterMask        = 0
-                                FileSystem             = 'CSVFS'
-                                FreeSpace              = 214748364800
-                                HasDriveLetter         = $false
-                                IsFormatted            = $true
-                                IsNtfs                 = $false
-                                Name                   = '\\?\Volume{00000xx0-0x0x-0xx0-xx00-000xx0x000x0}\'
-                                PartitionNumber        = 2
-                                PercentFree            = 20
-                                Size                   = 1073741824000
-                                UsedSpace              = 858993459200
+                                DriveLetterMask = 0
+                                FileSystem      = 'CSVFS'
+                                FreeSpace       = 214748364800
+                                HasDriveLetter  = $false
+                                IsFormatted     = $true
+                                IsNtfs          = $false
+                                Name            = '\\?\Volume{00000xx0-0x0x-0xx0-xx00-000xx0x000x0}\'
+                                PartitionNumber = 2
+                                PercentFree     = 20
+                                Size            = 1073741824000
+                                UsedSpace       = 858993459200
                             }
                             PartitionNumber    = 2
                             RedirectedAccess   = $false
@@ -1585,89 +1589,89 @@ InModuleScope Diag-V {
                 }#endMock
                 Mock Get-Disk -MockWith {
                     [PSCustomObject]@{
-                        DiskNumber            = 15
-                        PartitionStyle        = 'GPT'
-                        ProvisioningType      = 'Fixed'
-                        OperationalStatus     = 'Online'
-                        HealthStatus          = 'Healthy'
-                        BusType               = 'Spaces'
-                        UniqueIdFormat        = 'Vendor Specific'
-                        UniqueId              = '000X910300X9324F9446412XXXXXX'
-                        AllocatedSize         = 1073741824000
-                        BootFromDisk          = $false
-                        FirmwareVersion       = 0.1.1
-                        FriendlyName          = 'CSV2'
-                        Guid                  = '{XXXXXXXX-ec1d-4604-bed8-40ce34a53XXX}'
-                        IsBoot                = $false
-                        IsClustered           = $true
-                        IsHighlyAvailable     = $true
-                        IsOffline             = $false
-                        IsReadOnly            = $false
-                        IsScaleOut            = $true
-                        IsSystem              = $false
-                        LargestFreeExtent     = 0
-                        LogicalSectorSize     = 4096
-                        Manufacturer          = 'Msft'
-                        Model                 = 'Storage Space'
-                        Number                = 11
-                        NumberOfPartitions    = 2
-                        Path                  = '\\?\Disk{00010x55-x000-0X00-0000-412x58xx63x0}'
-                        PhysicalSectorSize    = 4096
-                        Size                  = 1073741824000
-                        CimClass              = 'ROOT/Microsoft/Windows/Storage:MSFT_Disk'
+                        DiskNumber         = 15
+                        PartitionStyle     = 'GPT'
+                        ProvisioningType   = 'Fixed'
+                        OperationalStatus  = 'Online'
+                        HealthStatus       = 'Healthy'
+                        BusType            = 'Spaces'
+                        UniqueIdFormat     = 'Vendor Specific'
+                        UniqueId           = '000X910300X9324F9446412XXXXXX'
+                        AllocatedSize      = 1073741824000
+                        BootFromDisk       = $false
+                        FirmwareVersion    = 0.1.1
+                        FriendlyName       = 'CSV2'
+                        Guid               = '{XXXXXXXX-ec1d-4604-bed8-40ce34a53XXX}'
+                        IsBoot             = $false
+                        IsClustered        = $true
+                        IsHighlyAvailable  = $true
+                        IsOffline          = $false
+                        IsReadOnly         = $false
+                        IsScaleOut         = $true
+                        IsSystem           = $false
+                        LargestFreeExtent  = 0
+                        LogicalSectorSize  = 4096
+                        Manufacturer       = 'Msft'
+                        Model              = 'Storage Space'
+                        Number             = 11
+                        NumberOfPartitions = 2
+                        Path               = '\\?\Disk{00010x55-x000-0X00-0000-412x58xx63x0}'
+                        PhysicalSectorSize = 4096
+                        Size               = 1073741824000
+                        CimClass           = 'ROOT/Microsoft/Windows/Storage:MSFT_Disk'
                     }
                 }#endMock
                 Mock Get-Partition -MockWith {
                     [PSCustomObject]@{
-                        OperationalStatus     = 'Online'
-                        Type                  = 'Basic'
-                        DiskPath              = '\\?\Disk{00010x55-x000-0X00-0000-412x58xx63x0}'
-                        ObjectId              = '{1}\\XXX-XXX00-01\root/Microsoft/Windows/Storage/Providers_v2\WSP_Partition.ObjectId="{0xx00x0x-x00x-000x-000x-1xx47x5x9x00}:PR:{00000000-0000-0000-0000-000000000000}\\?\Disk{00000x00-x000-4x00-0000-012x58xx63x0}"'
-                        AccessPaths           = '{C:\ClusterStorage\Volume2\, \\?\Volume{xxx000x5-0000-4x00-x0x1-0x946x483xxx}\}'
-                        DiskId                = '\\?\Disk{00010x55-x000-0X00-0000-412x58xx63x0}'
-                        DiskNumber            = 11
-                        DriveLetter           = ''
-                        IsActive              = $false
-                        IsBoot                = $false
-                        IsDAX                 = $false
-                        IsHidden              = $false
-                        IsOffline             = $false
-                        IsReadOnly            = $false
-                        IsShadowCopy          = $false
-                        IsSystem              = $false
-                        NoDefaultDriveLetter  = $true
-                        Offset                = 135266304
-                        PartitionNumber       = 2
-                        Size                  = 1073741824000
-                        TransitionState       = 1
-                        CimClass              = 'ROOT/Microsoft/Windows/Storage:MSFT_Partition'
+                        OperationalStatus    = 'Online'
+                        Type                 = 'Basic'
+                        DiskPath             = '\\?\Disk{00010x55-x000-0X00-0000-412x58xx63x0}'
+                        ObjectId             = '{1}\\XXX-XXX00-01\root/Microsoft/Windows/Storage/Providers_v2\WSP_Partition.ObjectId="{0xx00x0x-x00x-000x-000x-1xx47x5x9x00}:PR:{00000000-0000-0000-0000-000000000000}\\?\Disk{00000x00-x000-4x00-0000-012x58xx63x0}"'
+                        AccessPaths          = '{C:\ClusterStorage\Volume2\, \\?\Volume{xxx000x5-0000-4x00-x0x1-0x946x483xxx}\}'
+                        DiskId               = '\\?\Disk{00010x55-x000-0X00-0000-412x58xx63x0}'
+                        DiskNumber           = 11
+                        DriveLetter          = ''
+                        IsActive             = $false
+                        IsBoot               = $false
+                        IsDAX                = $false
+                        IsHidden             = $false
+                        IsOffline            = $false
+                        IsReadOnly           = $false
+                        IsShadowCopy         = $false
+                        IsSystem             = $false
+                        NoDefaultDriveLetter = $true
+                        Offset               = 135266304
+                        PartitionNumber      = 2
+                        Size                 = 1073741824000
+                        TransitionState      = 1
+                        CimClass             = 'ROOT/Microsoft/Windows/Storage:MSFT_Partition'
                     }
                 }#endMock
                 Mock Get-Volume -MockWith {
                     [PSCustomObject]@{
-                        OperationalStatus     = 'OK'
-                        HealthStatus          = 'Healthy'
-                        DriveType             = 'Fixed'
-                        FileSystemType        = 'CSVFS_ReFS'
-                        DedupMode             = 'Disabled'
-                        ObjectId              = '{1}\\XXX-XXX00-01\root/Microsoft/Windows/Storage/Providers_v2\WSP_Partition.ObjectId="{0xx00x0x-x00x-000x-000x-1xx47x5x9x00}:PR:{00000000-0000-0000-0000-000000000000}\\?\Disk{00000x00-x000-4x00-0000-012x58xx63x0}"'
-                        UniqueId              = '\\?\Volume{00000xx0-0x0x-0xx0-xx00-000xx0x000x0}\'
-                        AllocationUnitSize    = 65536
-                        DriveLetter           = ''
-                        FileSystem            = 'CSVFS'
-                        FileSystemLabel       = 'CSV1'
-                        Path                  = '\\?\Volume{00000xx0-0x0x-0xx0-xx00-000xx0x000x0}\'
-                        Size                  = 10994914951168
-                        SizeRemaining         = 3884529876992
-                        PSComputerName        = ''
-                        CimClass              = 'ROOT/Microsoft/Windows/Storage:MSFT_Volume'
+                        OperationalStatus  = 'OK'
+                        HealthStatus       = 'Healthy'
+                        DriveType          = 'Fixed'
+                        FileSystemType     = 'CSVFS_ReFS'
+                        DedupMode          = 'Disabled'
+                        ObjectId           = '{1}\\XXX-XXX00-01\root/Microsoft/Windows/Storage/Providers_v2\WSP_Partition.ObjectId="{0xx00x0x-x00x-000x-000x-1xx47x5x9x00}:PR:{00000000-0000-0000-0000-000000000000}\\?\Disk{00000x00-x000-4x00-0000-012x58xx63x0}"'
+                        UniqueId           = '\\?\Volume{00000xx0-0x0x-0xx0-xx00-000xx0x000x0}\'
+                        AllocationUnitSize = 65536
+                        DriveLetter        = ''
+                        FileSystem         = 'CSVFS'
+                        FileSystemLabel    = 'CSV1'
+                        Path               = '\\?\Volume{00000xx0-0x0x-0xx0-xx00-000xx0x000x0}\'
+                        Size               = 10994914951168
+                        SizeRemaining      = 3884529876992
+                        PSComputerName     = ''
+                        CimClass           = 'ROOT/Microsoft/Windows/Storage:MSFT_Volume'
                     }
                 }#endMock
             }#beforeEach
             It 'should return null if the device is not a cluster' {
                 Mock Test-IsACluster -MockWith {
                     $false
-                }
+                }#endMock
                 Get-CSVInfo | Should -BeNullOrEmpty
             }#it
             It 'should return null if the script is not running as admin' {
@@ -1679,30 +1683,30 @@ InModuleScope Diag-V {
             It 'should return null if an error is encountered getting csv information' {
                 Mock Get-ClusterSharedVolume -MockWith {
                     throw 'Bullshit Error'
-                }
+                }#endMock
                 Get-CSVInfo | Should -BeNullOrEmpty
             }#it
-            It 'should return null if no CSVs are found'{
+            It 'should return null if no CSVs are found' {
                 Mock Get-ClusterSharedVolume -MockWith {}
                 Get-CSVInfo | Should -BeNullOrEmpty
             }#it
-            It 'should return null if an error is encountered creating a CimSession'{
+            It 'should return null if an error is encountered creating a CimSession' {
                 Mock New-CimSession {
                     Throw 'Bullshit Error'
-                }
+                }#endMock
                 Get-CSVInfo | Should -BeNullOrEmpty
             }#it
-            It 'should return null if an error is encountered getting disk information'{
+            It 'should return null if an error is encountered getting disk information' {
                 $Credential = New-Object -TypeName System.Management.Automation.PSCredential('username', (ConvertTo-SecureString 'password' -AsPlainText -Force))
                 Mock Get-Disk {
                     Throw 'Bullshit Error'
-                }
+                }#endMock
                 Get-CSVInfo -Credential $Credential | Should -BeNullOrEmpty
             }#it
-            It 'should return null if an error is encountered getting partition information'{
+            It 'should return null if an error is encountered getting partition information' {
                 Mock Get-Partition {
                     Throw 'Bullshit Error'
-                }
+                }#endMock
                 Get-CSVInfo | Should -BeNullOrEmpty
             }#it
             #It doesn't appear that pester has the ability to mock into the Get-Volume Exrepession statement
@@ -1715,7 +1719,7 @@ InModuleScope Diag-V {
                 Get-CSVInfo | Should -BeNullOrEmpty
             }#it
             #>
-            It 'should return expected results if no issues are encountered'{
+            It 'should return expected results if no issues are encountered' {
                 $eval = Get-CSVInfo
                 $eval.CSVName | Should -BeExactly 'CSV1'
                 $eval.CSVOwnerNode | Should -BeExactly 'Server1'
@@ -1729,63 +1733,8 @@ InModuleScope Diag-V {
             }#it
         }#context
         Context "Test-HyperVAllocation" {
-            function Get-ClusterSharedVolume {}
-            <#
-                $w32ProcInfo.numberOfCores
-                $w32ProcInfo.NumberOfLogicalProcessors
-                $w32OSInfo.CSName
-                $w32OSInfo.TotalVisibleMemorySize
-                $w32OSInfo.FreePhysicalMemory
-                $drive.Size
-                $drive.DeviceID
-                $drive.Freespace
-            #>
-                        <#
-
-            Name          State  Node
-            ----          -----  ----
-            VMStorageCSV2 Online HV-WBU11-02
-
-
-            Name          State  Node
-            ----          -----  ----
-            VMStorageCSV1 Online HV-WBU11-03
-            VMStorageCSV2 Online HV-WBU11-02
-            VMStorageCSV3 Online HV-WBU11-01
-
-            PS C:\Windows\system32> $a[0].SharedVolumeInfo
-
-
-            FaultState         : NoFaults
-            FriendlyVolumeName : C:\ClusterStorage\Volume1
-            MaintenanceMode    : False
-            Partition          : Microsoft.FailoverClusters.PowerShell.ClusterDiskPartitionInfo
-            PartitionNumber    : 2
-            RedirectedAccess   : False
-            VolumeOffset       : 135266304
-
-
-            PS C:\Windows\system32> $a[0].SharedVolumeInfo.Partition
-
-
-            DriveLetter            :
-            DriveLetterMask        : 0
-            FileSystem             : CSVFS
-            FreeSpace              : 2431013945344
-            HasDriveLetter         : False
-            IsCompressed           : False
-            IsDirty                : Unknown
-            IsFormatted            : True
-            IsNtfs                 : False
-            IsPartitionNumberValid : True
-            IsPartitionSizeValid   : True
-            MountPoints            : {}
-            Name                   : \\?\Volume{06076bd5-9d4b-4cd8-ad79-344aa2f347c5}\
-            PartitionNumber        : 2
-            PercentFree            : 22.11035
-            Size                   : 10994914951168
-            UsedSpace              : 8563901005824
-            #>
+            function Get-ClusterSharedVolume {
+            }
             BeforeEach {
                 Mock Test-RunningAsAdmin -MockWith {
                     $true
@@ -1801,67 +1750,67 @@ InModuleScope Diag-V {
                             'Server2'
                         )
                     }
-                }
+                }#endMock
                 Mock Test-NetConnection -MockWith {
                     $true
-                }
+                }#endMock
                 Mock -CommandName New-CimSession -MockWith {
                     New-MockObject -Type Microsoft.Management.Infrastructure.CimSession
                 }#endMock
                 Mock Get-CimInstance -MockWith {
                     [PSCustomObject]@{
-                        NumberOfCores               = 16
-                        NumberOfLogicalProcessors   = 32
-                        CSName                      = 'Server1'
-                        TotalVisibleMemorySize      = 67009504
-                        FreePhysicalMemory          = 45268080
-                        Size                        = 1000056291328
-                        DeviceID                    = 'E:'
-                        Freespace                   = 248698044416
+                        NumberOfCores             = 16
+                        NumberOfLogicalProcessors = 32
+                        CSName                    = 'Server1'
+                        TotalVisibleMemorySize    = 67009504
+                        FreePhysicalMemory        = 45268080
+                        Size                      = 1000056291328
+                        DeviceID                  = 'E:'
+                        Freespace                 = 248698044416
                     }
                 }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 32
-                        DynamicMemoryEnabled        = $true
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 2147483648
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 32
+                        DynamicMemoryEnabled       = $true
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 2147483648
                     }
                 }#endMock
                 Mock Get-ClusterSharedVolume -MockWith {
                     [PSCustomObject]@{
-                        Name = 'CSV1'
-                        State = 'Online'
-                        Node = 'Server2'
+                        Name             = 'CSV1'
+                        State            = 'Online'
+                        Node             = 'Server2'
                         SharedVolumeInfo = [PSCustomObject]@{
-                            FaultState = 'NoFaults'
+                            FaultState         = 'NoFaults'
                             FriendlyVolumeName = 'C:\ClusterStorage\Volume1'
-                            Partition = [PSCustomObject]@{
+                            Partition          = [PSCustomObject]@{
                                 DriveLetter = ''
-                                FileSystem = 'CSVFS'
-                                FreeSpace = 214748364800
+                                FileSystem  = 'CSVFS'
+                                FreeSpace   = 214748364800
                                 PercentFree = 20
-                                Size = 1073741824000
+                                Size        = 1073741824000
                             }
                         }
                     }
@@ -1880,7 +1829,7 @@ InModuleScope Diag-V {
             It 'should return null if a cluster is detected and a connection cannot be established to a node' {
                 Mock Test-NetConnection -MockWith {
                     $false
-                }
+                }#endMock
                 Test-HyperVAllocation | Should -BeNullOrEmpty
             }#it
             It 'should return null if a cluster is detected and an error is encountered getting VMs' {
@@ -1926,33 +1875,33 @@ InModuleScope Diag-V {
                 $eval.DynamicMaxPotential[0] | Should -BeExactly 0
                 $eval.DynamicMaxAllocation[0] | Should -BeExactly 'NA'
             }#it
-            It 'should return different data if only VMs with static memory are found and cluster is detected.'{
+            It 'should return different data if only VMs with static memory are found and cluster is detected.' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 32
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 2147483648
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 32
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 2147483648
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
@@ -1972,150 +1921,150 @@ InModuleScope Diag-V {
                 $eval.SystemName[0] | Should -BeExactly 'Server1'
                 $eval.DynamicMaxPotential[0] | Should -BeExactly 0
                 $eval.DynamicMaxAllocation[0] | Should -BeExactly 'NA'
-            }
-            It 'should correctly calculate a higher vCPU ratio than 1:1 when cluster is detected'{
+            }#it
+            It 'should correctly calculate a higher vCPU ratio than 1:1 when cluster is detected' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 2147483648
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 2147483648
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.vCPURatio[0] | Should -BeExactly '4 : 1'
-            }
-            It 'should warn when VM ram required equals available VM ram and a cluster is detected'{
+            }#it
+            It 'should warn when VM ram required equals available VM ram and a cluster is detected' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 60129542144
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 60129542144
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 60129542144
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 60129542144
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.RAMAllocation[0] | Should -BeExactly 'Warning'
-            }
-            It 'should mark UNHEALTHY when VM RAM required greater than available system RAM with cluster detected'{
+            }#it
+            It 'should mark UNHEALTHY when VM RAM required greater than available system RAM with cluster detected' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 68719476736
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 68719476736
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 68719476736
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 68719476736
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.RAMAllocation[0] | Should -BeExactly 'UNHEALTHY'
             }#it
-            It 'should warn if dynamic max ram potential exceeds available memory with a cluster detected'{
+            It 'should warn if dynamic max ram potential exceeds available memory with a cluster detected' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $true
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 68719476736
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 68719476736
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 4294967296
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $true
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 68719476736
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 68719476736
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 4294967296
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.DynamicMaxAllocation[0] | Should -BeExactly 'Warning'
-            }
-            It 'should report HEALTHY if csv size is over 1TB with 12% free'{
+            }#it
+            It 'should report HEALTHY if csv size is over 1TB with 12% free' {
                 Mock Get-ClusterSharedVolume -MockWith {
                     [PSCustomObject]@{
-                        Name = 'CSV1'
-                        State = 'Online'
-                        Node = 'Server2'
+                        Name             = 'CSV1'
+                        State            = 'Online'
+                        Node             = 'Server2'
                         SharedVolumeInfo = [PSCustomObject]@{
-                            FaultState = 'NoFaults'
+                            FaultState         = 'NoFaults'
                             FriendlyVolumeName = 'C:\ClusterStorage\Volume1'
-                            Partition = [PSCustomObject]@{
+                            Partition          = [PSCustomObject]@{
                                 DriveLetter = ''
-                                FileSystem = 'CSVFS'
-                                FreeSpace = 135291469824
+                                FileSystem  = 'CSVFS'
+                                FreeSpace   = 135291469824
                                 PercentFree = 12
-                                Size = 1127428915200
+                                Size        = 1127428915200
                             }
                         }
                     }
@@ -2123,21 +2072,21 @@ InModuleScope Diag-V {
                 $eval = Test-HyperVAllocation
                 $eval.DriveHealth[3] | Should -BeExactly 'HEALTHY'
             }#it
-            It 'should report UNHEALTHY if csv size is under 1TB with 12% free'{
+            It 'should report UNHEALTHY if csv size is under 1TB with 12% free' {
                 Mock Get-ClusterSharedVolume -MockWith {
                     [PSCustomObject]@{
-                        Name = 'CSV1'
-                        State = 'Online'
-                        Node = 'Server2'
+                        Name             = 'CSV1'
+                        State            = 'Online'
+                        Node             = 'Server2'
                         SharedVolumeInfo = [PSCustomObject]@{
-                            FaultState = 'NoFaults'
+                            FaultState         = 'NoFaults'
                             FriendlyVolumeName = 'C:\ClusterStorage\Volume1'
-                            Partition = [PSCustomObject]@{
+                            Partition          = [PSCustomObject]@{
                                 DriveLetter = ''
-                                FileSystem = 'CSVFS'
-                                FreeSpace = 115964116992
+                                FileSystem  = 'CSVFS'
+                                FreeSpace   = 115964116992
                                 PercentFree = 12
-                                Size = 966367641600
+                                Size        = 966367641600
                             }
                         }
                     }
@@ -2145,16 +2094,15 @@ InModuleScope Diag-V {
                 $eval = Test-HyperVAllocation
                 $eval.DriveHealth[3] | Should -BeExactly 'UNHEALTHY'
             }#it
-            It 'should not return csv results if no csvs are found'{
-
+            It 'should not return csv results if no csvs are found' {
                 Mock Get-ClusterSharedVolume {}
                 $eval = Test-HyperVAllocation
                 $eval.DriveHealth[3] | Should -BeNullOrEmpty
             }#it
-            It 'should not return csv results if an error is encountered getting csvs'{
+            It 'should not return csv results if an error is encountered getting csvs' {
                 Mock Get-ClusterSharedVolume {
                     throw 'Bullshit Error'
-                }
+                }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.DriveHealth[3] | Should -BeNullOrEmpty
             }#it
@@ -2165,35 +2113,35 @@ InModuleScope Diag-V {
             It 'should correctly calculate N+1 when VMs can not survive a node failure' {
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 68719476736
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 68719476736
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 68719476736
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 68719476736
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 68719476736
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 68719476736
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.'N+1RAMEvaluation'[4] | Should -BeExactly $false
-            }
+            }#it
             It 'should return valid results if a cluster is detected, and no issues are encountered with credentials provided' {
                 $Credential = New-Object -TypeName System.Management.Automation.PSCredential('username', (ConvertTo-SecureString 'password' -AsPlainText -Force))
                 $eval = Test-HyperVAllocation -Credential $Credential
@@ -2291,36 +2239,36 @@ InModuleScope Diag-V {
                 $eval.DynamicMaxPotential[0] | Should -BeExactly 0
                 $eval.DynamicMaxAllocation[0] | Should -BeExactly 'NA'
             }#it
-            It 'should return different data if only VMs with static memory are found and standalone is detected.'{
+            It 'should return different data if only VMs with static memory are found and standalone is detected.' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 32
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 2147483648
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 32
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 2147483648
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
@@ -2341,195 +2289,195 @@ InModuleScope Diag-V {
                 $eval.DynamicMaxPotential[0] | Should -BeExactly 0
                 $eval.DynamicMaxAllocation[0] | Should -BeExactly 'NA'
             }#it
-            It 'should correctly calculate a higher vCPU ratio than 1:1 when standalone is detected'{
+            It 'should correctly calculate a higher vCPU ratio than 1:1 when standalone is detected' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 2147483648
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 2147483648
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 2147483648
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 2147483648
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.vCPURatio[0] | Should -BeExactly '4 : 1'
             }#it
-            It 'should warn when VM ram required equals available VM ram and a standalone is detected'{
+            It 'should warn when VM ram required equals available VM ram and a standalone is detected' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 60129542144
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 60129542144
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 60129542144
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 60129542144
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.RAMAllocation[0] | Should -BeExactly 'Warning'
             }#it
-            It 'should mark UNHEALTHY when VM RAM required greater than available system RAM with standalone detected'{
+            It 'should mark UNHEALTHY when VM RAM required greater than available system RAM with standalone detected' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $false
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 16978542592
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 68719476736
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 68719476736
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $false
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 16978542592
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 68719476736
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 68719476736
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.RAMAllocation[0] | Should -BeExactly 'UNHEALTHY'
             }#it
-            It 'should warn if dynamic max ram potential exceeds available memory with standalone deteceted'{
+            It 'should warn if dynamic max ram potential exceeds available memory with standalone deteceted' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-VM -MockWith {
                     [PSCustomObject]@{
-                        ComputerName                = 'Server1'
-                        VMName                      = 'DemoVM'
-                        ProcessorCount              = 128
-                        DynamicMemoryEnabled        = $true
-                        MemoryMinimum               = 4294967296
-                        MemoryMaximum               = 68719476736
-                        IsClustered                 = $false
-                        Version                     = '8.0'
-                        ReplicationHealth           = 'FakeStatus'
-                        State                       = 'Running'
-                        CPUUsage                    = '2'
-                        MemoryMB                    = '2048'
-                        Uptime                      = '51.05:14:44.6730000'
-                        Status                      = 'Operating normally'
-                        AutomaticStopAction         = 'Save'
-                        MemoryAssigned	            = 68719476736
-                        Path                        = 'E:\vms\'
-                        ConfigurationLocation       = 'E:\vms\'
-                        SnapshotFileLocation	    = 'E:\vms\'
-                        SmartPagingFilePath         = 'E:\vms\'
-                        ReplicationState	        = 'FakeStatus'
-                        ReplicationMode	            = 'FakeStatus'
-                        IntegrationServicesVersion  = '0.0'
-                        MemoryStartup               = 4294967296
+                        ComputerName               = 'Server1'
+                        VMName                     = 'DemoVM'
+                        ProcessorCount             = 128
+                        DynamicMemoryEnabled       = $true
+                        MemoryMinimum              = 4294967296
+                        MemoryMaximum              = 68719476736
+                        IsClustered                = $false
+                        Version                    = '8.0'
+                        ReplicationHealth          = 'FakeStatus'
+                        State                      = 'Running'
+                        CPUUsage                   = '2'
+                        MemoryMB                   = '2048'
+                        Uptime                     = '51.05:14:44.6730000'
+                        Status                     = 'Operating normally'
+                        AutomaticStopAction        = 'Save'
+                        MemoryAssigned             = 68719476736
+                        Path                       = 'E:\vms\'
+                        ConfigurationLocation      = 'E:\vms\'
+                        SnapshotFileLocation       = 'E:\vms\'
+                        SmartPagingFilePath        = 'E:\vms\'
+                        ReplicationState           = 'FakeStatus'
+                        ReplicationMode            = 'FakeStatus'
+                        IntegrationServicesVersion = '0.0'
+                        MemoryStartup              = 4294967296
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.DynamicMaxAllocation[0] | Should -BeExactly 'Warning'
             }#it
-            It 'should report HEALTHY if drive size is over 1TB with 12% free'{
+            It 'should report HEALTHY if drive size is over 1TB with 12% free' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-CimInstance -MockWith {
                     [PSCustomObject]@{
-                        NumberOfCores               = 16
-                        NumberOfLogicalProcessors   = 32
-                        CSName                      = 'Server1'
-                        TotalVisibleMemorySize      = 67009504
-                        FreePhysicalMemory          = 45268080
-                        Size                        = 1127428915200
-                        DeviceID                    = 'E:'
-                        Freespace                   = 135291469824
+                        NumberOfCores             = 16
+                        NumberOfLogicalProcessors = 32
+                        CSName                    = 'Server1'
+                        TotalVisibleMemorySize    = 67009504
+                        FreePhysicalMemory        = 45268080
+                        Size                      = 1127428915200
+                        DeviceID                  = 'E:'
+                        Freespace                 = 135291469824
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.DriveHealth[1] | Should -BeExactly 'HEALTHY'
             }#it
-            It 'should report UNHEALTHY if drive size is under 1TB with 12% free'{
+            It 'should report UNHEALTHY if drive size is under 1TB with 12% free' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-CimInstance -MockWith {
                     [PSCustomObject]@{
-                        NumberOfCores               = 16
-                        NumberOfLogicalProcessors   = 32
-                        CSName                      = 'Server1'
-                        TotalVisibleMemorySize      = 67009504
-                        FreePhysicalMemory          = 45268080
-                        Size                        = 966367641600
-                        DeviceID                    = 'E:'
-                        Freespace                   = 115964116992
+                        NumberOfCores             = 16
+                        NumberOfLogicalProcessors = 32
+                        CSName                    = 'Server1'
+                        TotalVisibleMemorySize    = 67009504
+                        FreePhysicalMemory        = 45268080
+                        Size                      = 966367641600
+                        DeviceID                  = 'E:'
+                        Freespace                 = 115964116992
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
                 $eval.DriveHealth[1] | Should -BeExactly 'UNHEALTHY'
             }#it
-            It 'should not return drive results if no drives are found'{
+            It 'should not return drive results if no drives are found' {
                 Mock Test-IsACluster -MockWith {
                     $false
                 }#endMock
                 Mock Get-CimInstance -MockWith {
                     [PSCustomObject]@{
-                        NumberOfCores               = 16
-                        NumberOfLogicalProcessors   = 32
-                        CSName                      = 'Server1'
-                        TotalVisibleMemorySize      = 67009504
-                        FreePhysicalMemory          = 45268080
+                        NumberOfCores             = 16
+                        NumberOfLogicalProcessors = 32
+                        CSName                    = 'Server1'
+                        TotalVisibleMemorySize    = 67009504
+                        FreePhysicalMemory        = 45268080
                     }
                 }#endMock
                 $eval = Test-HyperVAllocation
@@ -2573,7 +2521,7 @@ InModuleScope Diag-V {
                         throw 'Fake Error'
                     }#endMock
                     Get-HyperVLogInfo -HostName "Server01" -Credential $creds | Should -BeNullOrEmpty
-                }
+                }#it
             }#context_Error
             Context 'Success' {
                 It 'should return log information if matching log entries are found' {
@@ -2589,7 +2537,7 @@ InModuleScope Diag-V {
                     Get-HyperVLogInfo -HostName "Server01" `
                         | Select-Object -ExpandProperty LogName `
                         | Should -Be "System"
-                }
+                }#it
                 It 'should return a properly formatted message for the user indicating that no longs matches the query if none found' {
                     Mock Get-WinEvent {}
                     Get-HyperVLogInfo -HostName "Server01" `
@@ -2602,7 +2550,7 @@ InModuleScope Diag-V {
             BeforeEach {
                 Mock Test-Path -MockWith {
                     $true
-                }
+                }#endMock
                 Mock Get-ChildItem -MockWith {
                     [PSCustomObject]@{
                         PSPath            = 'Microsoft.PowerShell.Core\FileSystem::C:\files\disc.iso'
@@ -2629,8 +2577,8 @@ InModuleScope Diag-V {
                         LastWriteTimeUtc  = '08/25/18 01:56:17'
                         Attributes        = 'Archive'
                     }
-                }
-            }
+                }#endMock
+            }#beforeEach
             It 'should return null if the specified path is not found' {
                 Mock Test-Path -MockWith {
                     $false
@@ -2643,7 +2591,7 @@ InModuleScope Diag-V {
             }#it
             It 'should return file results if no issues are encountered' {
                 Get-FileSizeInfo -Path C:\files | Should -Not -BeNullOrEmpty
-            }
+            }#it
         }#context
     }#describe_Functions
 }#inModule

@@ -81,7 +81,7 @@ function Get-VMReplicationStatus {
                             return
                         }#catch_Get-VM
                         if ($rawVM) {
-                                $vmCollection += $rawVM
+                            $vmCollection += $rawVM
                         }#if_rawVM
                         else {
                             Write-Verbose "No VMs were returned from $node"
@@ -119,7 +119,7 @@ function Get-VMReplicationStatus {
     else {
         Write-Warning -Message "Not running as administrator. No further action can be taken."
     }#administrator check
-    $repEval = $vmCollection | Where-Object { $_.ReplicationState -ne "Disabled" } | Select-Object ComputerName,VMName,Status,ReplicationState,ReplicationHealth,ReplicationMode
+    $repEval = $vmCollection | Where-Object { $_.ReplicationState -ne "Disabled" } | Select-Object ComputerName, VMName, Status, ReplicationState, ReplicationHealth, ReplicationMode
     if (-not ($repEval)) {
         Write-Warning -Message 'No VMs were found that have replication enabled.'
     }#if_repEval

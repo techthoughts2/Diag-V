@@ -113,7 +113,7 @@ function Get-HyperVLogInfo {
             Write-Verbose -Message "Credentials set."
             $a = Get-WinEvent -FilterHashTable $filter -ComputerName $HostName -Credential $creds -ErrorAction Stop
         }
-        else{
+        else {
             $a = Get-WinEvent -FilterHashTable $filter -ComputerName $HostName -ErrorAction Stop
         }
         Write-Verbose -Message "Log capture complete."
