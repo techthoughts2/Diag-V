@@ -1007,6 +1007,8 @@ InModuleScope Diag-V {
             }#it
         }#context
         Context 'Get-IntegrationServicesCheck' {
+            function Get-VMIntegrationService {
+            }
             BeforeEach {
                 Mock Test-RunningAsAdmin -MockWith {
                     $true
@@ -1110,14 +1112,6 @@ InModuleScope Diag-V {
                 Mock Get-ClusterNode -MockWith {}
                 Get-IntegrationServicesCheck | Should -BeNullOrEmpty
             }#it
-            It 'should return null if no VMs have replication enabled' {
-                Mock Get-VM -MockWith {
-                    [PSCustomObject]@{
-                        ReplicationState = 'Disabled'
-                    }
-                }#endMock
-                Get-IntegrationServicesCheck | Should -BeNullOrEmpty
-            }
             It 'should return null if a cluster is detected but an error is encountered getting VMs' {
                 Mock Get-VM -MockWith {
                     Throw 'Bullshit Error'
