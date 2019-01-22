@@ -133,7 +133,12 @@ Test-HyperVAllocation
 ```
 
 ## Author
+
 [Jake Morrison](https://twitter.com/JakeMorrison) - [http://techthoughts.info/](http://techthoughts.info/)
+
+## Contributors
+
+[Justin Saylor](https://twitter.com/XJustinSaylorX) - Logo
 
 ## Notes
 
