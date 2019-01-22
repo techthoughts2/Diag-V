@@ -27,7 +27,7 @@
     Microsoft.PowerShell.Commands.Internal.Format.FormatEntryData
     Microsoft.PowerShell.Commands.Internal.Format.GroupEndData
     Microsoft.PowerShell.Commands.Internal.Format.FormatEndData
-    -or
+    -or-
     Selected.Microsoft.HyperV.PowerShell.GuestServiceInterfaceComponent
     Selected.Microsoft.HyperV.PowerShell.VMIntegrationComponent
     Selected.Microsoft.HyperV.PowerShell.DataExchangeComponent
