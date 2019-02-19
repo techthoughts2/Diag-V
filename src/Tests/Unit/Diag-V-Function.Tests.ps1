@@ -1322,6 +1322,11 @@ InModuleScope Diag-V {
                 $eval[0].'MaxSize(GB)' | Should -BeExactly 100
                 $eval[0].Path | Should -BeExactly 'E:\vms\Virtual Hard Disks\20163.vhdx'
             }#it
+            It 'should at least return the VMName if no VHDs are found for that VM' {
+                Mock Get-VHD -MockWith {}
+                $eval = Get-AllVHD -NoFormat
+                $eval[0].Name | Should -BeExactly 'DemoVM'
+            }#it
             It 'should return valid results if a cluster is detected and no errors are encountered' {
                 $eval = Get-AllVHD -NoFormat
                 $eval[0].Name | Should -BeExactly 'DemoVM'
@@ -1355,6 +1360,14 @@ InModuleScope Diag-V {
                 }#endMock
                 $eval = Get-AllVHD
                 $eval[0].Path | Should -BeNullOrEmpty
+            }#it
+            It 'should at least return the VMName if no VHDs are found for that VM' {
+                Mock Test-IsACluster -MockWith {
+                    $false
+                }#endMock
+                Mock Get-VHD -MockWith {}
+                $eval = Get-AllVHD -NoFormat
+                $eval[0].Name | Should -BeExactly 'DemoVM'
             }#it
             It 'should return valid results if a standalone is detected and no errors are encountered' {
                 Mock Test-IsACluster -MockWith {
