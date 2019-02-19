@@ -104,8 +104,8 @@ function Get-AllVHD {
                                 #_____________________________________________________________
                                 $vmname = ""
                                 $vmname = $vm.VMName
+                                $rawVHD = $null
                                 #resets
-                                $object = New-Object -TypeName PSObject
                                 Write-Verbose -Message "Retrieving VHD information for VM: $vmname"
                                 try {
                                     if ($Credential -and $env:COMPUTERNAME -ne $node) {
@@ -118,7 +118,6 @@ function Get-AllVHD {
                                 catch {
                                     Write-Warning -Message "An error was encountered getting VHD information for: $vmname"
                                 }#catch_Get-VHD
-                                $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
                                 foreach ($vhd in $rawVHD) {
                                     Write-Verbose -Message 'Processing VHD.'
                                     #________________
@@ -148,7 +147,11 @@ function Get-AllVHD {
                                 #_____________________________________________________________
                                 Write-Verbose -Message 'VM Information processed.'
                                 #_____________________________________________________________
-                                $vmCollection += $object
+                                if ($null -eq $rawVHD ) {
+                                    $object = New-Object -TypeName PSObject
+                                    $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
+                                    $vmCollection += $object
+                                }#if_noVHDs
                                 #_____________________________________________________________
                             }#foreachVM
                         }#if_rawVM
@@ -194,8 +197,9 @@ function Get-AllVHD {
                     #_____________________________________________________________
                     $vmname = ""
                     $vmname = $vm.VMName
+                    $rawVHD = $null
                     #resets
-                    $object = New-Object -TypeName PSObject
+
                     Write-Verbose -Message "Retrieving VHD information for VM: $vmname"
                     try {
                         $rawVHD = Get-VHD -VMId $VM.VMId -ErrorAction Stop
@@ -203,7 +207,7 @@ function Get-AllVHD {
                     catch {
                         Write-Warning -Message "An error was encountered getting VHD information for: $vmname"
                     }#catch_Get-VHD
-                    $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
+
                     foreach ($vhd in $rawVHD) {
                         Write-Verbose -Message 'Processing VHD.'
                         #________________
@@ -232,7 +236,11 @@ function Get-AllVHD {
                     #_____________________________________________________________
                     Write-Verbose -Message 'VM Information processed.'
                     #_____________________________________________________________
-                    $vmCollection += $object
+                    if ($null -eq $rawVHD ) {
+                        $object = New-Object -TypeName PSObject
+                        $object | Add-Member -MemberType NoteProperty -name Name -Value $vmname -Force
+                        $vmCollection += $object
+                    }#if_noVHDs
                     #_____________________________________________________________
                 }#foreachVM
                 #####################################

@@ -12,7 +12,7 @@
     RootModule        = 'Diag-V.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '3.0.0'
+    ModuleVersion     = '3.0.1'
 
     # ID used to uniquely identify this module
     GUID              = 'd0a9150d-b6a4-4b17-a325-e3a24fed0aa9'
@@ -98,6 +98,8 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = '
+3.0.1
+    Fixed bug where Get-AllVHD was returning duplicated VHD results
 3.0.0
     Added Pester tests for all functions.
     Re-wrote all functions from previous module versions to account for bugs and layout of new tests. Removed Write-Host - all functions now return PowerShell objects.
