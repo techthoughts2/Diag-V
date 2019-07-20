@@ -142,8 +142,6 @@ Test-HyperVAllocation
 
 ## Notes
 
-A complete write-up on Diag-V as well as a video demonstration can be found on the Tech Thoughts blog: http://techthoughts.info/diag-v/
-
 #### Running Diag-V remotely
 
 Diag-V leverages numerous existing cmdlets to provide rapid operational insight into your Hyper-V deployment. This makes it tricky to make Diag-V fully remote capable as some of these cmdlets support ```-ComputerName``` and ```-Credential``` while some do not. Diag-V is also cluster aware, and will scope your current or provided credentials to connect to *other* nodes in the cluster to retrieve operational data. This runs into the 'double-hop' issue as the remote machine has to pass credentials on to the other nodes to get data back.
