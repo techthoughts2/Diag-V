@@ -16,7 +16,7 @@
 .OUTPUTS
     System.Management.Automation.PSCustomObject
 .NOTES
-    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
     See the README for more details if you want to run this function remotely.
     If SupportPersistentReservations is true, the VHD / VHDX is shared.
 .COMPONENT
@@ -26,8 +26,6 @@
     VMName
     SupportPersistentReservations
     Path
-.LINK
-    http://techthoughts.info/diag-v/
 #>
 function Get-SharedVHD {
     [CmdletBinding()]

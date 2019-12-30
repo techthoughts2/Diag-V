@@ -12,19 +12,19 @@ $VerbosePreference = 'SilentlyContinue'
 $modulesToInstall = [System.Collections.ArrayList]::new()
 $null = $modulesToInstall.Add(([PSCustomObject]@{
     ModuleName    = 'Pester'
-    ModuleVersion = '4.5.0'
+    ModuleVersion = '4.9.0'
     BucketName    = 'ps-invoke-modules'
     KeyPrefix     = ''
 }))
 $null = $modulesToInstall.Add(([PSCustomObject]@{
     ModuleName    = 'InvokeBuild'
-    ModuleVersion = '5.4.2'
+    ModuleVersion = '5.5.6'
     BucketName    = 'ps-invoke-modules'
     KeyPrefix     = ''
 }))
 $null = $modulesToInstall.Add(([PSCustomObject]@{
     ModuleName    = 'PSScriptAnalyzer'
-    ModuleVersion = '1.17.1'
+    ModuleVersion = '1.18.2'
     BucketName    = 'ps-invoke-modules'
     KeyPrefix     = ''
 }))

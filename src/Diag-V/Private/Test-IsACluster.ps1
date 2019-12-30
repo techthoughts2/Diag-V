@@ -13,12 +13,10 @@
 .OUTPUTS
     System.Boolean
 .NOTES
-    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
     The design of this function intends the function to be run on the device that is being evaluated
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
-.LINK
-    http://techthoughts.info/diag-v/
 #>
 function Test-IsACluster {
     [CmdletBinding()]

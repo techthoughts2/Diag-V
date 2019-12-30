@@ -20,7 +20,7 @@
 .OUTPUTS
     System.Management.Automation.PSCustomObject
 .NOTES
-    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
     See the README for more details if you want to run this function remotely.
     This was really, really hard to make.
 .COMPONENT
@@ -51,8 +51,6 @@
     DriveHealth
 
     N+1RAMEvaluation (clusters only)
-.LINK
-    http://techthoughts.info/diag-v/
 #>
 function Test-HyperVAllocation {
     [CmdletBinding()]

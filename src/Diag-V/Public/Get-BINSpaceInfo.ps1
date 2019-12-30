@@ -22,7 +22,7 @@
 .OUTPUTS
 
 .NOTES
-    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
     See the README for more details if you want to run this function remotely.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
@@ -31,8 +31,6 @@
     VMName
     Memory Assigned
     AutomaticStopAction
-.LINK
-    http://techthoughts.info/diag-v/
 #>
 function Get-BINSpaceInfo {
     [CmdletBinding()]
