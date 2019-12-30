@@ -2,6 +2,7 @@
 
 [![Minimum Supported PowerShell Version](https://img.shields.io/badge/PowerShell-5.1-blue.svg)](https://github.com/PowerShell/PowerShell)
 [![downloads](https://img.shields.io/powershellgallery/dt/Diag-V.svg?label=downloads)](https://www.powershellgallery.com/packages/Diag-V)
+![Cross Platform](https://img.shields.io/badge/platform-windows-lightgrey)
 
 master | Enhancements
 --- | ---
@@ -61,30 +62,10 @@ Diag-V can quickly answer questions like these:
 
 ### Installing Diag-V via PowerShell Gallery
 
-***This is the recommended method***
-
 ```powershell
 #from an administrative 5.1.0+ PowerShell session
-Install-Module -Name 'Diag-V'
+Install-Module -Name 'Diag-V' -Scope CurrentUser
 ```
-
-### Installing Diag-V direct from GitHub
-
-*Note: You will need to **build** Diag-V yourself using [Invoke-Build](https://github.com/nightroman/Invoke-Build) if you want to install directly from GitHub*
-
-1. Download Zip from GitHub
-2. Extract files
-3. Navigate to download location
-4. Change dir to **\src**
-5. Invoke build
-    ``` powershell
-    Invoke-Build -Task Clean,CreateHelp,Build
-    ```
-6. Build will now be available in **\src\Artifacts**
-7. Import Diag-V
-    * Create the following directory: ```C:\Program Files\WindowsPowerShell\Modules\Diag-V```
-      * Copy Artifact files into the created directory
-    * Alternatively you can import module from Artifacts location manually
 
 ## Quick start
 
@@ -134,13 +115,15 @@ Test-HyperVAllocation
 
 ## Author
 
-[Jake Morrison](https://twitter.com/JakeMorrison) - [http://techthoughts.info/](http://techthoughts.info/)
+[Jake Morrison](https://twitter.com/JakeMorrison) - [https://techthoughts.info/](https://techthoughts.info/)
 
 ## Contributors
 
 [Justin Saylor](https://twitter.com/XJustinSaylorX) - Logo
 
 ## Notes
+
+This PowerShell project was created with [Catesta](https://github.com/techthoughts2/Catesta).
 
 #### Running Diag-V remotely
 

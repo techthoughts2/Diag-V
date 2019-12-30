@@ -1,8 +1,8 @@
-﻿---
+---
 Module Name: Diag-V
 Module Guid: d0a9150d-b6a4-4b17-a325-e3a24fed0aa9
 Download Help Link: NA
-Help Version: 3.0.0
+Help Version: 3.0.2
 Locale: en-US
 ---
 
@@ -46,7 +46,5 @@ Returns status of all discovered VMs.
 
 ### [Test-HyperVAllocation](Test-HyperVAllocation.md)
 Performs a Hyper-V system evaluation for each Hyper-V node found, and returns a resource allocation health report.
-
-
 
 

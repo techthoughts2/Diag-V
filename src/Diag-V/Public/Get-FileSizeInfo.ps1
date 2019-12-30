@@ -14,7 +14,7 @@
     Selected.System.Management.Automation.PSCustomObject
     System.String
 .NOTES
-    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
     This function can take some time to complete based on the size and number of files in the specified path.
 .COMPONENT
     Diag-V - https://github.com/techthoughts2/Diag-V
@@ -22,8 +22,6 @@
     Get the following information for the specified path:
     Total size of all files found under the path
     Top 10 largest files discovered
-.LINK
-    http://techthoughts.info/diag-v/
 #>
 function Get-FileSizeInfo {
     [cmdletbinding()]

@@ -32,7 +32,7 @@
     -or-
     System.Management.Automation.PSCustomObject
 .NOTES
-    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
     See the README for more details if you want to run this function remotely.
     The VHDX disk usage summary is only available when using the NoFormat switch.
 .COMPONENT
@@ -46,8 +46,6 @@
     Path
     Total current disk usage (NoFormat)
     Total POTENTIAL disk usage (NoFormat)
-.LINK
-    http://techthoughts.info/diag-v/
 #>
 function Get-AllVHD {
     [CmdletBinding()]

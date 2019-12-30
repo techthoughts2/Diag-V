@@ -1,7 +1,7 @@
-﻿---
+---
 external help file: Diag-V-help.xml
 Module Name: Diag-V
-online version: http://techthoughts.info/Diag-V/
+online version:
 schema: 2.0.0
 ---
 
@@ -79,13 +79,8 @@ For more information, see about_CommonParameters (http://go.microsoft.com/fwlink
 
 ### System.Management.Automation.PSCustomObject
 ## NOTES
-Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
 See the README for more details if you want to run this function remotely.
 This was really, really hard to make.
 
 ## RELATED LINKS
-
-[http://techthoughts.info/Diag-V/](http://techthoughts.info/Diag-V/)
-
-
-

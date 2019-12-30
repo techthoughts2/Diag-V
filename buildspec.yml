@@ -11,7 +11,7 @@ phases:
       - powershell -command '.\install_modules.ps1'
   pre_build:
     commands:
-      #- '& "C:\Program Files\PowerShell\6\pwsh.exe" -command ''Invoke-Build -File .\src\PoshGram.build.Settings.ps1 -Task ValidateUniqueModuleVersion'''
+      #- '& "C:\Program Files\PowerShell\6\pwsh.exe" -command ''Invoke-Build -File .\src\Diag-V.build.Settings.ps1 -Task ValidateUniqueModuleVersion'''
   build:
     commands:
       - powershell -command 'Invoke-Build -File .\src\Diag-V.build.ps1'

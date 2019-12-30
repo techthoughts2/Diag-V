@@ -16,7 +16,7 @@
 .OUTPUTS
     System.Management.Automation.PSCustomObject
 .NOTES
-    Author: Jake Morrison - @jakemorrison - http://techthoughts.info/
+    Author: Jake Morrison - @jakemorrison - https://techthoughts.info/
     See the README for more details if you want to run this function remotely.
     This function will only work on Hyper-V clusters.
 .COMPONENT
@@ -32,8 +32,6 @@
     Size (GB)
     FreeSpace (GB)
     Percent Free
-.LINK
-    http://techthoughts.info/diag-v/
 #>
 function Get-CSVInfo {
     [cmdletbinding()]
