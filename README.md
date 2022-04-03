@@ -1,4 +1,4 @@
-# Diag-V
+# Diag-V - ARCHIVED
 
 [![Minimum Supported PowerShell Version](https://img.shields.io/badge/PowerShell-5.1-blue.svg)](https://github.com/PowerShell/PowerShell)
 [![downloads](https://img.shields.io/powershellgallery/dt/Diag-V.svg?label=downloads)](https://www.powershellgallery.com/packages/Diag-V)
@@ -7,6 +7,12 @@
 master | Enhancements
 --- | ---
 ![Build Status](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiU1FRSnE3aFlRbnVsd3R4aDBYS2JjUlh3OGlnZmRadW9CeWVucTcwRFJnQktnSjdraFNmL05ZMGlRSzRsZFhCbE54Z204anJheTd5QThzQjNwOUhOaytnPSIsIml2UGFyYW1ldGVyU3BlYyI6ImZTT1g2akZaTXJqSWJscEIiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master) | ![Build Status](https://codebuild.us-west-2.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiaW1BTGJMNnBkckVnNnlYUTZZbXF2MFh1UVRiS2tEZHRVdk9XTFRMdVdqT1AxNjlVaGVEMm1WTjBHK3lXVkpNTEI3S2F4UloyQURPY1Y5SUU1MjlRdkFzPSIsIml2UGFyYW1ldGVyU3BlYyI6IjN4TWx0T1F0bzJyYlNCRmkiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=Enhancements)
+
+:no_entry: **This project is no longer actively maintained** :no_entry:
+
+*04/03/2022* - I have decided to archive this project. The module is also now unlisted on the PSGallery.
+
+If you are interested in picking up this project, feel free to reach out to me [on Twitter](https://twitter.com/JakeMorrison).
 
 ## Synopsis
 
